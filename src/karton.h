@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QProcess>
+#include <libvirt/libvirt.h>
 
 class Karton : public QObject {
     Q_OBJECT
@@ -18,4 +19,6 @@ class Karton : public QObject {
 
     private:
         QProcess *m_process;
+        virConnectPtr m_conn;
+        bool init();
 };

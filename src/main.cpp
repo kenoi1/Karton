@@ -8,6 +8,9 @@
 #include <KIconTheme>
 #include "karton.h"
 
+#include <libvirt/libvirt.h>
+#include <iostream>
+
 int main(int argc, char *argv[])
 {
     KIconTheme::initTheme();

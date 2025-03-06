@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
 project(karton)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 find_package(ECM 6.0.0 REQUIRED NO_MODULE)
-set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+# set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+list(APPEND CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
 include(KDEInstallDirs)
 include(KDECMakeSettings)
@@ -18,6 +21,8 @@ find_package(Qt6 REQUIRED COMPONENTS
     QuickControls2
     Widgets
 )
+
+find_package(Libvirt REQUIRED)
 
 find_package(KF6 REQUIRED COMPONENTS
     Kirigami
