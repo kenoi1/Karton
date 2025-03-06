@@ -163,12 +163,12 @@ Kirigami.Dialog {
         }
 
         RowLayout {
-            anchors {
-                right: parent.right
-                rightMargin: Kirigami.Units.gridUnit
-                bottom: parent.bottom
-                bottomMargin: Kirigami.Units.gridUnit
-            }
+            // anchors {
+            //     right: parent.right
+            //     rightMargin: Kirigami.Units.gridUnit
+            //     bottom: parent.bottom
+            //     bottomMargin: Kirigami.Units.gridUnit
+            // }
 
             Controls.Button {
                 id: saveButton
