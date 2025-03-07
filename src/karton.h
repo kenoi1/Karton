@@ -13,13 +13,14 @@ class Karton : public QObject {
     public:
         explicit Karton(QObject *parent = nullptr);
         ~Karton();
+        QVector<Domain> domains();
 
     public Q_SLOTS:
         Q_INVOKABLE bool runVM(const QString &command);
 
     Q_SIGNALS:
         void commandFinished(int exitCode, const QString &output);
-        void domainsUpdated();
+        // void domainsChanged();
 
     private:
         QProcess *m_process;

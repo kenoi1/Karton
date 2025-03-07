@@ -70,6 +70,11 @@ void Karton::refreshDomainList() {
     free(domains);
 }
 
+QVector<Domain> Karton::domains() {
+    refreshDomainList();
+    return m_domains;
+}
+
 // For virsh and other CLI
 bool Karton::runVM(const QString &command)
 {

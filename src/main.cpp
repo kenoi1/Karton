@@ -34,14 +34,14 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     qDebug() << "Hello! Starting application...";
-    Karton runVM;
+    Karton karton;
 
 
-    VMModel *model = new VMModel();
+    VMModel *model = new VMModel(&karton);
     model->populate();
     engine.rootContext()->setContextProperty(QStringLiteral("VMModel"), model);
 
-    engine.rootContext()->setContextProperty(QStringLiteral("runVM"), &runVM);
+    engine.rootContext()->setContextProperty(QStringLiteral("runVM"), &karton);
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.loadFromModule("org.kde.karton", "Main");
