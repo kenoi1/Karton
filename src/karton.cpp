@@ -1,7 +1,12 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
+
 #include "karton.h"
+#include "domain.h"
 #include <QDebug>
 #include <libvirt/libvirt.h>
 #include <iostream>
+#include <QObject>
 
 Karton::Karton(QObject *parent)
     : QObject(parent)
@@ -23,41 +28,49 @@ Karton::~Karton() {
         m_process->waitForFinished(1000);
     }
 }
+
 bool Karton::init() {
+    // Currently set to session, but could also do system for root..
     m_conn = virConnectOpen("qemu:///session");
     if (!m_conn) {
-        std::cerr << "Failed to connect to hypervisor" << std::endl;
+        qDebug() << "Failed to connect to hypervisor";
         return false;
     }
-    
-    std::cout << "Connected to hypervisor" << std::endl;
 
-    // Print vms
-    virDomainPtr *domains = nullptr;
-    int numDomains = virConnectListAllDomains(m_conn, &domains, 0);
-    
-    if (numDomains < 0) {
-        std::cerr << "Failed to list domains" << std::endl;
-    } else {
-        std::cout << "Total VMs: " << numDomains << std::endl;
-        
-        for (int i = 0; i < numDomains; i++) {
-            const char* name = virDomainGetName(domains[i]);
-            bool isActive = virDomainIsActive(domains[i]);
-            
-            std::cout << "  VM: " << name 
-                     << " (" << (isActive ? "running" : "stopped") << ")" 
-                     << std::endl;
-            
-            virDomainFree(domains[i]);
-        }
-        
-        free(domains);
+    qDebug() << "Connected to hypervisor";
+    refreshDomainList();
+    // Print VMs when started
+    qDebug() << "Total VMs: " << m_domains.size();
+    for (const auto& domain : m_domains) {
+        qDebug() << "  VM: " << domain.name()
+                    << " (" << domain.statusString() << ")"
+                    << " (UUID: " << domain.uuid() << ")";     
     }
-    //
     return true;
 }
 
+void Karton::refreshDomainList() {
+    m_domains.clear();
+
+    virDomainPtr *domains = nullptr;
+    int numDomains = virConnectListAllDomains(m_conn, &domains, 0);
+
+    for (int i = 0; i < numDomains; i++) {
+        const char* name = virDomainGetName(domains[i]);
+        char uuid[VIR_UUID_STRING_BUFLEN];
+        virDomainGetUUIDString(domains[i], uuid);
+        bool isActive = virDomainIsActive(domains[i]);
+        
+        // TODO USE POINTER
+        m_domains.append(Domain(QString::fromUtf8(name), 
+                                QString::fromUtf8(uuid), isActive));
+
+        virDomainFree(domains[i]);
+    }
+    free(domains);
+}
+
+// For virsh and other CLI
 bool Karton::runVM(const QString &command)
 {
     qDebug() << "Running VM:" << command;

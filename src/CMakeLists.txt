@@ -9,6 +9,8 @@ target_sources(karton
     PRIVATE
     main.cpp
     karton.cpp
+    vmlistmodel.cpp
+    domain.cpp
 )
 
 ecm_target_qml_sources(karton

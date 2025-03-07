@@ -1,8 +1,11 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 #pragma once
 
 #include <QObject>
 #include <QProcess>
 #include <libvirt/libvirt.h>
+#include "domain.h"
 
 class Karton : public QObject {
     Q_OBJECT
@@ -16,9 +19,13 @@ class Karton : public QObject {
 
     Q_SIGNALS:
         void commandFinished(int exitCode, const QString &output);
+        void domainsUpdated();
 
     private:
         QProcess *m_process;
         virConnectPtr m_conn;
+        QVector<Domain> m_domains;
+
         bool init();
+        void refreshDomainList();
 };
