@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2024 Aaron Rainbolt <arraybolt3@gmail.com>
-<<<<<<< HEAD
-=======
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
->>>>>>> work/dereklin/new
 
 // Includes relevant modules used by the QML
 import QtQuick

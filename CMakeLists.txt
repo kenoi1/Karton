@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: 2024 Aaron Rainbolt <arraybolt3@gmail.com>
-// SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2024 Aaron Rainbolt <arraybolt3@gmail.com>
+# SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 cmake_minimum_required(VERSION 3.20)
 project(karton)

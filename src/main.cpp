@@ -12,11 +12,7 @@
 #include <KIconTheme>
 #include "karton.h"
 #include "vmlistmodel.h"
-<<<<<<< HEAD
-
-=======
 #include <QDebug>
->>>>>>> work/dereklin/new
 #include <libvirt/libvirt.h>
 #include <iostream>
 
