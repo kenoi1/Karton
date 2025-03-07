@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2024 Aaron Rainbolt <arraybolt3@gmail.com>
+<<<<<<< HEAD
+=======
+// SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
+>>>>>>> work/dereklin/new
 
 // Includes relevant modules used by the QML
 import QtQuick
@@ -18,7 +22,7 @@ Kirigami.ApplicationWindow {
     // Window title
     // i18nc() makes a string translatable
     // and provides additional context for the translators
-    title: i18nc("@title:window", "Karton")
+    title: i18nc("@title:window", "Karton Virtual Machine Manager")
 
     // Set the first page that will be loaded when the app opens
     // This can also be set to an id of a Kirigami.Page

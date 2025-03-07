@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024 Aaron Rainbolt <arraybolt3@gmail.com>
+// SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
+
 add_executable(karton)
 
 ecm_add_qml_module(karton
@@ -10,6 +14,10 @@ target_sources(karton
     main.cpp
     karton.cpp
     vmlistmodel.cpp
+<<<<<<< HEAD
+=======
+    domain.cpp
+>>>>>>> work/dereklin/new
 )
 
 ecm_target_qml_sources(karton

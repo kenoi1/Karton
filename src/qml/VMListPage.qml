@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: 2024 Aaron Rainbolt <arraybolt3@gmail.com>
+// SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 import QtQuick
 import QtQuick.Layouts
@@ -107,7 +107,7 @@ Kirigami.ScrollablePage {
                     ColumnLayout {
                         Kirigami.Heading {
                             level: 2
-                            text: qsTr("Product ")+ modelData
+                            text: domainName
                         }
                         Kirigami.Separator {
                             Layout.fillWidth: true
@@ -115,14 +115,14 @@ Kirigami.ScrollablePage {
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: qsTr("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam id risus id augue euismod accumsan.")
+                            text: uuid
                         }
                     }
                     Controls.Button {
                         Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                         Layout.columnSpan: 2
-                        text: qsTr("Install")
-                        onClicked: showPassiveNotification("Install for Product " + modelData + " clicked");
+                        text: isRunning ? "running" : "stopped";
+                        onClicked: showPassiveNotification("Starting VM:" + domainName + "!");
                     }
                 }
             }

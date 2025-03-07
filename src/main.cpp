@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024 Aaron Rainbolt <arraybolt3@gmail.com>
+// SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
+
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QtQml>
@@ -8,7 +12,11 @@
 #include <KIconTheme>
 #include "karton.h"
 #include "vmlistmodel.h"
+<<<<<<< HEAD
 
+=======
+#include <QDebug>
+>>>>>>> work/dereklin/new
 #include <libvirt/libvirt.h>
 #include <iostream>
 
@@ -29,6 +37,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
+    qDebug() << "Hello! Starting application...";
     Karton runVM;
 
 

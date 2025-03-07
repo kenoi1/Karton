@@ -1,14 +1,17 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
+
 #include "vmlistmodel.h"
 
-VM::VM (const QString& firstname, const QString& lastname, const QDate& birthday) {
-    mFirstname = firstname;
-    mLastName = lastname;
-    mBirthday = birthday;
+VM::VM (const QString& domainName, const QString& uuid, const bool& isRunning) {
+    m_domainName = domainName;
+    m_uuid = uuid;
+    m_isRunning = isRunning;
 }
-VM::VM() { } 
-VMModel::VMModel(QObject *parent): QAbstractListModel(parent) {
-    
-}
+
+VM::VM() {} 
+
+VMModel::VMModel(QObject *parent): QAbstractListModel(parent) {}
 int VMModel::rowCount(const QModelIndex& parent) const {
       return mDatas.size();
 }
@@ -17,25 +20,25 @@ int VMModel::rowCount(const QModelIndex& parent) const {
 // }
 QVariant VMModel::data(const QModelIndex &index, int role) const
   {
-   if (!index.isValid())
-       return QVariant();
-   if ( role == Qt::DisplayRole)
-   {
-       if ( index.column() == 0)
-           return mDatas[index.row()].firstname();
-       if ( index.column() == 1)
-           return mDatas[index.row()].lastname();
-      if ( index.column() == 2)
-           return mDatas[index.row()].birthday();
-   }
-   return QVariant();
+    if (!index.isValid())
+        return QVariant();
+    if (role == DomainNameRole)
+        return mDatas[index.row()].domainName();
+    if (role == UuidRole)
+        return mDatas[index.row()].uuid();
+    if (role == IsRunningRole)
+        return mDatas[index.row()].isRunning();
+    return QVariant();
 }
+QHash<int, QByteArray> VMModel::roleNames() const {
+            return {{DomainNameRole, "domainName"}, {UuidRole, "uuid"}, {IsRunningRole, "isRunning"}};
+        }
 void VMModel::populate()
 {
         beginResetModel();
         mDatas.clear();
-        mDatas.append(VM(QStringLiteral("Charles"), QStringLiteral("Charles"), QDate(1812,22,23)));
-        mDatas.append(VM(QStringLiteral("Charles"), QStringLiteral("Charles"), QDate(1976,22,12)));
-        mDatas.append(VM(QStringLiteral("Charles"), QStringLiteral("Charles"), QDate(1951,21,31)));
+        mDatas.append(VM(QStringLiteral("Fedora"), QStringLiteral("3hr9823u8f924u8"), true));
+        mDatas.append(VM(QStringLiteral("Mint"), QStringLiteral("u9f898u498f2"), false));
+        mDatas.append(VM(QStringLiteral("Ubunut"), QStringLiteral("4u98fu4398"), true));
         endResetModel();
 }
