@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024 Aaron Rainbolt <arraybolt3@gmail.com>
+
 // Includes relevant modules used by the QML
 import QtQuick
 import QtQuick.Layouts

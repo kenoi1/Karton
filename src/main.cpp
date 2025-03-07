@@ -7,6 +7,7 @@
 #include <KLocalizedString>
 #include <KIconTheme>
 #include "karton.h"
+#include "vmlistmodel.h"
 
 #include <libvirt/libvirt.h>
 #include <iostream>
@@ -29,6 +30,12 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     Karton runVM;
+
+
+    VMModel *model = new VMModel();
+    model->populate();
+    engine.rootContext()->setContextProperty(QStringLiteral("VMModel"), model);
+
     engine.rootContext()->setContextProperty(QStringLiteral("runVM"), &runVM);
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
