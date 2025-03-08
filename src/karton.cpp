@@ -169,16 +169,30 @@ bool Karton::startDomain(const QString &uuid) {
 
 bool Karton::stopDomain(const QString &uuid) {
     virDomainPtr domain = virDomainLookupByUUIDString(m_conn, uuid.toUtf8().constData());
-    int result = virDomainShutdown(domain);
-
-    if (result < 0) {
-        qDebug() << "Failed to stop domain:" << uuid;
-        return false;
+    virDomainInfo info;
+    if (info.state == VIR_DOMAIN_RUNNING || info.state == VIR_DOMAIN_PAUSED) {
+        int result = virDomainShutdown(domain);
+        if (result < 0) {
+            qDebug() << "Failed to stop domain:" << uuid;
+            return false;
+        }
     }
+    
     qDebug() << "Successfully stopped domain:" << uuid;
+    virDomainFree(domain);
     return true;
 }
+bool Karton::forceStopDomain(const QString &uuid) {
+    virDomainPtr domain = virDomainLookupByUUIDString(m_conn, uuid.toUtf8().constData());
+    int result = virDomainDestroy(domain);
 
+    if (result < 0) {
+        qDebug() << "Failed to force-stop domain:" << uuid;
+        return false;
+    }
+    qDebug() << "Successfully force-stopped domain:" << uuid;
+    return true;
+}
 bool Karton::viewDomain(const QString &domainName) {
     return runCommand(QStringLiteral("virt-viewer ") + domainName);
 }

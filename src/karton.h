@@ -22,6 +22,7 @@ class Karton : public QObject {
         Q_INVOKABLE bool startDomain(const QString &uuid);
         Q_INVOKABLE bool stopDomain(const QString &uuid);
         Q_INVOKABLE bool viewDomain(const QString &domainName);
+        Q_INVOKABLE bool forceStopDomain(const QString &uuid);
 
     Q_SIGNALS:
         void commandFinished(int exitCode, const QString &output);

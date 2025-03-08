@@ -231,7 +231,7 @@ Kirigami.ScrollablePage {
                         }
                         Controls.Button {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
-                            Layout.columnSpan: 2
+                            Layout.columnSpan: 1
                             text: "Stop"
                             onClicked: {
                                 Karton.stopDomain(model.uuid)
@@ -240,7 +240,16 @@ Kirigami.ScrollablePage {
                         }
                         Controls.Button {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
-                            Layout.columnSpan: 3
+                            Layout.columnSpan: 1
+                            text: "Force Stop"
+                            onClicked: {
+                                Karton.forceStopDomain(model.uuid)
+                                showPassiveNotification("Force-stopping VM: " + model.domainName + "!");
+                            }
+                        }
+                        Controls.Button {
+                            Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
+                            Layout.columnSpan: 1
                             text: "View VM"
                             onClicked: {
                                 Karton.viewDomain(model.domainName)
