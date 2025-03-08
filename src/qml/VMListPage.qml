@@ -79,7 +79,76 @@ Kirigami.ScrollablePage {
 
         // ScrollIndicator.vertical:ScrollIndicator { }
     // }
+    title: "Karton Virtual Machine Manager"
+    actions: [
+        Kirigami.Action {
+            icon.name: "list-add-symbolic"
+            text: "Add VM"
+            onTriggered: source => {
+                showPassiveNotification("Add a Virtual Machine!");
+                addDomainDialog.open();
+            }
+        }
+    ]
+    Kirigami.Dialog {
+        id: addDomainDialog
+        title: "Add New Virtual Machine"
+        modal: true
 
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        
+        anchors.centerIn: parent
+        width: Math.min(root.width - 50, 400)
+        
+        onAccepted: {
+            console.log("VM Name:", nameField.text);
+            console.log("VM Type:", vmTypeComboBox.currentText);
+            showPassiveNotification("Created VM: " + nameField.text);
+        }
+            
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 20
+            
+            Controls.Label {
+                text: "VM Name:"
+            }
+            
+            Kirigami.ActionTextField {
+                id: nameField
+                Layout.fillWidth: true
+                placeholderText: "Enter VM name"
+            }
+            
+            Controls.Label {
+                text: "VM Type: "
+            }
+            
+            // Kirigami.OverlayDrawer {
+            //     id: vmTypeComboBox
+            //     edge: Qt.BottomEdge
+            //     modal: false
+
+            //     contentItem: Controls.Label {
+            //         text: "Hey"
+            //     }
+            // }
+            
+            Controls.Label {
+                text: "Memory (MB): "
+            }
+            
+            // SpinBox {
+            //     id: memorySpinBox
+            //     Layout.fillWidth: true
+            //     from: 512
+            //     to: 65536
+            //     stepSize: 512
+            //     value: 2048
+            // }
+        }
+    }
     Kirigami.CardsListView {
         id: view
         model: VMModel
@@ -88,18 +157,19 @@ Kirigami.ScrollablePage {
             contentItem: Item {
                 implicitWidth: delegateLayout.implicitWidth
                 implicitHeight: delegateLayout.implicitHeight
-                GridLayout {
+                RowLayout {
                     id: delegateLayout
                     anchors {
                         left: parent.left
                         top: parent.top
                         right: parent.right
                     }
-                    rowSpacing: Kirigami.Units.largeSpacing
-                    columnSpacing: Kirigami.Units.largeSpacing
-                    columns: width > Kirigami.Units.gridUnit * 20 ? 4 : 2
+                    // rowSpacing: Kirigami.Units.largeSpacing
+                    // columnSpacing: Kirigami.Units.largeSpacing
+                    // columns: width > Kirigami.Units.gridUnit * 20 ? 4 : 2
                     Kirigami.Icon {
-                        source: "choqok"
+                        source: "choqok" 
+                        // TODO: Add OS Icon -> eventually, have screencap of VM window
                         Layout.fillHeight: true
                         Layout.maximumHeight: Kirigami.Units.iconSizes.huge
                         Layout.preferredWidth: height
@@ -135,7 +205,7 @@ Kirigami.ScrollablePage {
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "CPUs: " + model.cpus
+                            text: "CPU Cores: " + model.cpus
                         }
                         Controls.Label {
                             Layout.fillWidth: true
@@ -145,16 +215,38 @@ Kirigami.ScrollablePage {
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "Autostart" + (model.autostart ? "Enabled" : "Disabled")
+                            text: "Autostart: " + (model.autostart ? "Enabled" : "Disabled")
                         }
 
-                        
                     }
-                    Controls.Button {
-                        Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
-                        Layout.columnSpan: 2
-                        text: "Start"
-                        onClicked: showPassiveNotification("Starting VM:" + domainName + "!");
+                    ColumnLayout{
+                        Controls.Button {
+                            Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
+                            Layout.columnSpan: 1
+                            text: "Start"
+                            onClicked: {
+                                Karton.startDomain(model.uuid)
+                                showPassiveNotification("Starting VM: " + model.domainName + "!");
+                            }
+                        }
+                        Controls.Button {
+                            Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
+                            Layout.columnSpan: 2
+                            text: "Stop"
+                            onClicked: {
+                                Karton.stopDomain(model.uuid)
+                                showPassiveNotification("Stopping VM: " + model.domainName + "!");
+                            }
+                        }
+                        Controls.Button {
+                            Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
+                            Layout.columnSpan: 3
+                            text: "View VM"
+                            onClicked: {
+                                Karton.viewDomain(model.domainName)
+                                showPassiveNotification("Opening in virt-viewer: " + model.domainName + "!");
+                            }
+                        }
                     }
                 }
             }

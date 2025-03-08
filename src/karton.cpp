@@ -130,10 +130,39 @@ QVector<Domain> Karton::domains() {
     return m_domains;
 }
 
-// For virsh and other CLI
-bool Karton::runVM(const QString &command)
+
+bool Karton::startDomain(const QString &uuid) {
+    virDomainPtr domain = virDomainLookupByUUIDString(m_conn, uuid.toUtf8().constData());
+    int result = virDomainCreate(domain);
+
+    if (result < 0) {
+        qDebug() << "Failed to start domain:" << uuid;
+        return false;
+    }
+    qDebug() << "Successfully started domain:" << uuid;
+    return true;
+}
+
+bool Karton::stopDomain(const QString &uuid) {
+    virDomainPtr domain = virDomainLookupByUUIDString(m_conn, uuid.toUtf8().constData());
+    int result = virDomainShutdown(domain);
+
+    if (result < 0) {
+        qDebug() << "Failed to stop domain:" << uuid;
+        return false;
+    }
+    qDebug() << "Successfully stopped domain:" << uuid;
+    return true;
+}
+
+bool Karton::viewDomain(const QString &domainName) {
+    return runCommand(QStringLiteral("virt-viewer ") + domainName);
+}
+
+// For virsh, virt-viewer, virt-install and other CLI
+bool Karton::runCommand(const QString &command)
 {
-    qDebug() << "Running VM:" << command;
-    m_process->start(command);
+    qDebug() << "Running Command:" << command;
+    m_process->startCommand(command);
     return m_process->waitForStarted();
 }

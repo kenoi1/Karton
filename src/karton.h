@@ -16,7 +16,10 @@ class Karton : public QObject {
         QVector<Domain> domains();
 
     public Q_SLOTS:
-        Q_INVOKABLE bool runVM(const QString &command);
+        Q_INVOKABLE bool runCommand(const QString &command);
+        Q_INVOKABLE bool startDomain(const QString &uuid);
+        Q_INVOKABLE bool stopDomain(const QString &uuid);
+        Q_INVOKABLE bool viewDomain(const QString &domainName);
 
     Q_SIGNALS:
         void commandFinished(int exitCode, const QString &output);
@@ -29,4 +32,5 @@ class Karton : public QObject {
 
         bool init();
         void refreshDomainList();
+        
 };

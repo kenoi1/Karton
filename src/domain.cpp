@@ -25,7 +25,7 @@ Domain::Domain(const QString& name,
     , m_diskPath(diskPath)
     , m_autostart(autostart) 
 {
-    qDebug() << "Created domain:" << m_name << "UUID:" << m_uuid 
+    qDebug() << "Created domain object:" << m_name << "UUID:" << m_uuid 
              << "State:" << m_state << "Active:" << m_isActive;
 }
 

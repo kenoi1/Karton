@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     model->populate();
     engine.rootContext()->setContextProperty(QStringLiteral("VMModel"), model);
 
-    engine.rootContext()->setContextProperty(QStringLiteral("runVM"), &karton);
+    engine.rootContext()->setContextProperty(QStringLiteral("Karton"), &karton);
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.loadFromModule("org.kde.karton", "Main");
