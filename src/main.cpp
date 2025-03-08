@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
 
     VMModel *model = new VMModel(&karton);
-    model->populate();
+    model->updateDomains();
     engine.rootContext()->setContextProperty(QStringLiteral("VMModel"), model);
 
     engine.rootContext()->setContextProperty(QStringLiteral("Karton"), &karton);

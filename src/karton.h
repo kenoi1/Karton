@@ -7,6 +7,8 @@
 #include <libvirt/libvirt.h>
 #include "domain.h"
 
+class LibvirtMonitor;
+
 class Karton : public QObject {
     Q_OBJECT
 
@@ -23,14 +25,17 @@ class Karton : public QObject {
 
     Q_SIGNALS:
         void commandFinished(int exitCode, const QString &output);
-        // void domainsChanged();
+        void domainsChanged(const QString &domainName, int event, int detail);
 
+    private Q_SLOTS:
+        void onDomainStateChanged(const QString &domainName, int event, int detail);
+    
     private:
         QProcess *m_process;
         virConnectPtr m_conn;
         QVector<Domain> m_domains;
+        LibvirtMonitor *m_monitor;
 
         bool init();
         void refreshDomainList();
-        
 };

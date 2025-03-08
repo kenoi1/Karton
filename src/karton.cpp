@@ -3,15 +3,20 @@
 
 #include "karton.h"
 #include "domain.h"
+#include "libvirtmonitor.h"
+
 #include <QDebug>
 #include <libvirt/libvirt.h>
 #include <iostream>
 #include <QObject>
 #include <KLocalizedString>
 
+
 Karton::Karton(QObject *parent)
     : QObject(parent)
-    , m_process(new QProcess(this)) {
+    , m_process(new QProcess(this))
+    , m_conn(nullptr)
+    , m_monitor(nullptr) {
 
     connect(m_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
         [this](int exitCode, QProcess::ExitStatus) {
@@ -23,11 +28,24 @@ Karton::Karton(QObject *parent)
 }
 
 Karton::~Karton() {
-    virConnectClose(m_conn);
+
+    delete m_monitor;
+
+    if (m_conn) {
+        virConnectClose(m_conn);
+    }
+    
     if (m_process->state() == QProcess::Running) {
         m_process->terminate();
         m_process->waitForFinished(1000);
     }
+
+}
+
+void Karton::onDomainStateChanged(const QString &domainName, int event, int detail) {
+    qDebug() << "Domain state changed:" << domainName << "Event:" << event << "Detail:" << detail;
+    
+    Q_EMIT domainsChanged(domainName, event, detail);
 }
 
 bool Karton::init() {
@@ -39,11 +57,17 @@ bool Karton::init() {
     }
 
     qDebug() << "Connected to hypervisor";
+
+    m_monitor = new LibvirtMonitor(this, m_conn);
+    connect(m_monitor, &LibvirtMonitor::domainStateChanged,
+        this, &Karton::onDomainStateChanged);
+
     refreshDomainList();
+
     // Print VMs when started
     qDebug() << "Total VMs: " << m_domains.size();
-for (const auto& domain : m_domains) {
-    qDebug() << "VM:" << domain.name()
+    for (const auto& domain : m_domains) {
+        qDebug() << "VM:" << domain.name()
              << "\n    UUID:" << domain.uuid()
              << "\n    Active:" << (domain.isActive() ? "Yes" : "No")
              << "\n    State:" << domain.state()
@@ -52,7 +76,7 @@ for (const auto& domain : m_domains) {
              << "\n    CPUs:" << domain.cpus()
              << "\n    Disk Path:" << domain.diskPath()
              << "\n    Autostart:" << (domain.autostart() ? "Yes" : "No");
-}
+    }
     return true;
 }
 
@@ -159,10 +183,10 @@ bool Karton::viewDomain(const QString &domainName) {
     return runCommand(QStringLiteral("virt-viewer ") + domainName);
 }
 
-// For virsh, virt-viewer, virt-install and other CLI
-bool Karton::runCommand(const QString &command)
-{
+// Use for virsh, virt-viewer, virt-install and other CLI
+bool Karton::runCommand(const QString &command) {
     qDebug() << "Running Command:" << command;
     m_process->startCommand(command);
     return m_process->waitForStarted();
 }
+

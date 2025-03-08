@@ -6,7 +6,6 @@
 #include <QObject>
 #include <QAbstractListModel>
 #include <libvirt/libvirt.h>
-// #include <QDate>
 #include <QVariant>
 #include <QModelIndex>
 #include <QHash>
@@ -33,7 +32,9 @@ class VMModel : public QAbstractListModel {
         QHash<int, QByteArray> roleNames() const;
         // int columnCount(const QModelIndex& parent = QModelIndex()) const override;
         QVariant data(const QModelIndex &index, int role) const;
-        void populate();
+        void updateDomains();
+    private Q_SLOTS:
+        void onDomainsChanged (const QString &domainName, int event, int detail);
     private:
         QList<Domain> mDatas;
         Karton *m_karton;

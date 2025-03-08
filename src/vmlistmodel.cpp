@@ -6,6 +6,7 @@
 
 VMModel::VMModel(Karton *parent): QAbstractListModel(parent) {
     m_karton = parent;
+    connect(m_karton, &Karton::domainsChanged, this, &VMModel::onDomainsChanged);
 }
 int VMModel::rowCount(const QModelIndex& parent) const {
       return mDatas.size();
@@ -54,7 +55,10 @@ QHash<int, QByteArray> VMModel::roleNames() const {
         {AutostartRole, "autostart"}
     };
 }
-void VMModel::populate()
+void VMModel::onDomainsChanged (const QString &domainName, int event, int detail) {
+    updateDomains();
+}
+void VMModel::updateDomains()
 {
         beginResetModel();
         mDatas.clear();
