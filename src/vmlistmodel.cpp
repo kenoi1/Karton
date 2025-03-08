@@ -3,13 +3,6 @@
 
 #include "vmlistmodel.h"
 #include "karton.h"
-// VM::VM (const QString& domainName, const QString& uuid, const bool& isRunning) {
-//     m_domainName = domainName;
-//     m_uuid = uuid;
-//     m_isRunning = isRunning;
-// }
-
-// VM::VM() {} 
 
 VMModel::VMModel(Karton *parent): QAbstractListModel(parent) {
     m_karton = parent;
@@ -17,24 +10,50 @@ VMModel::VMModel(Karton *parent): QAbstractListModel(parent) {
 int VMModel::rowCount(const QModelIndex& parent) const {
       return mDatas.size();
 }
-// int VMModel::columnCount(const QModelIndex& parent = QModelIndex()) const {
-//    return 3;
-// }
+
 QVariant VMModel::data(const QModelIndex &index, int role) const
   {
-    if (!index.isValid())
+    if (!index.isValid() || index.row() >= mDatas.size())
         return QVariant();
-    if (role == DomainNameRole)
-        return mDatas[index.row()].name();
-    if (role == UuidRole)
-        return mDatas[index.row()].uuid();
-    if (role == IsRunningRole)
-        return mDatas[index.row()].isActive();
-    return QVariant();
+        
+    const Domain &domain = mDatas[index.row()];
+    
+    switch (role) {
+        case DomainNameRole:
+            return domain.name();
+        case UuidRole:
+            return domain.uuid();
+        case IsActiveRole:
+            return domain.isActive();
+        case StateRole:
+            return domain.state();
+        case MaxRamRole:
+            return domain.maxRam();
+        case RamUsageRole:
+            return domain.ramUsage();
+        case CpusRole:
+            return domain.cpus();
+        case DiskPathRole:
+            return domain.diskPath();
+        case AutostartRole:
+            return domain.autostart();
+        default:
+            return QVariant();
+    }
 }
 QHash<int, QByteArray> VMModel::roleNames() const {
-            return {{DomainNameRole, "domainName"}, {UuidRole, "uuid"}, {IsRunningRole, "isRunning"}};
-        }
+    return {
+        {DomainNameRole, "domainName"},
+        {UuidRole, "uuid"},
+        {IsActiveRole, "isActive"},
+        {StateRole, "state"},
+        {MaxRamRole, "maxRam"},
+        {RamUsageRole, "ramUsage"},
+        {CpusRole, "cpus"},
+        {DiskPathRole, "diskPath"},
+        {AutostartRole, "autostart"}
+    };
+}
 void VMModel::populate()
 {
         beginResetModel();

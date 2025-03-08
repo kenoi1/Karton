@@ -99,7 +99,7 @@ Kirigami.ScrollablePage {
                     columnSpacing: Kirigami.Units.largeSpacing
                     columns: width > Kirigami.Units.gridUnit * 20 ? 4 : 2
                     Kirigami.Icon {
-                        source: "applications-graphics"
+                        source: "choqok"
                         Layout.fillHeight: true
                         Layout.maximumHeight: Kirigami.Units.iconSizes.huge
                         Layout.preferredWidth: height
@@ -107,7 +107,7 @@ Kirigami.ScrollablePage {
                     ColumnLayout {
                         Kirigami.Heading {
                             level: 2
-                            text: domainName
+                            text: model.domainName
                         }
                         Kirigami.Separator {
                             Layout.fillWidth: true
@@ -115,13 +115,45 @@ Kirigami.ScrollablePage {
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: uuid
+                            text: "UUID: " + model.uuid
                         }
+                        Controls.Label {
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            text: "State: " + model.state
+                        }
+                        Controls.Label {
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            text: "Memory: " + model.maxRam
+                        }
+                        Controls.Label {
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            text: "Memory Usage: " + model.ramUsage
+                        }
+                        Controls.Label {
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            text: "CPUs: " + model.cpus
+                        }
+                        Controls.Label {
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            text: "Disk: " + model.diskPath
+                        }
+                        Controls.Label {
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            text: "Autostart" + (model.autostart ? "Enabled" : "Disabled")
+                        }
+
+                        
                     }
                     Controls.Button {
                         Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                         Layout.columnSpan: 2
-                        text: isRunning ? "running" : "stopped";
+                        text: "Start"
                         onClicked: showPassiveNotification("Starting VM:" + domainName + "!");
                     }
                 }

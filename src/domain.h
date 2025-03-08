@@ -9,12 +9,28 @@
 
 class Domain {
     public:
-    Domain(const QString& name, const QString& uuid, const bool isActive);
+    Domain(const QString& name,
+            const QString& uuid,
+            const bool isActive,
+            QString state,
+            const int maxRam,
+            const int ramUsage,
+            const int cpus,
+            const QString& diskPath,
+            bool autostart);
 
+    // getters
     QString name() const { return m_name; }
     QString uuid() const { return m_uuid; }
     bool isActive() const { return m_isActive; }
-    QString statusString() const { return m_isActive ? QStringLiteral("running") : QStringLiteral("stopped"); }
+    QString state() const {return m_state; }
+    int maxRam() const { return m_maxRam; }
+    int ramUsage() const { return m_ramUsage; }
+    int cpus() const { return m_cpus; }
+    QString diskPath() const { return m_diskPath; }
+    bool autostart() const { return m_autostart; }
+
+    // QString statusString() const { return m_isActive ? QStringLiteral("running") : QStringLiteral("stopped"); }
 
     // void setDomainPtr(virDomainPtr domainPtr) { m_domainPtr = domainPtr; }
 
@@ -22,6 +38,12 @@ class Domain {
         QString m_name;
         QString m_uuid;
         bool m_isActive;
+        QString m_state;
+        int m_maxRam;
+        int m_ramUsage;
+        int m_cpus;
+        QString m_diskPath;
+        bool m_autostart;
         // virDomainPtr m_domainPtr = nullptr;
 
 };

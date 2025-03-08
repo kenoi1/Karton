@@ -14,28 +14,20 @@
 #include "domain.h"
 #include "karton.h"
 
-// class VM {
-//     public :
-//         VM();
-//         VM(const QString& domainName, const QString& uuid, const bool& isRunning);  
-        
-//         QString domainName() const {return m_domainName;}
-//         QString uuid() const {return m_uuid;}
-//         bool isRunning() const {return m_isRunning;}
-//     private:
-//         QString m_domainName; 
-//         QString m_uuid;
-//         bool m_isRunning;
-// };
-
 class VMModel : public QAbstractListModel {
     Q_OBJECT
     public:
         enum Roles {
             DomainNameRole,
             UuidRole,
-            IsRunningRole
-        };
+            IsActiveRole,
+            StateRole,
+            MaxRamRole,
+            RamUsageRole,
+            CpusRole,
+            DiskPathRole,
+            AutostartRole
+    };
         VMModel(Karton * parent = nullptr);
         int rowCount(const QModelIndex& parent = QModelIndex()) const override;
         QHash<int, QByteArray> roleNames() const;

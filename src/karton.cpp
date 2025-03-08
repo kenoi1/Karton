@@ -7,6 +7,7 @@
 #include <libvirt/libvirt.h>
 #include <iostream>
 #include <QObject>
+#include <KLocalizedString>
 
 Karton::Karton(QObject *parent)
     : QObject(parent)
@@ -41,11 +42,17 @@ bool Karton::init() {
     refreshDomainList();
     // Print VMs when started
     qDebug() << "Total VMs: " << m_domains.size();
-    for (const auto& domain : m_domains) {
-        qDebug() << "  VM: " << domain.name()
-                    << " (" << domain.statusString() << ")"
-                    << " (UUID: " << domain.uuid() << ")";     
-    }
+for (const auto& domain : m_domains) {
+    qDebug() << "VM:" << domain.name()
+             << "\n    UUID:" << domain.uuid()
+             << "\n    Active:" << (domain.isActive() ? "Yes" : "No")
+             << "\n    State:" << domain.state()
+             << "\n    RAM:" << domain.maxRam() << "MB"
+             << "\n    RAM Usage:" << domain.ramUsage() << "MB"
+             << "\n    CPUs:" << domain.cpus()
+             << "\n    Disk Path:" << domain.diskPath()
+             << "\n    Autostart:" << (domain.autostart() ? "Yes" : "No");
+}
     return true;
 }
 
@@ -56,14 +63,62 @@ void Karton::refreshDomainList() {
     int numDomains = virConnectListAllDomains(m_conn, &domains, 0);
 
     for (int i = 0; i < numDomains; i++) {
+        // getting all information from libvirt
         const char* name = virDomainGetName(domains[i]);
         char uuid[VIR_UUID_STRING_BUFLEN];
         virDomainGetUUIDString(domains[i], uuid);
         bool isActive = virDomainIsActive(domains[i]);
         
+        virDomainInfo domInfo;
+        virDomainGetInfo(domains[i], &domInfo);
+        QString state;
+        switch (domInfo.state) {
+            case VIR_DOMAIN_NOSTATE: state = i18n("no state"); break;
+            case VIR_DOMAIN_RUNNING: state = i18n("running"); break;
+            case VIR_DOMAIN_BLOCKED: state = i18n("blocked"); break;
+            case VIR_DOMAIN_PAUSED: state = i18n("paused"); break;
+            case VIR_DOMAIN_SHUTDOWN: state = i18n("shutting down"); break;
+            case VIR_DOMAIN_SHUTOFF: state = i18n("shutoff"); break;
+            case VIR_DOMAIN_CRASHED: state = i18n("crashed"); break;
+            case VIR_DOMAIN_PMSUSPENDED: state = i18n("suspended"); break;
+            default: state = i18n("unknown"); break;
+        }
+
+        int maxRam = domInfo.maxMem / 1024; // convert to MB
+        int ramUsage = domInfo.memory / 1024;
+        int cpus = domInfo.nrVirtCpu;
+
+        // QString diskPath;
+        // virDomainXMLOptionPtr xmlopt = virDomainXMLOptionNew();
+        // char *xmlDesc = virDomainGetXMLDesc(domains[i], 0);
+        // if (xmlDesc) {
+        //     // This is a simplified approach - for production code, properly parse the XML
+        //     QString xml = QString::fromUtf8(xmlDesc);
+        //     QRegularExpression rx("<source file='([^']+)'");
+        //     QRegularExpressionMatch match = rx.match(xml);
+        //     if (match.hasMatch()) {
+        //         diskPath = match.captured(1);
+        //     }
+        //     free(xmlDesc);
+        // }
+
+        int autoFlag = 0;
+        virDomainGetAutostart(domains[i], &autoFlag);
+        bool autostart = (autoFlag != 0);
+
         // TODO USE POINTER
-        m_domains.append(Domain(QString::fromUtf8(name), 
-                                QString::fromUtf8(uuid), isActive));
+        m_domains.append(Domain(
+            QString::fromUtf8(name),
+            QString::fromUtf8(uuid),
+            isActive,
+            state,
+            maxRam,
+            ramUsage,
+            cpus,
+            // diskPath,
+            QStringLiteral("TODO for now..."),
+            autostart
+        ));
 
         virDomainFree(domains[i]);
     }
