@@ -58,8 +58,7 @@ QHash<int, QByteArray> VMModel::roleNames() const {
 void VMModel::onDomainsChanged (const QString &domainName, int event, int detail) {
     updateDomains();
 }
-void VMModel::updateDomains()
-{
+void VMModel::updateDomains() {
         beginResetModel();
         mDatas.clear();
         mDatas = m_karton->domains();

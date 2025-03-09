@@ -85,7 +85,8 @@ void Karton::refreshDomainList() {
 
     virDomainPtr *domains = nullptr;
     int numDomains = virConnectListAllDomains(m_conn, &domains, 0);
-
+    m_domains.reserve(numDomains);
+    
     for (int i = 0; i < numDomains; i++) {
         // getting all information from libvirt
         const char* name = virDomainGetName(domains[i]);
@@ -130,7 +131,7 @@ void Karton::refreshDomainList() {
         bool autostart = (autoFlag != 0);
 
         // TODO USE POINTER
-        m_domains.append(Domain(
+        m_domains.emplace_back(Domain(
             QString::fromUtf8(name),
             QString::fromUtf8(uuid),
             isActive,
