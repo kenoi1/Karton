@@ -116,7 +116,6 @@ void Karton::refreshDomainList() {
         // virDomainXMLOptionPtr xmlopt = virDomainXMLOptionNew();
         // char *xmlDesc = virDomainGetXMLDesc(domains[i], 0);
         // if (xmlDesc) {
-        //     // This is a simplified approach - for production code, properly parse the XML
         //     QString xml = QString::fromUtf8(xmlDesc);
         //     QRegularExpression rx("<source file='([^']+)'");
         //     QRegularExpressionMatch match = rx.match(xml);

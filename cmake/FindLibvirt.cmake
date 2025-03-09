@@ -1,27 +1,18 @@
-# FindLibvirt.cmake
-# Finds the libvirt library
-#
-# This will define the following variables:
-#   LIBVIRT_FOUND        - True if libvirt is found
-#   LIBVIRT_INCLUDE_DIRS - The libvirt include directories
-#   LIBVIRT_LIBRARIES    - The libvirt libraries
-#
-# and the following imported targets:
-#   Libvirt::Libvirt
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2024 Aaron Rainbolt <arraybolt3@gmail.com>
+# SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)
   pkg_check_modules(PC_LIBVIRT QUIET libvirt)
 endif()
 
-# Find the include directory
 find_path(LIBVIRT_INCLUDE_DIR
   NAMES libvirt/libvirt.h
   PATHS ${PC_LIBVIRT_INCLUDE_DIRS}
   PATH_SUFFIXES libvirt
 )
 
-# Find the library
 find_library(LIBVIRT_LIBRARY
   NAMES virt libvirt
   PATHS ${PC_LIBVIRT_LIBRARY_DIRS}
