@@ -2,6 +2,9 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 #include "libvirtmonitor.h"
+#include "libvirteventloop.h"
+#include <QDebug>
+
 LibvirtMonitor::LibvirtMonitor(QObject *parent, virConnectPtr conn)
     : QObject(parent)
     , m_conn(conn)
@@ -12,25 +15,41 @@ LibvirtMonitor::LibvirtMonitor(QObject *parent, virConnectPtr conn)
         return;
     }
 
-    LibvirtEventLoop::registerQtEventLoop();
+    auto virtEventLoop = new LibvirtEventLoop{this}; // TODO store
+    virtEventLoop->start();
+    // LibvirtEventLoop::registerQtEventLoop();
+    connect(virtEventLoop, &LibvirtEventLoop::result, this, [this](bool result) {
+        if (!result) {
+            qDebug() << "virteventloop register failed";
+            return;
+        }
+        m_callbackId =
+            virConnectDomainEventRegisterAny(m_conn, nullptr, VIR_DOMAIN_EVENT_ID_LIFECYCLE, VIR_DOMAIN_EVENT_CALLBACK(domainEventCallback), this, nullptr);
 
-    m_callbackId =
-        virConnectDomainEventRegisterAny(m_conn, nullptr, VIR_DOMAIN_EVENT_ID_LIFECYCLE, VIR_DOMAIN_EVENT_CALLBACK(domainEventCallback), this, nullptr);
+        // For reference...
+        // EVENT_ID_LIFECYCLE is listening to all events under:
+        // https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainEventType
+        // Also a list of other callbacks:
+        // https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainEventID
 
-    if (m_callbackId < 0) {
-        qDebug() << "Failed to register event callback";
-    } else {
-        qDebug() << "Successfully registered domain event callback";
-    }
+        if (m_callbackId < 0) {
+            qDebug() << "Failed to register event callback";
+        } else {
+            qDebug() << "Successfully registered domain event callback";
+        }
+    });
 }
+
 LibvirtMonitor::~LibvirtMonitor()
 {
     if (m_callbackId >= 0 && m_conn) {
         virConnectDomainEventDeregisterAny(m_conn, m_callbackId);
     }
 }
+
 int LibvirtMonitor::domainEventCallback(virConnectPtr conn, virDomainPtr dom, int event, int detail, void *opaque)
 {
+    qDebug() << "event callback!";
     LibvirtMonitor *monitor = static_cast<LibvirtMonitor *>(opaque);
     const char *name = virDomainGetName(dom);
 

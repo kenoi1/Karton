@@ -15,8 +15,8 @@ target_sources(karton
     karton.cpp
     vmlistmodel.cpp
     domain.cpp
-    libvirteventloop.cpp
     libvirtmonitor.cpp
+    libvirteventloop.cpp
 )
 
 ecm_target_qml_sources(karton

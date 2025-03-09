@@ -65,18 +65,18 @@ bool Karton::init() {
     refreshDomainList();
 
     // Print VMs when started
-    qDebug() << "Total VMs: " << m_domains.size();
-    for (const auto& domain : m_domains) {
-        qDebug() << "VM:" << domain.name()
-             << "\n    UUID:" << domain.uuid()
-             << "\n    Active:" << (domain.isActive() ? "Yes" : "No")
-             << "\n    State:" << domain.state()
-             << "\n    RAM:" << domain.maxRam() << "MB"
-             << "\n    RAM Usage:" << domain.ramUsage() << "MB"
-             << "\n    CPUs:" << domain.cpus()
-             << "\n    Disk Path:" << domain.diskPath()
-             << "\n    Autostart:" << (domain.autostart() ? "Yes" : "No");
-    }
+    // qDebug() << "Total VMs: " << m_domains.size();
+    // for (const auto& domain : m_domains) {
+    //     qDebug() << "VM:" << domain.name()
+    //          << "\n    UUID:" << domain.uuid()
+    //          << "\n    Active:" << (domain.isActive() ? "Yes" : "No")
+    //          << "\n    State:" << domain.state()
+    //          << "\n    RAM:" << domain.maxRam() << "MB"
+    //          << "\n    RAM Usage:" << domain.ramUsage() << "MB"
+    //          << "\n    CPUs:" << domain.cpus()
+    //          << "\n    Disk Path:" << domain.diskPath()
+    //          << "\n    Autostart:" << (domain.autostart() ? "Yes" : "No");
+    // }
     return true;
 }
 

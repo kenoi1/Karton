@@ -3,13 +3,11 @@
 
 #pragma once
 
-#include "libvirteventloop.h"
 #include <QDebug>
 #include <QObject>
 #include <QString>
 #include <libvirt/libvirt.h>
 
-class LibvirtEventLoop;
 
 class LibvirtMonitor : public QObject
 {
