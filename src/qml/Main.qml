@@ -13,7 +13,7 @@ Kirigami.ApplicationWindow {
     // Unique identifier to reference this object
     id: root
 
-    width: 700
+    width: 800
     height: 600
 
     // Window title

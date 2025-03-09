@@ -168,7 +168,7 @@ Kirigami.ScrollablePage {
                     // columnSpacing: Kirigami.Units.largeSpacing
                     // columns: width > Kirigami.Units.gridUnit * 20 ? 4 : 2
                     Kirigami.Icon {
-                        source: "choqok" 
+                        source: "computer-symbolic" 
                         // TODO: Add OS Icon -> eventually, have screencap of VM window
                         Layout.fillHeight: true
                         Layout.maximumHeight: Kirigami.Units.iconSizes.huge
