@@ -17,6 +17,8 @@ void LibvirtEventLoop::run()
     if (virInitialize() == 0) {
         int registered = virEventRegisterDefaultImpl();
         Q_EMIT result(registered == 0);
+        // TODO: run in a qTimer infinite loop
+        // virEventRunDefaultImpl();
 
     } else {
         Q_EMIT result(false);

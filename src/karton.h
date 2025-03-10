@@ -19,6 +19,7 @@ class Karton : public QObject {
 
     public Q_SLOTS:
         Q_INVOKABLE bool runCommand(const QString &command);
+        bool startDomain(const virDomainPtr domain);
         Q_INVOKABLE bool startDomain(const QString &uuid);
         Q_INVOKABLE bool stopDomain(const QString &uuid);
         Q_INVOKABLE bool viewDomain(const QString &domainName);

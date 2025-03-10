@@ -6,7 +6,8 @@
 #include <QString>
 
 
-Domain::Domain(const QString& name, 
+Domain::Domain(const virDomainPtr domainPtr,
+               const QString& name, 
                const QString& uuid, 
                const bool isActive,
                QString state,
@@ -15,7 +16,8 @@ Domain::Domain(const QString& name,
                const int cpus,
                const QString& diskPath,
                bool autostart)
-    : m_name(name)
+    : m_domainPtr(domainPtr)
+    , m_name(name)
     , m_uuid(uuid)
     , m_isActive(isActive)
     , m_state(state)
