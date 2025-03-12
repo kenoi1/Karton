@@ -129,96 +129,79 @@ void Karton::refreshDomainList()
         int maxRam = domInfo.maxMem / 1024; // convert to MB
         int ramUsage = domInfo.memory / 1024;
         int cpus = domInfo.nrVirtCpu;
-
-        // QString diskPath;
-        // virDomainXMLOptionPtr xmlopt = virDomainXMLOptionNew();
-        // char *xmlDesc = virDomainGetXMLDesc(domains[i], 0);
-        // if (xmlDesc) {
-        //     QString xml = QString::fromUtf8(xmlDesc);
-        //     QRegularExpression rx("<source file='([^']+)'");
-        //     QRegularExpressionMatch match = rx.match(xml);
-        //     if (match.hasMatch()) {
-        //         diskPath = match.captured(1);
-        //     }
-        //     free(xmlDesc);
-        // }
+        QString diskPath = QStringLiteral(" "); // TODO
 
         int autoFlag = 0;
         virDomainGetAutostart(domains[i], &autoFlag);
         bool autostart = (autoFlag != 0);
 
-        // TODO USE POINTER
-        m_domains.emplace_back(domainPtr,
-                               QString::fromUtf8(name),
-                               QString::fromUtf8(uuid),
-                               isActive,
-                               state,
-                               maxRam,
-                               ramUsage,
-                               cpus,
-                               // diskPath, TODO implement retrieving path
-                               QStringLiteral(" "),
-                               autostart);
-
-        virDomainFree(domains[i]);
+        Domain *domain = new Domain(domainPtr,
+                                    QString::fromUtf8(name),
+                                    QString::fromUtf8(uuid),
+                                    isActive,
+                                    state,
+                                    maxRam,
+                                    ramUsage,
+                                    cpus,
+                                    diskPath, // TODO: implement retrieving path
+                                    autostart,
+                                    this);
+        m_domains.emplace_back(domain);
+        // virDomainFree(domains[i]);
     }
+    free(domains);
 }
 
-QVector<Domain> Karton::domains()
+QVector<Domain *> Karton::domains()
 {
     refreshDomainList();
     return m_domains;
 }
 
-// TODO: use virdomainptr directly from qml
-bool Karton::startDomain(const QString &uuid)
+bool Karton::startDomain(const Domain *domain)
 {
-    virDomainPtr domain = virDomainLookupByUUIDString(m_conn, uuid.toUtf8().constData());
-    return startDomain(domain);
-}
-bool Karton::startDomain(const virDomainPtr domain)
-{
-    int result = virDomainCreate(domain);
+    virDomainPtr domainPtr = domain->domainPtr();
+    int result = virDomainCreate(domainPtr);
 
     if (result < 0) {
-        qDebug() << "Failed to start domain:";
+        qDebug() << "Failed to start domain:" << domain->name();
         return false;
     }
-    qDebug() << "Successfully started domain:";
+    qDebug() << "Successfully started domain:" << domain->name();
     return true;
 }
 
-bool Karton::stopDomain(const QString &uuid)
+bool Karton::stopDomain(const Domain *domain)
 {
-    virDomainPtr domain = virDomainLookupByUUIDString(m_conn, uuid.toUtf8().constData());
+    virDomainPtr domainPtr = domain->domainPtr();
     virDomainInfo info;
     if (info.state == VIR_DOMAIN_RUNNING || info.state == VIR_DOMAIN_PAUSED) {
-        int result = virDomainShutdown(domain);
+        int result = virDomainShutdown(domainPtr);
         if (result < 0) {
-            qDebug() << "Failed to stop domain:" << uuid;
+            qDebug() << "Failed to stop domain:" << domain->name();
             return false;
         }
     }
 
-    qDebug() << "Successfully stopped domain:" << uuid;
-    virDomainFree(domain);
+    qDebug() << "Successfully stopped domain:"<< domain->name();
+    virDomainFree(domainPtr);
     return true;
 }
-bool Karton::forceStopDomain(const QString &uuid)
+bool Karton::forceStopDomain(const Domain *domain)
 {
-    virDomainPtr domain = virDomainLookupByUUIDString(m_conn, uuid.toUtf8().constData());
-    int result = virDomainDestroy(domain);
+    virDomainPtr domainPtr = domain->domainPtr();
+    int result = virDomainDestroy(domainPtr);
 
     if (result < 0) {
-        qDebug() << "Failed to force-stop domain:" << uuid;
+        qDebug() << "Failed to force-stop domain:" << domain->name();
         return false;
     }
-    qDebug() << "Successfully force-stopped domain:" << uuid;
+    qDebug() << "Successfully force-stopped domain:" << domain->name();
     return true;
 }
-bool Karton::viewDomain(const QString &domainName)
+bool Karton::viewDomain(const Domain *domain)
 {
-    return runCommand(QStringLiteral("virt-viewer ") + domainName);
+    return runCommand(QStringLiteral("virt-viewer") + domain->name());
 }
 
 // Use for virsh, virt-viewer, virt-install and other CLI

@@ -4,46 +4,93 @@
 #pragma once
 
 #include <QObject>
-#include <libvirt/libvirt.h>
 #include <QString>
+#include <libvirt/libvirt.h>
 
-class Domain {
-    public:
+class Domain : public QObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(QString name READ name CONSTANT)
+    Q_PROPERTY(QString uuid READ uuid CONSTANT)
+    Q_PROPERTY(bool isActive READ isActive)
+    Q_PROPERTY(QString state READ state)
+    Q_PROPERTY(int maxRam READ maxRam CONSTANT)
+    Q_PROPERTY(int ramUsage READ ramUsage)
+    Q_PROPERTY(int cpus READ cpus CONSTANT)
+    Q_PROPERTY(QString diskPath READ diskPath CONSTANT)
+    Q_PROPERTY(bool autostart READ autostart)
+
+public:
+    Domain(QObject *parent = nullptr);
     Domain(const virDomainPtr domainPtr,
-            const QString& name,
-            const QString& uuid,
-            const bool isActive,
-            QString state,
-            const int maxRam,
-            const int ramUsage,
-            const int cpus,
-            const QString& diskPath,
-            bool autostart);
+           const QString &name,
+           const QString &uuid,
+           const bool isActive,
+           QString state,
+           const int maxRam,
+           const int ramUsage,
+           const int cpus,
+           const QString &diskPath,
+           bool autostart,
+           QObject *parent = nullptr);
 
     // getters
-    virDomainPtr domainPtr() const { return m_domainPtr; }
-    QString name() const { return m_name; }
-    QString uuid() const { return m_uuid; }
-    bool isActive() const { return m_isActive; }
-    QString state() const {return m_state; }
-    int maxRam() const { return m_maxRam; }
-    int ramUsage() const { return m_ramUsage; }
-    int cpus() const { return m_cpus; }
-    QString diskPath() const { return m_diskPath; }
-    bool autostart() const { return m_autostart; }
+    virDomainPtr domainPtr() const
+    {
+        return m_domainPtr;
+    }
+    QString name() const
+    {
+        return m_name;
+    }
+    QString uuid() const
+    {
+        return m_uuid;
+    }
+    bool isActive() const
+    {
+        return m_isActive;
+    }
+    QString state() const
+    {
+        return m_state;
+    }
+    int maxRam() const
+    {
+        return m_maxRam;
+    }
+    int ramUsage() const
+    {
+        return m_ramUsage;
+    }
+    int cpus() const
+    {
+        return m_cpus;
+    }
+    QString diskPath() const
+    {
+        return m_diskPath;
+    }
+    bool autostart() const
+    {
+        return m_autostart;
+    }
 
-    private:
-        virDomainPtr m_domainPtr;
-        QString m_name;
-        QString m_uuid;
-        bool m_isActive;
-        QString m_state;
-        int m_maxRam;
-        int m_ramUsage;
-        int m_cpus;
-        QString m_diskPath;
-        bool m_autostart;
+    // void setIsActive(bool active);
+    // void setState(const QString& state);
+    // void ramUsage(int usage);
+    // void setAutostart(bool autostart);
+
+private:
+    virDomainPtr m_domainPtr;
+    QString m_name;
+    QString m_uuid;
+    bool m_isActive;
+    QString m_state;
+    int m_maxRam;
+    int m_ramUsage;
+    int m_cpus;
+    QString m_diskPath;
+    bool m_autostart;
 };
-
-
-

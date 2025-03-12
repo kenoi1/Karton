@@ -83,7 +83,7 @@ Kirigami.ScrollablePage {
     actions: [
         Kirigami.Action {
             icon.name: "list-add-symbolic"
-            text: "Add VM"
+            text: "Add"
             onTriggered: source => {
                 showPassiveNotification("Add a Virtual Machine!");
                 addDomainDialog.open();
@@ -225,7 +225,7 @@ Kirigami.ScrollablePage {
                             Layout.columnSpan: 1
                             text: "Start"
                             onClicked: {
-                                Karton.startDomain(model.uuid)
+                                Karton.startDomain(model.domainObject)
                                 showPassiveNotification("Starting VM: " + model.domainName + "!");
                             }
                         }
@@ -234,7 +234,7 @@ Kirigami.ScrollablePage {
                             Layout.columnSpan: 1
                             text: "Stop"
                             onClicked: {
-                                Karton.stopDomain(model.uuid)
+                                Karton.stopDomain(model.domainObject)
                                 showPassiveNotification("Stopping VM: " + model.domainName + "!");
                             }
                         }
@@ -243,7 +243,7 @@ Kirigami.ScrollablePage {
                             Layout.columnSpan: 1
                             text: "Force Stop"
                             onClicked: {
-                                Karton.forceStopDomain(model.uuid)
+                                Karton.forceStopDomain(model.domainObject)
                                 showPassiveNotification("Force-stopping VM: " + model.domainName + "!");
                             }
                         }
@@ -252,7 +252,7 @@ Kirigami.ScrollablePage {
                             Layout.columnSpan: 1
                             text: "View VM"
                             onClicked: {
-                                Karton.viewDomain(model.domainName)
+                                Karton.viewDomain(model.domainObject)
                                 showPassiveNotification("Opening in virt-viewer: " + model.domainName + "!");
                             }
                         }

@@ -10,8 +10,8 @@ import org.kde.kirigami as Kirigami
 Kirigami.ApplicationWindow {
     id: root
 
-    width: 800
-    height: 600
+    width: Kirigami.Units.gridUnit * 45
+    height: Kirigami.Units.gridUnit * 35
 
     title: i18nc("@title:window", "Karton Virtual Machine Manager")
 

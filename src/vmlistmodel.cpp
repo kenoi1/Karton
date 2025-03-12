@@ -12,32 +12,37 @@ int VMModel::rowCount(const QModelIndex& parent) const {
       return mDatas.size();
 }
 
+VMModel::~VMModel() {
+    mDatas.clear();
+}
 QVariant VMModel::data(const QModelIndex &index, int role) const
   {
     if (!index.isValid() || index.row() >= mDatas.size())
         return QVariant();
         
-    const Domain &domain = mDatas[index.row()];
+    const Domain* domain = mDatas[index.row()];
     
     switch (role) {
         case DomainNameRole:
-            return domain.name();
+            return domain->name();
         case UuidRole:
-            return domain.uuid();
+            return domain->uuid();
         case IsActiveRole:
-            return domain.isActive();
+            return domain->isActive();
         case StateRole:
-            return domain.state();
+            return domain->state();
         case MaxRamRole:
-            return domain.maxRam();
+            return domain->maxRam();
         case RamUsageRole:
-            return domain.ramUsage();
+            return domain->ramUsage();
         case CpusRole:
-            return domain.cpus();
+            return domain->cpus();
         case DiskPathRole:
-            return domain.diskPath();
+            return domain->diskPath();
         case AutostartRole:
-            return domain.autostart();
+            return domain->autostart();
+        case DomainObjectRole:
+            return QVariant::fromValue(domain);
         default:
             return QVariant();
     }
@@ -52,7 +57,8 @@ QHash<int, QByteArray> VMModel::roleNames() const {
         {RamUsageRole, "ramUsage"},
         {CpusRole, "cpus"},
         {DiskPathRole, "diskPath"},
-        {AutostartRole, "autostart"}
+        {AutostartRole, "autostart"},
+        {DomainObjectRole, "domainObject"}
     };
 }
 void VMModel::onDomainsChanged (const QString &domainName, int event, int detail) {

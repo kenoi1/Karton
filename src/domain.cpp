@@ -5,18 +5,32 @@
 #include <QDebug>
 #include <QString>
 
-
+Domain::Domain(QObject *parent)
+    : QObject(parent)
+    , m_domainPtr(nullptr)
+    , m_name(QStringLiteral(""))
+    , m_uuid(QStringLiteral(""))
+    , m_isActive(false)
+    , m_maxRam(0)
+    , m_ramUsage(0)
+    , m_cpus(0)
+    , m_diskPath(QStringLiteral(""))
+    , m_autostart(false)
+{
+}
 Domain::Domain(const virDomainPtr domainPtr,
-               const QString& name, 
-               const QString& uuid, 
+               const QString &name,
+               const QString &uuid,
                const bool isActive,
                QString state,
                const int maxRam,
                const int ramUsage,
                const int cpus,
-               const QString& diskPath,
-               bool autostart)
-    : m_domainPtr(domainPtr)
+               const QString &diskPath,
+               bool autostart,
+               QObject *parent)
+    : QObject(parent)
+    , m_domainPtr(domainPtr)
     , m_name(name)
     , m_uuid(uuid)
     , m_isActive(isActive)
@@ -25,9 +39,8 @@ Domain::Domain(const virDomainPtr domainPtr,
     , m_ramUsage(ramUsage)
     , m_cpus(cpus)
     , m_diskPath(diskPath)
-    , m_autostart(autostart) 
+    , m_autostart(autostart)
 {
-    // qDebug() << "Created domain object:" << m_name << "UUID:" << m_uuid 
-            //  << "State:" << m_state << "Active:" << m_isActive;
+    // qDebug() << "Created domain object:" << m_name << "UUID:" << m_uuid
+    //  << "State:" << m_state << "Active:" << m_isActive;
 }
-

@@ -25,17 +25,19 @@ class VMModel : public QAbstractListModel {
             RamUsageRole,
             CpusRole,
             DiskPathRole,
-            AutostartRole
+            AutostartRole,
+            DomainObjectRole
     };
         VMModel(Karton * parent = nullptr);
+        ~VMModel();
+
         int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-        QHash<int, QByteArray> roleNames() const;
-        // int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-        QVariant data(const QModelIndex &index, int role) const;
+        QHash<int, QByteArray> roleNames() const override;
+        QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
         void updateDomains();
     private Q_SLOTS:
         void onDomainsChanged (const QString &domainName, int event, int detail);
     private:
-        QList<Domain> mDatas;
+        QList<Domain*> mDatas;
         Karton *m_karton;
 };
