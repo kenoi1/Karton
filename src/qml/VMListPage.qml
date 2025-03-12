@@ -177,7 +177,7 @@ Kirigami.ScrollablePage {
                     ColumnLayout {
                         Kirigami.Heading {
                             level: 2
-                            text: model.domainName
+                            text: domain.name
                         }
                         Kirigami.Separator {
                             Layout.fillWidth: true
@@ -185,32 +185,32 @@ Kirigami.ScrollablePage {
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "UUID: " + model.uuid
+                            text: "UUID: " + domain.uuid
                         }
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "State: " + model.state
+                            text: "State: " + domain.state
                         }
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "Memory: " + model.maxRam
+                            text: "Memory: " + domain.maxRam
                         }
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "Memory Usage: " + model.ramUsage
+                            text: "Memory Usage: " + domain.ramUsage
                         }
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "CPU Cores: " + model.cpus
+                            text: "CPU Cores: " + domain.cpus
                         }
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "Disk: " + model.diskPath
+                            text: "Disk: " + domain.diskPath
                         }
                         Controls.Label {
                             Layout.fillWidth: true
@@ -225,8 +225,8 @@ Kirigami.ScrollablePage {
                             Layout.columnSpan: 1
                             text: "Start"
                             onClicked: {
-                                Karton.startDomain(model.domainObject)
-                                showPassiveNotification("Starting VM: " + model.domainName + "!");
+                                Karton.startDomain(domain)
+                                showPassiveNotification("Starting VM: " + domain.name + "!");
                             }
                         }
                         Controls.Button {
@@ -234,8 +234,8 @@ Kirigami.ScrollablePage {
                             Layout.columnSpan: 1
                             text: "Stop"
                             onClicked: {
-                                Karton.stopDomain(model.domainObject)
-                                showPassiveNotification("Stopping VM: " + model.domainName + "!");
+                                Karton.stopDomain(domain)
+                                showPassiveNotification("Stopping VM: " + domain.name + "!");
                             }
                         }
                         Controls.Button {
@@ -243,8 +243,8 @@ Kirigami.ScrollablePage {
                             Layout.columnSpan: 1
                             text: "Force Stop"
                             onClicked: {
-                                Karton.forceStopDomain(model.domainObject)
-                                showPassiveNotification("Force-stopping VM: " + model.domainName + "!");
+                                Karton.forceStopDomain(domain)
+                                showPassiveNotification("Force-stopping VM: " + domain.name + "!");
                             }
                         }
                         Controls.Button {
@@ -252,8 +252,8 @@ Kirigami.ScrollablePage {
                             Layout.columnSpan: 1
                             text: "View VM"
                             onClicked: {
-                                Karton.viewDomain(model.domainObject)
-                                showPassiveNotification("Opening in virt-viewer: " + model.domainName + "!");
+                                Karton.viewDomain(domain)
+                                showPassiveNotification("Opening in virt-viewer: " + domain.name + "!");
                             }
                         }
                     }

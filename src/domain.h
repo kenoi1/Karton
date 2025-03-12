@@ -13,13 +13,19 @@ class Domain : public QObject
 
     Q_PROPERTY(QString name READ name CONSTANT)
     Q_PROPERTY(QString uuid READ uuid CONSTANT)
-    Q_PROPERTY(bool isActive READ isActive)
-    Q_PROPERTY(QString state READ state)
+    Q_PROPERTY(bool isActive READ isActive NOTIFY isActiveChanged)
+    Q_PROPERTY(QString state READ state NOTIFY stateChanged)
     Q_PROPERTY(int maxRam READ maxRam CONSTANT)
-    Q_PROPERTY(int ramUsage READ ramUsage)
+    Q_PROPERTY(int ramUsage READ ramUsage NOTIFY ramUsageChanged)
     Q_PROPERTY(int cpus READ cpus CONSTANT)
     Q_PROPERTY(QString diskPath READ diskPath CONSTANT)
-    Q_PROPERTY(bool autostart READ autostart)
+    Q_PROPERTY(bool autostart READ autostart NOTIFY autostartChanged)
+
+Q_SIGNALS:
+    void isActiveChanged(const bool active);
+    void stateChanged(const QString &state);
+    void ramUsageChanged(const int usage);
+    void autostartChanged(const bool autostart);
 
 public:
     Domain(QObject *parent = nullptr);
@@ -76,11 +82,6 @@ public:
     {
         return m_autostart;
     }
-
-    // void setIsActive(bool active);
-    // void setState(const QString& state);
-    // void ramUsage(int usage);
-    // void setAutostart(bool autostart);
 
 private:
     virDomainPtr m_domainPtr;
