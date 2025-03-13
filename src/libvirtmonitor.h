@@ -23,7 +23,7 @@ public:
     ~LibvirtMonitor();
 
 Q_SIGNALS:
-    void domainStateChanged(const QString &domainName, int event, int detail);
+    void domainStateChanged(const virDomainPtr domainPtr, int event, int detail);
 
 private:
     static int domainEventCallback(virConnectPtr conn, virDomainPtr dom, int event, int detail, void *opaque);

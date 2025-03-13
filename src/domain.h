@@ -83,6 +83,11 @@ public:
         return m_autostart;
     }
 
+    void setActive(bool active);
+    void setState(const QString &state);
+    void setRamUsage(int ramUsage);
+    void setAutostart(bool autostart);
+
 private:
     virDomainPtr m_domainPtr;
     QString m_name;

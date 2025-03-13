@@ -38,11 +38,12 @@ Karton::~Karton()
     }
 }
 
-void Karton::onDomainStateChanged(const QString &domainName, int event, int detail)
+void Karton::onDomainStateChanged(virDomainPtr domainPtr, int event, int detail)
 {
+    const char *domainName = virDomainGetName(domainPtr);
     qDebug() << "Domain state changed:" << domainName << "Event:" << event << "Detail:" << detail;
-
-    Q_EMIT domainsChanged(domainName, event, detail);
+    
+    Q_EMIT domainsChanged(domainPtr, event, detail);
 }
 
 bool Karton::init()
@@ -76,7 +77,80 @@ bool Karton::init()
     // }
     return true;
 }
+// searchDomain(domain) returns index position of the domain in m_domains
+int Karton::searchDomain(const virDomainPtr domainPtr)
+{
+    char uuid[VIR_UUID_STRING_BUFLEN];
+    virDomainGetUUIDString(domainPtr, uuid);
+    QString searchUuid = QString::fromUtf8(uuid);
+    
+    for (int i = 0; i < m_domains.size(); i++) {
+        if (searchUuid == m_domains[i]->uuid()) {
+            return i;
+        }
+    }
+    return -1;
+}
 
+// refresh a singular domain, used to update list
+void Karton::refreshDomain(const virDomainPtr domainPtr) {
+    int index = searchDomain(domainPtr);
+    if (index == -1) {
+        qDebug() << "Domain not found in list.";
+        return;
+    }
+    
+    Domain* domain = m_domains[index];
+    
+    bool isActive = virDomainIsActive(domainPtr);
+    
+    virDomainInfo domInfo;
+    virDomainGetInfo(domainPtr, &domInfo);
+    QString state;
+    switch (domInfo.state) {
+        case VIR_DOMAIN_NOSTATE:
+            state = i18n("no state");
+            break;
+        case VIR_DOMAIN_RUNNING:
+            state = i18n("running");
+            break;
+        case VIR_DOMAIN_BLOCKED:
+            state = i18n("blocked");
+            break;
+        case VIR_DOMAIN_PAUSED:
+            state = i18n("paused");
+            break;
+        case VIR_DOMAIN_SHUTDOWN:
+            state = i18n("shutting down");
+            break;
+        case VIR_DOMAIN_SHUTOFF:
+            state = i18n("shutoff");
+            break;
+        case VIR_DOMAIN_CRASHED:
+            state = i18n("crashed");
+            break;
+        case VIR_DOMAIN_PMSUSPENDED:
+            state = i18n("suspended");
+            break;
+        default:
+            state = i18n("unknown");
+            break;
+    }
+    
+    int ramUsage = domInfo.memory / 1024;
+    
+    int autoFlag = 0;
+    virDomainGetAutostart(domainPtr, &autoFlag);
+    bool autostart = (autoFlag != 0);
+    
+// updates only mutable fields
+    domain->setActive(isActive);
+    domain->setState(state);
+    domain->setRamUsage(ramUsage);
+    domain->setAutostart(autostart);
+    
+}
+// TODO: clean up code... resets whole list
 void Karton::refreshDomainList()
 {
     m_domains.clear();
@@ -154,7 +228,7 @@ void Karton::refreshDomainList()
 
 QVector<Domain *> Karton::domains()
 {
-    refreshDomainList();
+    // refreshDomainList();
     return m_domains;
 }
 
@@ -175,6 +249,8 @@ bool Karton::stopDomain(const Domain *domain)
 {
     virDomainPtr domainPtr = domain->domainPtr();
     virDomainInfo info;
+    virDomainGetInfo(domainPtr, &info);
+
     if (info.state == VIR_DOMAIN_RUNNING || info.state == VIR_DOMAIN_PAUSED) {
         int result = virDomainShutdown(domainPtr);
         if (result < 0) {
@@ -201,7 +277,8 @@ bool Karton::forceStopDomain(const Domain *domain)
 }
 bool Karton::viewDomain(const Domain *domain)
 {
-    return runCommand(QStringLiteral("virt-viewer") + domain->name());
+    qDebug() << QStringLiteral("virt-viewer ") + domain->name();
+    return runCommand(QStringLiteral("virt-viewer ") + domain->name());
 }
 
 // Use for virsh, virt-viewer, virt-install and other CLI

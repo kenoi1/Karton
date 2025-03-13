@@ -51,9 +51,9 @@ int LibvirtMonitor::domainEventCallback(virConnectPtr conn, virDomainPtr dom, in
 {
     qDebug() << "event callback!";
     LibvirtMonitor *monitor = static_cast<LibvirtMonitor *>(opaque);
-    const char *name = virDomainGetName(dom);
+    // const char *name = virDomainGetName(dom);
 
-    Q_EMIT monitor->domainStateChanged(QString::fromUtf8(name), event, detail);
+    Q_EMIT monitor->domainStateChanged(dom, event, detail);
 
     return 0;
 }

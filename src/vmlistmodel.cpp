@@ -3,6 +3,7 @@
 
 #include "vmlistmodel.h"
 #include "karton.h"
+#include <QDebug>
 
 VMModel::VMModel(Karton *parent)
     : QAbstractListModel(parent)
@@ -72,22 +73,43 @@ QHash<int, QByteArray> VMModel::roleNames() const
     // };
     return {{DomainRole, "domain"}};
 }
-void VMModel::onDomainsChanged(const QString &domainName, int event, int detail)
-{
-    updateDomains();
-}
-void VMModel::updateDomains()
-{
-    beginResetModel();
-    mDatas.clear();
-    mDatas = m_karton->domains();
+// void VMModel::onDomainsChanged(const virDomainPtr domainPtr, int event, int detail)
+// {
+//     updateDomains();
+// }
 
-    /*
-    Testing Sample Data
-    */
-    // mDatas.clear();
-    // mDatas.append(VM(QStringLiteral("Fedora"), QStringLiteral("3hr9823u8f924u8"), true));
-    // mDatas.append(VM(QStringLiteral("Mint"), QStringLiteral("u9f898u498f2"), false));
-    // mDatas.append(VM(QStringLiteral("Ubuntu Tux :)"), QStringLiteral("4u98fu4398"), true));
-    endResetModel();
+void VMModel::onDomainsChanged(const virDomainPtr domainPtr, int event, int detail)
+{
+    updateDomains(domainPtr);
+}
+
+void VMModel::updateDomains(const virDomainPtr domainPtr)
+{
+    char uuid[VIR_UUID_STRING_BUFLEN];
+    virDomainGetUUIDString(domainPtr, uuid);
+    QString domainUuid = QString::fromUtf8(uuid);
+    qDebug() << "Domain UUID:" << domainUuid;
+    
+    int modelIndex = -1;
+    for (int i = 0; i < mDatas.size(); ++i) {
+        if (mDatas[i]->uuid() == domainUuid) {
+            modelIndex = i;
+            break;
+        }
+    }
+    
+    if (modelIndex >= 0) {
+        qDebug() << "Found matching domain in model at index" << modelIndex;
+        m_karton->refreshDomain(domainPtr);
+        
+        QModelIndex qModelIndex = createIndex(modelIndex, 0);
+        Q_EMIT dataChanged(qModelIndex, qModelIndex);
+    } else {
+        qDebug() << "Domain not found in model by UUID, reset list";
+        beginResetModel();
+        mDatas.clear();
+        m_karton->refreshDomainList();
+        mDatas = m_karton->domains();
+        endResetModel();
+    }
 }

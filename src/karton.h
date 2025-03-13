@@ -17,6 +17,9 @@ public:
     explicit Karton(QObject *parent = nullptr);
     ~Karton();
     QVector<Domain *> domains();
+    void refreshDomain(const virDomainPtr domainPtr);
+    int searchDomain(virDomainPtr domainPtr);
+    void refreshDomainList();
 
 public Q_SLOTS:
     Q_INVOKABLE bool runCommand(const QString &command);
@@ -28,10 +31,10 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void commandFinished(int exitCode, const QString &output);
-    void domainsChanged(const QString &domainName, int event, int detail);
+    void domainsChanged(const virDomainPtr domainPtr, int event, int detail);
 
 private Q_SLOTS:
-    void onDomainStateChanged(const QString &domainName, int event, int detail);
+    void onDomainStateChanged(const virDomainPtr domainPtr, int event, int detail);
 
 private:
     QProcess *m_process;
@@ -40,5 +43,4 @@ private:
     LibvirtMonitor *m_monitor;
 
     bool init();
-    void refreshDomainList();
 };

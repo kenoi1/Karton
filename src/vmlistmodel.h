@@ -35,9 +35,9 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QHash<int, QByteArray> roleNames() const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    void updateDomains();
+    void updateDomains(const virDomainPtr domainPtr = nullptr);
 private Q_SLOTS:
-    void onDomainsChanged(const QString &domainName, int event, int detail);
+    void onDomainsChanged(const virDomainPtr domainPtr, int event, int detail);
 
 private:
     QList<Domain *> mDatas;
