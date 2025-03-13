@@ -98,8 +98,8 @@ Kirigami.ScrollablePage {
         standardButtons: Dialog.Ok | Dialog.Cancel
         
         anchors.centerIn: parent
-        width: Math.min(root.width - 50, 400)
-        
+        width: root.width - Kirigami.Units.gridUnit * 10
+        height: root.height - Kirigami.Units.gridUnit * 10
         onAccepted: {
             console.log("VM Name:", nameField.text);
             console.log("VM Type:", vmTypeComboBox.currentText);
@@ -113,16 +113,19 @@ Kirigami.ScrollablePage {
             
             Controls.Label {
                 text: "VM Name:"
+                Layout.leftMargin: 20
             }
             
             Kirigami.ActionTextField {
                 id: nameField
                 Layout.fillWidth: true
                 placeholderText: "Enter VM name"
+                Layout.leftMargin: 20
             }
             
             Controls.Label {
                 text: "VM Type: "
+                Layout.leftMargin: 20
             }
             
             // Kirigami.OverlayDrawer {
@@ -137,6 +140,7 @@ Kirigami.ScrollablePage {
             
             Controls.Label {
                 text: "Memory (MB): "
+                Layout.leftMargin: 20
             }
             
             // SpinBox {
