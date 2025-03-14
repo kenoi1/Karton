@@ -281,6 +281,26 @@ bool Karton::viewDomain(const Domain *domain)
     return runCommand(QStringLiteral("virt-viewer ") + domain->name());
 }
 
+bool Karton::createDomain(const QString &name,
+                                const QString &osVariant,
+                                const float memoryGB,
+                                const float storageGB,
+                                const QString &diskPath,
+                                const int cpus) {
+    //  qDebug() << QStringLiteral("virt-install --name " + name 
+    //                                 + " --memory " + memoryGB 
+    //                                 + " --vcpus " + cpus
+    //                                 + " --disk size=" + storageGB
+    //                                 + " --cdrom " + diskPath
+    //                                 + " --os-variant " + osVariant);
+return runCommand(QStringLiteral("virt-install --name %1 --memory %2 --vcpus %3 --disk size=%4 --cdrom %5 --os-variant %6")
+                 .arg(name)
+                 .arg(QString::number(memoryGB))
+                 .arg(QString::number(cpus))
+                 .arg(QString::number(storageGB))
+                 .arg(diskPath)
+                 .arg(osVariant));
+}
 // Use for virsh, virt-viewer, virt-install and other CLI
 bool Karton::runCommand(const QString &command)
 {

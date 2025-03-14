@@ -5,80 +5,11 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
+import QtQuick.Dialogs as Dialogs
+import org.kde.kirigamiaddons.formcard 1.0 as FormCard
+import org.kde.kirigamiaddons.components 1.0 as Components
 
 Kirigami.ScrollablePage {
-    // ColumnLayout {
-    //     anchors.fill:parent
-    //     Item {
-    //         Layout.fillHeight: true
-    //     }
-    //     Controls.Label {
-    //         // Center label horizontally and vertically within parent object
-    //         text: i18n("hi!")
-    //         Layout.alignment: Qt.AlignHCenter
-    //     }
-    //     Controls.Button {
-    //         text: "AL VM"
-    //         Layout.alignment: Qt.AlignHCenter
-    //         onClicked: {
-    //             runVM.runVM("tree")
-    //             console.log("helo")
-    //         }
-            
-    //     }
-    //     Item {
-    //         Layout.fillHeight: true
-    //     }
-    // }
-
-
-// LIST VER
-
-    // ListView {
-    //     id: vmList
-        
-    //     model: ListModel {
-    //         ListElement { name: "Mercury"; surfaceColor: "gray" }
-    //         ListElement { name: "Venus"; surfaceColor: "yellow" }
-    //         ListElement { name: "Earth"; surfaceColor: "blue" }
-    //         ListElement { name: "Mars"; surfaceColor: "orange" }
-    //         ListElement { name: "Jupiter"; surfaceColor: "orange" }
-    //         ListElement { name: "Saturn"; surfaceColor: "yellow" }
-    //         ListElement { name: "Uranus"; surfaceColor: "lightBlue" }
-    //         ListElement { name: "Neptune"; surfaceColor: "lightBlue" }
-    //     }
-
-    //     delegate: Kirigami.SwipeListItem {
-    //         id: vmDelegate
-
-    //         text: name
-    //         width: parent.width
-
-    //         onClicked: console.log("clicked:", name)
-
-
-    //         required property string name
-
-    //         actions: [
-    //             Kirigami.Action {
-    //                 icon.name: "document-decrypt"
-    //                 text: qsTr("Action 1")
-    //                 onTriggered: source => {
-    //                     showPassiveNotification(qsTr("%1: %2 clicked").arg(listItem.title).arg(text));
-    //                 }
-    //             },
-    //             Kirigami.Action {
-    //                 icon.name: "mail-reply-sender"
-    //                 text: qsTr("Action 2")
-    //                 onTriggered: source => {
-    //                     showPassiveNotification(qsTr("%1: %2 clicked").arg(listItem.title).arg(text));
-    //                 }
-    //             }
-    //         ]
-        // }
-
-        // ScrollIndicator.vertical:ScrollIndicator { }
-    // }
     title: "Karton Virtual Machine Manager"
     actions: [
         Kirigami.Action {
@@ -90,16 +21,45 @@ Kirigami.ScrollablePage {
             }
         }
     ]
+    function createDomainWrapper(config) {
+    console.log("Creating VM with configuration:", JSON.stringify(config));
+    Karton.createDomain(config.name, 
+                        config.osVariant,
+                        config.memoryGB, 
+                        config.storageGB, 
+                        config.diskImage,
+                        config.cpus
+                        );
+}
     Kirigami.Dialog {
         id: addDomainDialog
         title: "Add New Virtual Machine"
         modal: true
 
-        standardButtons: Dialog.Ok | Dialog.Cancel
+        customFooterActions: [
+                Kirigami.Action {
+                    text: i18n("Create")
+                    icon.name: "dialog-ok"
+                    onTriggered: {
+                        const domainConfig = {
+                            name: nameField.text.trim(),
+                            osVariant: osField.text.trim(),
+                            diskImage: diskImageField.text,
+                            memoryGB: memorySpinBox.value,
+                            storageGB: storageSpinBox.value,
+                            cpu: cpuSpinBox.value
+                        };
+                        createDomainWrapper(domainConfig);
+                        showPassiveNotification("Created VM: " + nameField.text);
+                        addDomainDialog.close();
+                    }
+                }
+        ]
         
-        anchors.centerIn: parent
-        width: root.width - Kirigami.Units.gridUnit * 10
-        height: root.height - Kirigami.Units.gridUnit * 10
+        preferredWidth: root.width - Kirigami.Units.gridUnit * 10
+        preferredHeight: root.height - Kirigami.Units.gridUnit * 10
+        // width: root.width - Kirigami.Units.gridUnit * 10
+        // height: root.height - Kirigami.Units.gridUnit * 10
         onAccepted: {
             console.log("VM Name:", nameField.text);
             console.log("VM Type:", vmTypeComboBox.currentText);
@@ -108,50 +68,99 @@ Kirigami.ScrollablePage {
             
 
         ColumnLayout {
-            anchors.fill: parent
-            spacing: 20
-            
-            Controls.Label {
-                text: "VM Name:"
-                Layout.leftMargin: 20
-            }
-            
-            Kirigami.ActionTextField {
-                id: nameField
-                Layout.fillWidth: true
-                placeholderText: "Enter VM name"
-                Layout.leftMargin: 20
-            }
-            
-            Controls.Label {
-                text: "VM Type: "
-                Layout.leftMargin: 20
-            }
-            
-            // Kirigami.OverlayDrawer {
-            //     id: vmTypeComboBox
-            //     edge: Qt.BottomEdge
-            //     modal: false
+            spacing: Kirigami.Units.largeSpacing
 
-            //     contentItem: Controls.Label {
-            //         text: "Hey"
-            //     }
-            // }
-            
-            Controls.Label {
-                text: "Memory (MB): "
-                Layout.leftMargin: 20
+            FormCard.FormCard {
+                Layout.fillWidth: true
+
+                FormCard.FormTextFieldDelegate {
+                    id: nameField
+                    label: i18nc("@label:textbox Enter VM Name", "VM Name:")
+                    placeholderText: "Enter VM Name."
+                    Layout.fillWidth: true
+                }
+                FormCard.FormTextFieldDelegate {
+                    id: osField
+                    label: i18nc("@label:textbox OS Variant", "OS Variant:")
+                    placeholderText: "Enter an OS Variant."
+                    Layout.fillWidth: true
+                }
+                // FormCard.FormDelegateSeparator {}
+                
+                Dialogs.FileDialog {
+                    id: fileDialog
+                    title: "Choose a disk image"
+                    nameFilters: ["Disk images (*.qcow2 *.raw *.img *.iso *.vdi *.vmdk)"]
+                      onAccepted: {
+    // console.log("File dialog properties:", Object.keys(fileDialog))
+        // console.log("You chose: " + fileDialog.selectedFile)
+        diskImageField.text = fileDialog.selectedFile.toString().replace("file://", "")
+                }
+                }
+                FormCard.FormDelegateSeparator {}
+                FormCard.AbstractFormDelegate {
+                    background: NULL
+                    contentItem: RowLayout {
+                        Layout.fillWidth: true
+                        
+                        Controls.TextField {
+                            id: diskImageField
+                            Layout.fillWidth: true
+                            placeholderText: "Select a disk image."
+                            readOnly: true
+                        }
+                        
+                        Controls.Button {
+                            text: "Browse"
+                            onClicked: {
+                                fileDialog.open();
+
+                            }
+                        }
+                    }
+                }
             }
-            
-            // SpinBox {
-            //     id: memorySpinBox
-            //     Layout.fillWidth: true
-            //     from: 512
-            //     to: 65536
-            //     stepSize: 512
-            //     value: 2048
-            // }
+
+            FormCard.FormCard {
+                Layout.bottomMargin: Kirigami.Units.largeSpacing
+                FormCard.FormSpinBoxDelegate {
+                    id: memorySpinBox
+                    label: "Memory (GB)"
+                    value: 4
+                    from: 1
+                    to: 64
+
+                    Layout.fillWidth: true
+                }
+
+                FormCard.FormDelegateSeparator {}
+
+                FormCard.FormSpinBoxDelegate {
+                    id: storageSpinBox
+                    label: "Disk Storage (GB)"
+                    from: 1
+                    to: 2048
+                    value: 4
+
+
+                    Layout.fillWidth: true
+                }
+
+                FormCard.FormDelegateSeparator {}
+
+                FormCard.FormSpinBoxDelegate {
+                    id: cpuSpinBox
+                    label: "CPUs"
+                    from: 1
+                    to: 16
+                    value: 2
+
+
+                    Layout.fillWidth: true
+                }
+            }
         }
+        
     }
     Kirigami.CardsListView {
         id: view
