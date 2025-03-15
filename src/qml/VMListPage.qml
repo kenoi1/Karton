@@ -58,8 +58,6 @@ Kirigami.ScrollablePage {
         
         preferredWidth: root.width - Kirigami.Units.gridUnit * 10
         preferredHeight: root.height - Kirigami.Units.gridUnit * 10
-        // width: root.width - Kirigami.Units.gridUnit * 10
-        // height: root.height - Kirigami.Units.gridUnit * 10
         onAccepted: {
             console.log("VM Name:", nameField.text);
             console.log("VM Type:", vmTypeComboBox.currentText);
@@ -85,17 +83,14 @@ Kirigami.ScrollablePage {
                     placeholderText: "Enter an OS Variant."
                     Layout.fillWidth: true
                 }
-                // FormCard.FormDelegateSeparator {}
                 
                 Dialogs.FileDialog {
                     id: fileDialog
                     title: "Choose a disk image"
                     nameFilters: ["Disk images (*.qcow2 *.raw *.img *.iso *.vdi *.vmdk)"]
                       onAccepted: {
-    // console.log("File dialog properties:", Object.keys(fileDialog))
-        // console.log("You chose: " + fileDialog.selectedFile)
-        diskImageField.text = fileDialog.selectedFile.toString().replace("file://", "")
-                }
+                    diskImageField.text = fileDialog.selectedFile.toString().replace("file://", "")
+                    }
                 }
                 FormCard.FormDelegateSeparator {}
                 FormCard.AbstractFormDelegate {

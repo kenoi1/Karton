@@ -15,6 +15,7 @@ include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
 include(ECMFindQmlModule)
+include(ECMAddAppIcon)
 include(ECMQmlModule)
 
 find_package(Qt6 REQUIRED COMPONENTS
@@ -35,6 +36,15 @@ find_package(KF6 REQUIRED COMPONENTS
     QQC2DesktopStyle
     IconThemes
 )
+install(FILES
+    img/karton_logo.png
+    DESTINATION /usr/share/icons/hicolor/scalable/apps
+)
+install(FILES
+	org.kde.karton.desktop
+	DESTINATION /usr/share/applications
+)
+
 
 ecm_find_qmlmodule(org.kde.kirigami REQUIRED)
 

@@ -42,7 +42,7 @@ void Karton::onDomainStateChanged(virDomainPtr domainPtr, int event, int detail)
 {
     const char *domainName = virDomainGetName(domainPtr);
     qDebug() << "Domain state changed:" << domainName << "Event:" << event << "Detail:" << detail;
-    
+
     Q_EMIT domainsChanged(domainPtr, event, detail);
 }
 
@@ -77,13 +77,14 @@ bool Karton::init()
     // }
     return true;
 }
+
 // searchDomain(domain) returns index position of the domain in m_domains
 int Karton::searchDomain(const virDomainPtr domainPtr)
 {
     char uuid[VIR_UUID_STRING_BUFLEN];
     virDomainGetUUIDString(domainPtr, uuid);
     QString searchUuid = QString::fromUtf8(uuid);
-    
+
     for (int i = 0; i < m_domains.size(); i++) {
         if (searchUuid == m_domains[i]->uuid()) {
             return i;
@@ -93,63 +94,64 @@ int Karton::searchDomain(const virDomainPtr domainPtr)
 }
 
 // refresh a singular domain, used to update list
-void Karton::refreshDomain(const virDomainPtr domainPtr) {
+void Karton::refreshDomain(const virDomainPtr domainPtr)
+{
     int index = searchDomain(domainPtr);
     if (index == -1) {
         qDebug() << "Domain not found in list.";
         return;
     }
-    
-    Domain* domain = m_domains[index];
-    
+
+    Domain *domain = m_domains[index];
+
     bool isActive = virDomainIsActive(domainPtr);
-    
+
     virDomainInfo domInfo;
     virDomainGetInfo(domainPtr, &domInfo);
     QString state;
     switch (domInfo.state) {
-        case VIR_DOMAIN_NOSTATE:
-            state = i18n("no state");
-            break;
-        case VIR_DOMAIN_RUNNING:
-            state = i18n("running");
-            break;
-        case VIR_DOMAIN_BLOCKED:
-            state = i18n("blocked");
-            break;
-        case VIR_DOMAIN_PAUSED:
-            state = i18n("paused");
-            break;
-        case VIR_DOMAIN_SHUTDOWN:
-            state = i18n("shutting down");
-            break;
-        case VIR_DOMAIN_SHUTOFF:
-            state = i18n("shutoff");
-            break;
-        case VIR_DOMAIN_CRASHED:
-            state = i18n("crashed");
-            break;
-        case VIR_DOMAIN_PMSUSPENDED:
-            state = i18n("suspended");
-            break;
-        default:
-            state = i18n("unknown");
-            break;
+    case VIR_DOMAIN_NOSTATE:
+        state = i18n("no state");
+        break;
+    case VIR_DOMAIN_RUNNING:
+        state = i18n("running");
+        break;
+    case VIR_DOMAIN_BLOCKED:
+        state = i18n("blocked");
+        break;
+    case VIR_DOMAIN_PAUSED:
+        state = i18n("paused");
+        break;
+    case VIR_DOMAIN_SHUTDOWN:
+        state = i18n("shutting down");
+        break;
+    case VIR_DOMAIN_SHUTOFF:
+        state = i18n("shutoff");
+        break;
+    case VIR_DOMAIN_CRASHED:
+        state = i18n("crashed");
+        break;
+    case VIR_DOMAIN_PMSUSPENDED:
+        state = i18n("suspended");
+        break;
+    default:
+        state = i18n("unknown");
+        break;
     }
-    
+
     int ramUsage = domInfo.memory / 1024;
-    
+
     int autoFlag = 0;
     virDomainGetAutostart(domainPtr, &autoFlag);
     bool autostart = (autoFlag != 0);
-    
-// updates only mutable fields
+
+    // updates only mutable fields
     domain->setActive(isActive);
     domain->setState(state);
     domain->setRamUsage(ramUsage);
     domain->setAutostart(autostart);
-    
 }
+
 // TODO: clean up code... resets whole list
 void Karton::refreshDomainList()
 {
@@ -259,10 +261,11 @@ bool Karton::stopDomain(const Domain *domain)
         }
     }
 
-    qDebug() << "Successfully stopped domain:"<< domain->name();
+    qDebug() << "Successfully stopped domain:" << domain->name();
     virDomainFree(domainPtr);
     return true;
 }
+
 bool Karton::forceStopDomain(const Domain *domain)
 {
     virDomainPtr domainPtr = domain->domainPtr();
@@ -275,32 +278,30 @@ bool Karton::forceStopDomain(const Domain *domain)
     qDebug() << "Successfully force-stopped domain:" << domain->name();
     return true;
 }
+
 bool Karton::viewDomain(const Domain *domain)
 {
     qDebug() << QStringLiteral("virt-viewer ") + domain->name();
     return runCommand(QStringLiteral("virt-viewer ") + domain->name());
 }
-Print VMs when started
-bool Karton::createDomain(const QString &name,
-                                const QString &osVariant,
-                                const float memoryGB,
-                                const float storageGB,
-                                const QString &diskPath,
-                                const int cpus) {
-    //  qDebug() << QStringLiteral("virt-install --name " + name 
-    //                                 + " --memory " + memoryGB 
+
+bool Karton::createDomain(const QString &name, const QString &osVariant, const float memoryGB, const float storageGB, const QString &diskPath, const int cpus)
+{
+    //  qDebug() << QStringLiteral("virt-install --name " + name
+    //                                 + " --memory " + memoryGB
     //                                 + " --vcpus " + cpus
     //                                 + " --disk size=" + storageGB
     //                                 + " --cdrom " + diskPath
     //                                 + " --os-variant " + osVariant);
-return runCommand(QStringLiteral("virt-install --name %1 --memory %2 --vcpus %3 --disk size=%4 --cdrom %5 --os-variant %6")
-                 .arg(name)
-                 .arg(QString::number(memoryGB))
-                 .arg(QString::number(cpus))
-                 .arg(QString::number(storageGB))
-                 .arg(diskPath)
-                 .arg(osVariant));
+    return runCommand(QStringLiteral("virt-install --name %1 --memory %2 --vcpus %3 --disk size=%4 --cdrom %5 --os-variant %6")
+                          .arg(name)
+                          .arg(QString::number(memoryGB))
+                          .arg(QString::number(cpus))
+                          .arg(QString::number(storageGB))
+                          .arg(diskPath)
+                          .arg(osVariant));
 }
+
 // Use for virsh, virt-viewer, virt-install and other CLI
 bool Karton::runCommand(const QString &command)
 {
