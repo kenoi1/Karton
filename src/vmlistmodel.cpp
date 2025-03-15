@@ -31,52 +31,11 @@ QVariant VMModel::data(const QModelIndex &index, int role) const
         return QVariant::fromValue(domain);
     }
     return QVariant();
-    // SWITCHED OVER TO QOBJECT*
-    // switch (role) {
-    //     case DomainNameRole:
-    //         return domain->name();
-    //     case UuidRole:
-    //         return domain->uuid();
-    //     case IsActiveRole:
-    //         return domain->isActive();
-    //     case StateRole:
-    //         return domain->state();
-    //     case MaxRamRole:
-    //         return domain->maxRam();
-    //     case RamUsageRole:
-    //         return domain->ramUsage();
-    //     case CpusRole:
-    //         return domain->cpus();
-    //     case DiskPathRole:
-    //         return domain->diskPath();
-    //     case AutostartRole:
-    //         return domain->autostart();
-    //     case DomainObjectRole:
-    //         return QVariant::fromValue(domain);
-    //     default:
-    //         return QVariant();
-    // }
 }
 QHash<int, QByteArray> VMModel::roleNames() const
 {
-    // return {
-    //     {DomainNameRole, "domainName"},
-    //     {UuidRole, "uuid"},
-    //     {IsActiveRole, "isActive"},
-    //     {StateRole, "state"},
-    //     {MaxRamRole, "maxRam"},
-    //     {RamUsageRole, "ramUsage"},
-    //     {CpusRole, "cpus"},
-    //     {DiskPathRole, "diskPath"},
-    //     {AutostartRole, "autostart"},
-    //     {DomainObjectRole, "domainObject"}
-    // };
     return {{DomainRole, "domain"}};
 }
-// void VMModel::onDomainsChanged(const virDomainPtr domainPtr, int event, int detail)
-// {
-//     updateDomains();
-// }
 
 void VMModel::onDomainsChanged(const virDomainPtr domainPtr, int event, int detail)
 {

@@ -18,15 +18,6 @@ class VMModel : public QAbstractListModel
     Q_OBJECT
 public:
     enum Roles {
-        // DomainNameRole,
-        // UuidRole,
-        // IsActiveRole,
-        // StateRole,
-        // MaxRamRole,
-        // RamUsageRole,
-        // CpusRole,
-        // DiskPathRole,
-        // AutostartRole,
         DomainRole
     };
     VMModel(Karton *parent = nullptr);

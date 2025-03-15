@@ -280,7 +280,7 @@ bool Karton::viewDomain(const Domain *domain)
     qDebug() << QStringLiteral("virt-viewer ") + domain->name();
     return runCommand(QStringLiteral("virt-viewer ") + domain->name());
 }
-
+Print VMs when started
 bool Karton::createDomain(const QString &name,
                                 const QString &osVariant,
                                 const float memoryGB,
