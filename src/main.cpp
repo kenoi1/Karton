@@ -36,12 +36,10 @@ int main(int argc, char *argv[])
 
     qDebug() << "Hello! Starting application...";
     Karton karton;
-
     VMModel *model = new VMModel(&karton);
-    model->updateDomains();
+    engine.rootContext()->setContextProperty(QStringLiteral("Karton"), &karton);
     engine.rootContext()->setContextProperty(QStringLiteral("VMModel"), model);
 
-    engine.rootContext()->setContextProperty(QStringLiteral("Karton"), &karton);
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.loadFromModule("org.kde.karton", "Main");
