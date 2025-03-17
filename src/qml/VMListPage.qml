@@ -28,12 +28,13 @@ Kirigami.ScrollablePage {
                         config.memoryGB, 
                         config.storageGB, 
                         config.diskImage,
-                        config.cpus
+                        config.cpu
                         );
 }
     Kirigami.Dialog {
         id: addDomainDialog
         title: "Add New Virtual Machine"
+        padding: Kirigami.Units.largeSpacing
         modal: true
 
         customFooterActions: [
@@ -203,12 +204,12 @@ Kirigami.ScrollablePage {
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "Memory: " + domain.maxRam
+                            text: "Memory (GB): " + domain.maxRam
                         }
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "Memory Usage: " + domain.ramUsage
+                            text: "Memory Usage (GB): " + domain.ramUsage
                         }
                         Controls.Label {
                             Layout.fillWidth: true
@@ -232,6 +233,7 @@ Kirigami.ScrollablePage {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                             Layout.columnSpan: 1
                             text: "Start"
+                            icon.name: "media-playback-start"
                             onClicked: {
                                 Karton.startDomain(domain)
                                 showPassiveNotification("Starting VM: " + domain.name + "!");
@@ -241,6 +243,7 @@ Kirigami.ScrollablePage {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                             Layout.columnSpan: 1
                             text: "Stop"
+                            icon.name: "media-playback-pause"
                             onClicked: {
                                 Karton.stopDomain(domain)
                                 showPassiveNotification("Stopping VM: " + domain.name + "!");
@@ -250,6 +253,7 @@ Kirigami.ScrollablePage {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                             Layout.columnSpan: 1
                             text: "Force Stop"
+                            // icon.name: "process-stop"
                             onClicked: {
                                 Karton.forceStopDomain(domain)
                                 showPassiveNotification("Force-stopping VM: " + domain.name + "!");
@@ -259,9 +263,20 @@ Kirigami.ScrollablePage {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                             Layout.columnSpan: 1
                             text: "View VM"
+                            icon.name: "computer-laptop-symbolic"
                             onClicked: {
                                 Karton.viewDomain(domain)
                                 showPassiveNotification("Opening in virt-viewer: " + domain.name + "!");
+                            }
+                        }
+                        Controls.Button {
+                            Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
+                            Layout.columnSpan: 1
+                            text: "Delete"
+                            icon.name: "delete"
+                            onClicked: {
+                                Karton.undefineDomain(domain)
+                                showPassiveNotification("Deleting " + domain.name + "!");
                             }
                         }
                     }

@@ -35,6 +35,7 @@ public Q_SLOTS:
                                 const QString &diskPath,
                                 const int cpus
                                 );
+    Q_INVOKABLE bool undefineDomain(const Domain *domain);
 
 Q_SIGNALS:
     void commandFinished(int exitCode, const QString &output);

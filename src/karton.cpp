@@ -139,7 +139,7 @@ void Karton::refreshDomain(const virDomainPtr domainPtr)
         break;
     }
 
-    int ramUsage = domInfo.memory / 1024;
+    int ramUsage = domInfo.memory / (1024 * 1024);
 
     int autoFlag = 0;
     virDomainGetAutostart(domainPtr, &autoFlag);
@@ -202,10 +202,10 @@ void Karton::refreshDomainList()
             break;
         }
 
-        int maxRam = domInfo.maxMem / 1024; // convert to MB
-        int ramUsage = domInfo.memory / 1024;
+        int maxRam = domInfo.maxMem / (1024 * 1024); // convert to MB
+        int ramUsage = domInfo.memory / (1024 * 1024);
         int cpus = domInfo.nrVirtCpu;
-        QString diskPath = QStringLiteral(" "); // TODO
+        QString diskPath = QStringLiteral("*WIP*"); // TODO likely requires .xml parsing
 
         int autoFlag = 0;
         virDomainGetAutostart(domains[i], &autoFlag);
@@ -223,14 +223,12 @@ void Karton::refreshDomainList()
                                     autostart,
                                     this);
         m_domains.emplace_back(domain);
-        // virDomainFree(domains[i]);
     }
     free(domains);
 }
 
 QVector<Domain *> Karton::domains()
 {
-    // refreshDomainList();
     return m_domains;
 }
 
@@ -287,19 +285,26 @@ bool Karton::viewDomain(const Domain *domain)
 
 bool Karton::createDomain(const QString &name, const QString &osVariant, const float memoryGB, const float storageGB, const QString &diskPath, const int cpus)
 {
-    //  qDebug() << QStringLiteral("virt-install --name " + name
-    //                                 + " --memory " + memoryGB
-    //                                 + " --vcpus " + cpus
-    //                                 + " --disk size=" + storageGB
-    //                                 + " --cdrom " + diskPath
-    //                                 + " --os-variant " + osVariant);
     return runCommand(QStringLiteral("virt-install --name %1 --memory %2 --vcpus %3 --disk size=%4 --cdrom %5 --os-variant %6")
                           .arg(name)
-                          .arg(QString::number(memoryGB))
+                          .arg(QString::number(memoryGB * 1024))
                           .arg(QString::number(cpus))
                           .arg(QString::number(storageGB))
                           .arg(diskPath)
                           .arg(osVariant));
+}
+
+bool Karton::undefineDomain(const Domain *domain)
+{
+    virDomainPtr domainPtr = domain->domainPtr();
+    int result = virDomainUndefine(domainPtr);
+
+    if (result < 0) {
+        qDebug() << "Failed to undefine domain:" << domain->name();
+        return false;
+    }
+    qDebug() << "Successfully undefined domain:" << domain->name();
+    return true;
 }
 
 // Use for virsh, virt-viewer, virt-install and other CLI
