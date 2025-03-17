@@ -16,7 +16,7 @@ LibvirtMonitor::LibvirtMonitor(QObject *parent, virConnectPtr conn)
     }
 
     auto virtEventLoop = new LibvirtEventLoop{this}; // TODO store
-    virtEventLoop->start();
+
     // LibvirtEventLoop::registerQtEventLoop();
     connect(virtEventLoop, &LibvirtEventLoop::result, this, [this](bool result) {
         if (!result) {
@@ -38,6 +38,7 @@ LibvirtMonitor::LibvirtMonitor(QObject *parent, virConnectPtr conn)
             qDebug() << "Successfully registered domain event callback";
         }
     });
+    virtEventLoop->run();
 }
 
 LibvirtMonitor::~LibvirtMonitor()

@@ -3,7 +3,7 @@
 
 #include <QThread>
 
-class LibvirtEventLoop : public QThread
+class LibvirtEventLoop : public QObject
 {
     Q_OBJECT
 

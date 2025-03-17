@@ -94,7 +94,7 @@ Kirigami.ScrollablePage {
                 }
                 FormCard.FormDelegateSeparator {}
                 FormCard.AbstractFormDelegate {
-                    background: NULL
+                    background: null
                     contentItem: RowLayout {
                         Layout.fillWidth: true
                         

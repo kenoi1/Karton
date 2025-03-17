@@ -2,12 +2,13 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 #include "libvirteventloop.h"
-#include <iostream>
 #include <QDebug>
+#include <QTimer>
+#include <iostream>
 #include <libvirt/libvirt.h>
 
 LibvirtEventLoop::LibvirtEventLoop(QObject *parent)
-    : QThread(parent)
+    : QObject(parent)
 {
 }
 void LibvirtEventLoop::run()
@@ -17,8 +18,13 @@ void LibvirtEventLoop::run()
     if (virInitialize() == 0) {
         int registered = virEventRegisterDefaultImpl();
         Q_EMIT result(registered == 0);
-        // TODO: run in a qTimer infinite loop
-        // virEventRunDefaultImpl();
+        // Note: Hacky attempt at infinite loop, does not really work.
+        // In the future, implement a proper virEventRegisterImpl
+        QTimer *timer = new QTimer(this);
+        connect(timer, &QTimer::timeout, this, []() {
+            virEventRunDefaultImpl();
+        });
+        timer->start(1000);
 
     } else {
         Q_EMIT result(false);
