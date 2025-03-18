@@ -13,7 +13,7 @@ This project is still in early development and will likely break existing virtua
 ## Features
 - Displays list of existing VMs
 - Basic functionality to start, stop, and view VMs
-- Install and delete VMs
+- Installing and deleting VMs
 
 ## Dependencies
 - Kirigami
@@ -35,5 +35,12 @@ sudo make install
 ```
 Check your app menu for "Karton", it should be hiding under the "System" section.
 
-We hope you find Karton useful!
- Feel free to join our matrix at [#karton:kde.org](https://matrix.to/#/#karton:kde.org).
+## Gallery
+<img src="img/list.png" width="800"/>
+<img src="img/install.png" width="400"/>
+<img src="img/view.png" width="400"/>
+
+
+## We hope you find Karton useful!
+
+Feel free to join our matrix at [#karton:kde.org](https://matrix.to/#/#karton:kde.org).
