@@ -260,7 +260,6 @@ bool Karton::stopDomain(const Domain *domain)
     }
 
     qDebug() << "Successfully stopped domain:" << domain->name();
-    virDomainFree(domainPtr);
     return true;
 }
 
@@ -279,13 +278,12 @@ bool Karton::forceStopDomain(const Domain *domain)
 
 bool Karton::viewDomain(const Domain *domain)
 {
-    qDebug() << QStringLiteral("virt-viewer ") + domain->name();
-    return runCommand(QStringLiteral("virt-viewer ") + domain->name());
+    return runCommand(QStringLiteral("virt-viewer --attach ") + domain->name());
 }
 
 bool Karton::createDomain(const QString &name, const QString &osVariant, const float memoryGB, const float storageGB, const QString &diskPath, const int cpus)
 {
-    return runCommand(QStringLiteral("virt-install --name %1 --memory %2 --vcpus %3 --disk size=%4 --cdrom %5 --os-variant %6")
+    return runCommand(QStringLiteral("virt-install --noautoconsole --name %1 --memory %2 --vcpus %3 --disk size=%4 --cdrom %5 --os-variant %6")
                           .arg(name)
                           .arg(QString::number(memoryGB * 1024))
                           .arg(QString::number(cpus))
