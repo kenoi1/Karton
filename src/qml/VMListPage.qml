@@ -30,7 +30,7 @@ Kirigami.ScrollablePage {
                         config.diskImage,
                         config.cpu
                         );
-}
+    }
     Kirigami.Dialog {
         id: addDomainDialog
         title: "Add New Virtual Machine"

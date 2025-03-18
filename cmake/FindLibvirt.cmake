@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: BSD-2-Clause
 # SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 find_package(PkgConfig REQUIRED)

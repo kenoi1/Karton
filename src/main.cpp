@@ -27,7 +27,6 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName(QStringLiteral("Karton"));
     QApplication::setDesktopFileName(QStringLiteral("org.kde.karton"));
     QGuiApplication::setWindowIcon(QIcon::fromTheme(QStringLiteral("org.kde.karton")));
-    QApplication::setStyle(QStringLiteral("breeze"));
     if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
         QQuickStyle::setStyle(QStringLiteral("org.kde.desktop"));
     }
