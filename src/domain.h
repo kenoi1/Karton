@@ -29,56 +29,56 @@ Q_SIGNALS:
 
 public:
     Domain(QObject *parent = nullptr);
-    Domain(const virDomainPtr domainPtr,
+    Domain(virDomainPtr domainPtr,
            const QString &name,
            const QString &uuid,
-           const bool isActive,
+           bool isActive,
            QString state,
-           const int maxRam,
-           const int ramUsage,
-           const int cpus,
+           int maxRam,
+           int ramUsage,
+           int cpus,
            const QString &diskPath,
            bool autostart,
            QObject *parent = nullptr);
 
     // getters
-    virDomainPtr domainPtr() const
+    [[nodiscard]] virDomainPtr domainPtr() const
     {
         return m_domainPtr;
     }
-    QString name() const
+    [[nodiscard]] QString name() const
     {
         return m_name;
     }
-    QString uuid() const
+    [[nodiscard]] QString uuid() const
     {
         return m_uuid;
     }
-    bool isActive() const
+    [[nodiscard]] bool isActive() const
     {
         return m_isActive;
     }
-    QString state() const
+    [[nodiscard]] QString state() const
     {
         return m_state;
     }
-    int maxRam() const
+    [[nodiscard]] int maxRam() const
     {
         return m_maxRam;
     }
-    int ramUsage() const
+    [[nodiscard]] int ramUsage() const
     {
         return m_ramUsage;
     }
-    int cpus() const
+    [[nodiscard]] int cpus() const
     {
         return m_cpus;
     }
-    QString diskPath() const
+    [[nodiscard]] QString diskPath() const
     {
         return m_diskPath;
     }
-    bool autostart() const
+    [[nodiscard]] bool autostart() const
     {
         return m_autostart;
     }
