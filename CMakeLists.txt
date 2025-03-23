@@ -17,6 +17,7 @@ include(KDECompilerSettings NO_POLICY_SCOPE)
 include(ECMFindQmlModule)
 include(ECMAddAppIcon)
 include(ECMQmlModule)
+include(ECMQtDeclareLoggingCategory)
 
 find_package(Qt6 REQUIRED COMPONENTS
     Core

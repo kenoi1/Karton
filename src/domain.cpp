@@ -44,6 +44,10 @@ Domain::Domain(const virDomainPtr domainPtr,
     // qDebug() << "Created domain object:" << m_name << "UUID:" << m_uuid
     //  << "State:" << m_state << "Active:" << m_isActive;
 }
+Domain::~Domain()
+{
+    virDomainFree(m_domainPtr);
+}
 
 void Domain::setActive(bool active) {
     if (m_isActive != active) {

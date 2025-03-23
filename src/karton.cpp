@@ -7,6 +7,7 @@
 
 #include <KLocalizedString>
 #include <QDebug>
+#include "karton_debug.h"
 #include <QObject>
 #include <iostream>
 #include <libvirt/libvirt.h>
@@ -41,7 +42,7 @@ Karton::~Karton()
 void Karton::onDomainStateChanged(virDomainPtr domainPtr, int event, int detail)
 {
     const char *domainName = virDomainGetName(domainPtr);
-    qDebug() << "Domain state changed:" << domainName << "Event:" << event << "Detail:" << detail;
+    qCInfo(KARTON_DEBUG) << "Domain state changed:" << domainName << "Event:" << event << "Detail:" << detail;
 
     Q_EMIT domainsChanged(domainPtr, event, detail);
 }
@@ -51,11 +52,11 @@ bool Karton::init()
     // Currently set to session, but could also do system for root..
     m_conn = virConnectOpen("qemu:///session");
     if (!m_conn) {
-        qDebug() << "Failed to connect to hypervisor";
+        qCCritical(KARTON_DEBUG) << "Failed to connect to hypervisor";
         return false;
     }
 
-    qDebug() << "Connected to hypervisor";
+    qCInfo(KARTON_DEBUG) << "Connected to hypervisor";
 
     m_monitor = new LibvirtMonitor(this, m_conn);
     connect(m_monitor, &LibvirtMonitor::domainStateChanged, this, &Karton::onDomainStateChanged);
@@ -301,7 +302,7 @@ bool Karton::undefineDomain(const Domain *domain)
         qDebug() << "Failed to undefine domain:" << domain->name();
         return false;
     }
-    qDebug() << "Successfully undefined domain:" << domain->name();
+    qCDebug(KARTON_DEBUG) << "Successfully undefined domain:" << domain->name();
     return true;
 }
 

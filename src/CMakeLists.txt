@@ -25,6 +25,21 @@ ecm_target_qml_sources(karton
     qml/VMListPage.qml
 )
 
+ecm_qt_declare_logging_category(
+    karton
+    HEADER karton_debug.h
+    IDENTIFIER KARTON_DEBUG
+    CATEGORY_NAME org.kde.karton
+    DESCRIPTION "Karton Virtual Machine Manager"
+    EXPORT Karton
+)
+
+ecm_qt_install_logging_categories(
+    EXPORT Karton
+    FILE karton.categories
+    DESTINATION ${KDE_INSTALL_LOGGINGCATEGORIESDIR}
+)
+
 target_link_libraries(karton
     PRIVATE
     Qt6::Quick

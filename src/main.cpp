@@ -16,6 +16,7 @@
 #include <QDebug>
 #include <libvirt/libvirt.h>
 #include <iostream>
+#include "karton_debug.h"
 
 int main(int argc, char *argv[])
 {
@@ -33,7 +34,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    qDebug() << "Hello! Starting application...";
+    qCDebug(KARTON_DEBUG) << "Hello! Starting application...";
     Karton karton;
     VMModel *model = new VMModel(&karton);
     model->updateDomains();
