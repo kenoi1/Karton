@@ -16,7 +16,6 @@ Kirigami.ScrollablePage {
             icon.name: "list-add-symbolic"
             text: "Add"
             onTriggered: source => {
-                showPassiveNotification("Add a Virtual Machine!");
                 addDomainDialog.open();
             }
         }
@@ -75,13 +74,13 @@ Kirigami.ScrollablePage {
                 FormCard.FormTextFieldDelegate {
                     id: nameField
                     label: i18nc("@label:textbox Enter VM Name", "VM Name:")
-                    placeholderText: "Enter VM Name."
+                    placeholderText: "Enter VM Name"
                     Layout.fillWidth: true
                 }
                 FormCard.FormTextFieldDelegate {
                     id: osField
                     label: i18nc("@label:textbox OS Variant", "OS Variant:")
-                    placeholderText: "Enter an OS Variant."
+                    placeholderText: "Enter an OS Variant"
                     Layout.fillWidth: true
                 }
                 
@@ -102,7 +101,7 @@ Kirigami.ScrollablePage {
                         Controls.TextField {
                             id: diskImageField
                             Layout.fillWidth: true
-                            placeholderText: "Select a disk image."
+                            placeholderText: "Select a disk image"
                             readOnly: true
                         }
                         
