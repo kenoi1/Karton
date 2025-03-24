@@ -36,9 +36,9 @@ sudo make install
 Check your app menu for "Karton", it should be hiding under the "System" section.
 
 ## Gallery
-<img src="img/list.png" width="800"/>
-<img src="img/install.png" width="400"/>
-<img src="img/view.png" width="400"/>
+<img src="img/gallery_list.png" width="800"/>
+<img src="img/gallery_install.png" width="370"/>
+<img src="img/gallery_view.png" width="370"/>
 
 
 ## We hope you find Karton useful!
