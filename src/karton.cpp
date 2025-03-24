@@ -84,6 +84,30 @@ int Karton::searchDomain(const virDomainPtr domainPtr)
     return -1;
 }
 
+// get string from state
+static QString domainStateString(unsigned int state) {
+    switch (state) {
+    case VIR_DOMAIN_NOSTATE:
+        return i18n("no state");
+    case VIR_DOMAIN_RUNNING:
+        return i18n("running");
+    case VIR_DOMAIN_BLOCKED:
+        return i18n("blocked");
+    case VIR_DOMAIN_PAUSED:
+        return i18n("paused");
+    case VIR_DOMAIN_SHUTDOWN:
+        return i18n("shutting down");
+    case VIR_DOMAIN_SHUTOFF:
+        return i18n("shutoff");
+    case VIR_DOMAIN_CRASHED:
+        return i18n("crashed");
+    case VIR_DOMAIN_PMSUSPENDED:
+        return i18n("suspended");
+    default:
+        return i18n("unknown");
+    }
+}
+
 // refresh a singular domain, used to update list
 void Karton::refreshDomain(const virDomainPtr domainPtr)
 {
@@ -99,36 +123,7 @@ void Karton::refreshDomain(const virDomainPtr domainPtr)
 
     virDomainInfo domInfo;
     virDomainGetInfo(domainPtr, &domInfo);
-    QString state;
-    switch (domInfo.state) {
-    case VIR_DOMAIN_NOSTATE:
-        state = i18n("no state");
-        break;
-    case VIR_DOMAIN_RUNNING:
-        state = i18n("running");
-        break;
-    case VIR_DOMAIN_BLOCKED:
-        state = i18n("blocked");
-        break;
-    case VIR_DOMAIN_PAUSED:
-        state = i18n("paused");
-        break;
-    case VIR_DOMAIN_SHUTDOWN:
-        state = i18n("shutting down");
-        break;
-    case VIR_DOMAIN_SHUTOFF:
-        state = i18n("shutoff");
-        break;
-    case VIR_DOMAIN_CRASHED:
-        state = i18n("crashed");
-        break;
-    case VIR_DOMAIN_PMSUSPENDED:
-        state = i18n("suspended");
-        break;
-    default:
-        state = i18n("unknown");
-        break;
-    }
+    QString state = domainStateString(domInfo.state);
 
     int ramUsage = domInfo.memory / (1024 * 1024);
 
@@ -143,7 +138,7 @@ void Karton::refreshDomain(const virDomainPtr domainPtr)
     domain->setAutostart(autostart);
 }
 
-// TODO: clean up code... resets whole list
+// Refresh the complete list of domains
 void Karton::refreshDomainList()
 {
     m_domains.clear();
@@ -162,36 +157,7 @@ void Karton::refreshDomainList()
 
         virDomainInfo domInfo;
         virDomainGetInfo(domains[i], &domInfo);
-        QString state;
-        switch (domInfo.state) {
-        case VIR_DOMAIN_NOSTATE:
-            state = i18n("no state");
-            break;
-        case VIR_DOMAIN_RUNNING:
-            state = i18n("running");
-            break;
-        case VIR_DOMAIN_BLOCKED:
-            state = i18n("blocked");
-            break;
-        case VIR_DOMAIN_PAUSED:
-            state = i18n("paused");
-            break;
-        case VIR_DOMAIN_SHUTDOWN:
-            state = i18n("shutting down");
-            break;
-        case VIR_DOMAIN_SHUTOFF:
-            state = i18n("shutoff");
-            break;
-        case VIR_DOMAIN_CRASHED:
-            state = i18n("crashed");
-            break;
-        case VIR_DOMAIN_PMSUSPENDED:
-            state = i18n("suspended");
-            break;
-        default:
-            state = i18n("unknown");
-            break;
-        }
+        QString state = domainStateString(domInfo.state);
 
         int maxRam = domInfo.maxMem / (1024 * 1024); // convert to MB
         int ramUsage = domInfo.memory / (1024 * 1024);
