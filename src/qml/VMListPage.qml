@@ -282,6 +282,16 @@ Kirigami.ScrollablePage {
                 }
             }
         }
+        Kirigami.PlaceholderMessage {
+            anchors.centerIn: parent
+            width: parent.width - (Kirigami.Units.largeSpacing * 4)
+
+            visible: view.count === 0
+
+            text: "Welcome to Karton!"
+            explanation: "Create a new virtual machine to proceed."
+            icon.name: "computer-symbolic"
+        }
     }
 
     
