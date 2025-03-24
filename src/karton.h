@@ -45,7 +45,6 @@ private Q_SLOTS:
     void onDomainStateChanged(const virDomainPtr domainPtr, int event, int detail);
 
 private:
-    QProcess *m_process;
     virConnectPtr m_conn;
     QVector<Domain *> m_domains;
     LibvirtMonitor *m_monitor;
