@@ -39,12 +39,14 @@ QHash<int, QByteArray> VMModel::roleNames() const
 
 void VMModel::onDomainsChanged(const virDomainPtr domainPtr, int event, int detail)
 {
-    updateDomains(domainPtr);
+    if(domainPtr) {
+        updateDomains(domainPtr);
+    }
 }
 
 void VMModel::updateDomains(const virDomainPtr domainPtr)
 {
-    char uuid[VIR_UUID_STRING_BUFLEN];
+    char uuid[VIR_UUID_STRING_BUFLEN] = {0};
     virDomainGetUUIDString(domainPtr, uuid);
     QString domainUuid = QString::fromUtf8(uuid);
     qDebug() << "Domain UUID:" << domainUuid;
