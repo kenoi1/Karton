@@ -15,21 +15,16 @@ void LibvirtEventLoop::run()
 {
     qDebug() << "starting event loop";
 
-    if (virInitialize() == 0) {
-        int registered = virEventRegisterDefaultImpl();
-        Q_EMIT result(registered == 0);
+    // TODO: In the future, implement a proper virEventRegisterImpl
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, []() {
+        virEventRunDefaultImpl();
+    });
+    
+    timer->setInterval(1000);
+    timer->setSingleShot(false);
 
-        // TODO: In the future, implement a proper virEventRegisterImpl
-        QTimer *timer = new QTimer(this);
-        connect(timer, &QTimer::timeout, this, []() {
-            virEventRunDefaultImpl();
-        });
-        
-        timer->setInterval(1000);
-        timer->setSingleShot(false);
+    timer->start();
+    Q_EMIT result(true);
 
-        timer->start();
-    } else {
-        Q_EMIT result(false);
-    }
 }

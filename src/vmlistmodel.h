@@ -27,10 +27,11 @@ public:
     QHash<int, QByteArray> roleNames() const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     void updateDomains(const virDomainPtr domainPtr = nullptr);
+    void refreshAllDomains();
 private Q_SLOTS:
     void onDomainsChanged(const virDomainPtr domainPtr, int event, int detail);
 
 private:
-    QList<Domain *> mDatas;
+    QList<Domain *> m_datas;
     Karton *m_karton;
 };

@@ -33,12 +33,16 @@ void Karton::onDomainStateChanged(virDomainPtr domainPtr, int event, int detail)
 {
     const char *domainName = virDomainGetName(domainPtr);
     qCInfo(KARTON_DEBUG) << "Domain state changed:" << domainName << "Event:" << event << "Detail:" << detail;
+    // Reference for event/details: https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainEventType
 
     Q_EMIT domainsChanged(domainPtr, event, detail);
 }
 
 bool Karton::init()
 {
+    // Register event loop. Note: must be done before connection to hypervisor.
+    virEventRegisterDefaultImpl();
+
     // Currently set to session, but could also do system for root..
     m_conn = virConnectOpen("qemu:///session");
     if (!m_conn) {
@@ -113,7 +117,7 @@ void Karton::refreshDomain(const virDomainPtr domainPtr)
 {
     int index = searchDomain(domainPtr);
     if (index == -1) {
-        qDebug() << "Domain not found in list.";
+        qCWarning(KARTON_DEBUG) << "Domain not found in list.";
         return;
     }
 
@@ -195,10 +199,10 @@ bool Karton::startDomain(const Domain *domain)
     int result = virDomainCreate(domainPtr);
 
     if (result < 0) {
-        qDebug() << "Failed to start domain:" << domain->name();
+        qCWarning(KARTON_DEBUG) << "Failed to start domain:" << domain->name();
         return false;
     }
-    qDebug() << "Successfully started domain:" << domain->name();
+    qCInfo(KARTON_DEBUG) << "Successfully started domain:" << domain->name();
     return true;
 }
 
@@ -211,12 +215,12 @@ bool Karton::stopDomain(const Domain *domain)
     if (info.state == VIR_DOMAIN_RUNNING || info.state == VIR_DOMAIN_PAUSED) {
         int result = virDomainShutdown(domainPtr);
         if (result < 0) {
-            qDebug() << "Failed to stop domain:" << domain->name();
+            qCWarning(KARTON_DEBUG) << "Failed to stop domain:" << domain->name();
             return false;
         }
     }
 
-    qDebug() << "Successfully stopped domain:" << domain->name();
+    qCInfo(KARTON_DEBUG) << "Successfully stopped domain:" << domain->name();
     return true;
 }
 
@@ -226,10 +230,10 @@ bool Karton::forceStopDomain(const Domain *domain)
     int result = virDomainDestroy(domainPtr);
 
     if (result < 0) {
-        qDebug() << "Failed to force-stop domain:" << domain->name();
+        qCWarning(KARTON_DEBUG) << "Failed to force-stop domain:" << domain->name();
         return false;
     }
-    qDebug() << "Successfully force-stopped domain:" << domain->name();
+    qCInfo(KARTON_DEBUG) << "Successfully force-stopped domain:" << domain->name();
     return true;
 }
 
@@ -255,17 +259,17 @@ bool Karton::undefineDomain(const Domain *domain)
     int result = virDomainUndefine(domainPtr);
 
     if (result < 0) {
-        qDebug() << "Failed to undefine domain:" << domain->name();
+        qCWarning(KARTON_DEBUG) << "Failed to undefine domain:" << domain->name();
         return false;
     }
-    qCDebug(KARTON_DEBUG) << "Successfully undefined domain:" << domain->name();
+    qCInfo(KARTON_DEBUG) << "Successfully undefined domain:" << domain->name();
     return true;
 }
 
 // Use for virsh, virt-viewer, virt-install and other CLI
 bool Karton::runCommand(const QString &command)
 {
-    qDebug() << "Running Command:" << command;
+    qCDebug(KARTON_DEBUG) << "Running Command:" << command;
     QProcess* process = new QProcess(this);
     connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [this, process](int exitCode, QProcess::ExitStatus) {
         QString output = QString::fromLocal8Bit(process->readAllStandardOutput());
