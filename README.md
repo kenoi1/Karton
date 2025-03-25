@@ -19,7 +19,7 @@ This project is still in early development and will likely break existing virtua
 - Kirigami
 - Kirigami Addons
 - Qt Quick Controls
-- Libvirt
+- libvirt
 - virt-install
 - virt-viewer
 

@@ -6,7 +6,6 @@
 #include "libvirtmonitor.h"
 
 #include <KLocalizedString>
-#include <QDebug>
 #include "karton_debug.h"
 #include <QObject>
 #include <iostream>

@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include <QDebug>
 #include <QObject>
 #include <QString>
 #include <libvirt/libvirt.h>

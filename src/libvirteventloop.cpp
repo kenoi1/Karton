@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 #include "libvirteventloop.h"
-#include <QDebug>
+#include "karton_debug.h"
 #include <QTimer>
 #include <iostream>
 #include <libvirt/libvirt.h>
@@ -13,7 +13,7 @@ LibvirtEventLoop::LibvirtEventLoop(QObject *parent)
 }
 void LibvirtEventLoop::run()
 {
-    qDebug() << "starting event loop";
+    qCInfo(KARTON_DEBUG) << "Starting event loop";
 
     // TODO: In the future, implement a proper virEventRegisterImpl
     QTimer *timer = new QTimer(this);

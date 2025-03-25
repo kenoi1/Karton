@@ -76,6 +76,9 @@ Kirigami.ScrollablePage {
                     label: i18nc("@label:textbox Enter VM Name", "VM Name:")
                     placeholderText: "Enter VM Name"
                     Layout.fillWidth: true
+                    validator: RegularExpressionValidator {
+                        regularExpression: /^[^\s]+$/ 
+                    }
                 }
                 FormCard.FormTextFieldDelegate {
                     id: osField

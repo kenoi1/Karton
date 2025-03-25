@@ -3,7 +3,7 @@
 
 #include "libvirtmonitor.h"
 #include "libvirteventloop.h"
-#include <QDebug>
+#include "karton_debug.h"
 
 LibvirtMonitor::LibvirtMonitor(QObject *parent, virConnectPtr conn)
     : QObject(parent)
@@ -11,7 +11,7 @@ LibvirtMonitor::LibvirtMonitor(QObject *parent, virConnectPtr conn)
     , m_callbackId(-1)
 {
     if (!m_conn) {
-        qDebug() << "No libvirt connection provided to monitor";
+        qCCritical(KARTON_DEBUG) << "No libvirt connection provided to monitor";
         return;
     }
 
@@ -20,7 +20,7 @@ LibvirtMonitor::LibvirtMonitor(QObject *parent, virConnectPtr conn)
     // LibvirtEventLoop::registerQtEventLoop();
     connect(virtEventLoop, &LibvirtEventLoop::result, this, [this](bool result) {
         if (!result) {
-            qDebug() << "virteventloop register failed";
+            qCCritical(KARTON_DEBUG) << "LibvirtEventLoop register failed";
             return;
         }
         m_callbackId =
@@ -33,9 +33,9 @@ LibvirtMonitor::LibvirtMonitor(QObject *parent, virConnectPtr conn)
         // https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainEventID
 
         if (m_callbackId < 0) {
-            qDebug() << "Failed to register event callback";
+            qCCritical(KARTON_DEBUG) << "Failed to register event callback";
         } else {
-            qDebug() << "Successfully registered domain event callback";
+            qCInfo(KARTON_DEBUG) << "Successfully registered domain event callback";
         }
     });
     virtEventLoop->run();
@@ -50,7 +50,7 @@ LibvirtMonitor::~LibvirtMonitor()
 
 int LibvirtMonitor::domainEventCallback(virConnectPtr conn, virDomainPtr dom, int event, int detail, void *opaque)
 {
-    qDebug() << "event callback!";
+    qCInfo(KARTON_DEBUG) << "event callback!";
     LibvirtMonitor *monitor = static_cast<LibvirtMonitor *>(opaque);
     // const char *name = virDomainGetName(dom);
 

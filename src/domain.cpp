@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 #include "domain.h"
-#include <QDebug>
 #include <QString>
 
 Domain::Domain(QObject *parent)
@@ -41,7 +40,7 @@ Domain::Domain(const virDomainPtr domainPtr,
     , m_diskPath(diskPath)
     , m_autostart(autostart)
 {
-    // qDebug() << "Created domain object:" << m_name << "UUID:" << m_uuid
+    // qCDebug(KARTON_DEBUG) << "Created domain object:" << m_name << "UUID:" << m_uuid
     //  << "State:" << m_state << "Active:" << m_isActive;
 }
 Domain::~Domain()

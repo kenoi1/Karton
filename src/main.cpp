@@ -13,7 +13,6 @@
 #include <KIconTheme>
 #include "karton.h"
 #include "vmlistmodel.h"
-#include <QDebug>
 #include <libvirt/libvirt.h>
 #include <iostream>
 #include "karton_debug.h"
@@ -37,7 +36,8 @@ int main(int argc, char *argv[])
     qCDebug(KARTON_DEBUG) << "Hello! Starting application...";
     Karton karton;
     VMModel *model = new VMModel(&karton);
-    model->updateDomains();
+    model->refreshAllDomains();
+    
     engine.rootContext()->setContextProperty(QStringLiteral("Karton"), &karton);
     engine.rootContext()->setContextProperty(QStringLiteral("VMModel"), model);
 
