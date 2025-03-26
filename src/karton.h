@@ -40,6 +40,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void commandFinished(int exitCode, const QString &output);
     void domainsChanged(const virDomainPtr domainPtr, int event, int detail);
+    void errorOccurred(const QString &errorMessage);
 
 private Q_SLOTS:
     void onDomainStateChanged(const virDomainPtr domainPtr, int event, int detail);

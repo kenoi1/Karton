@@ -198,7 +198,9 @@ bool Karton::startDomain(const Domain *domain)
     int result = virDomainCreate(domainPtr);
 
     if (result < 0) {
-        qCWarning(KARTON_DEBUG) << "Failed to start domain:" << domain->name();
+        QString errorMsg = QStringLiteral("Failed to start domain: %1").arg(domain->name());
+            qCWarning(KARTON_DEBUG) << errorMsg;
+            Q_EMIT errorOccurred(errorMsg);
         return false;
     }
     qCInfo(KARTON_DEBUG) << "Successfully started domain:" << domain->name();
@@ -214,7 +216,9 @@ bool Karton::stopDomain(const Domain *domain)
     if (info.state == VIR_DOMAIN_RUNNING || info.state == VIR_DOMAIN_PAUSED) {
         int result = virDomainShutdown(domainPtr);
         if (result < 0) {
-            qCWarning(KARTON_DEBUG) << "Failed to stop domain:" << domain->name();
+            QString errorMsg = QStringLiteral("Failed to stop domain: %1").arg(domain->name());
+            qCWarning(KARTON_DEBUG) << errorMsg;
+            Q_EMIT errorOccurred(errorMsg);
             return false;
         }
     }
@@ -229,10 +233,27 @@ bool Karton::forceStopDomain(const Domain *domain)
     int result = virDomainDestroy(domainPtr);
 
     if (result < 0) {
-        qCWarning(KARTON_DEBUG) << "Failed to force-stop domain:" << domain->name();
+        QString errorMsg = QStringLiteral("Failed to force-stop domain: %1").arg(domain->name());
+        qCWarning(KARTON_DEBUG) << errorMsg;
+        Q_EMIT errorOccurred(errorMsg);
         return false;
     }
     qCInfo(KARTON_DEBUG) << "Successfully force-stopped domain:" << domain->name();
+    return true;
+}
+
+bool Karton::undefineDomain(const Domain *domain)
+{
+    virDomainPtr domainPtr = domain->domainPtr();
+    int result = virDomainUndefine(domainPtr);
+
+    if (result < 0) {
+        QString errorMsg = QStringLiteral("Failed to undefine domain: %1").arg(domain->name());
+        qCWarning(KARTON_DEBUG) << errorMsg;
+        Q_EMIT errorOccurred(errorMsg);
+        return false;
+    }
+    qCInfo(KARTON_DEBUG) << "Successfully undefined domain:" << domain->name();
     return true;
 }
 
@@ -250,19 +271,6 @@ bool Karton::createDomain(const QString &name, const QString &osVariant, const f
                           .arg(QString::number(storageGB))
                           .arg(diskPath)
                           .arg(osVariant));
-}
-
-bool Karton::undefineDomain(const Domain *domain)
-{
-    virDomainPtr domainPtr = domain->domainPtr();
-    int result = virDomainUndefine(domainPtr);
-
-    if (result < 0) {
-        qCWarning(KARTON_DEBUG) << "Failed to undefine domain:" << domain->name();
-        return false;
-    }
-    qCInfo(KARTON_DEBUG) << "Successfully undefined domain:" << domain->name();
-    return true;
 }
 
 // Use for virsh, virt-viewer, virt-install and other CLI

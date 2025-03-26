@@ -10,35 +10,39 @@ import org.kde.kirigamiaddons.formcard 1.0 as FormCard
 import org.kde.kirigamiaddons.components 1.0 as Components
 
 Kirigami.ScrollablePage {
-    title: "Karton Virtual Machine Manager"
+    title: i18nc("noun, title of listpage","Karton Virtual Machine Manager")
+    Component.onCompleted: {
+        Karton.errorOccurred.connect(function(errorMessage) {
+            showPassiveNotification(errorMessage, "long");
+        });
+    }
     actions: [
         Kirigami.Action {
             icon.name: "list-add-symbolic"
-            text: "Add"
+            text: i18nc("verb, to add a new virtual machine","Add")
             onTriggered: source => {
                 addDomainDialog.open();
             }
         }
     ]
     function createDomainWrapper(config) {
-    console.log("Creating VM with configuration:", JSON.stringify(config));
-    Karton.createDomain(config.name, 
-                        config.osVariant,
-                        config.memoryGB, 
-                        config.storageGB, 
-                        config.diskImage,
-                        config.cpu
-                        );
+        Karton.createDomain(config.name, 
+                            config.osVariant,
+                            config.memoryGB, 
+                            config.storageGB, 
+                            config.diskImage,
+                            config.cpu
+                            );
     }
     Kirigami.Dialog {
         id: addDomainDialog
-        title: "Add New Virtual Machine"
+        title: i18n("Add New Virtual Machine")
         padding: Kirigami.Units.largeSpacing
         modal: true
 
         customFooterActions: [
                 Kirigami.Action {
-                    text: i18n("Create")
+                    text: i18nc("verb, creation button for a new VM", "Create")
                     icon.name: "dialog-ok"
                     onTriggered: {
                         const domainConfig = {
@@ -73,8 +77,8 @@ Kirigami.ScrollablePage {
 
                 FormCard.FormTextFieldDelegate {
                     id: nameField
-                    label: i18nc("@label:textbox Enter VM Name", "VM Name:")
-                    placeholderText: "Enter VM Name"
+                    label: i18nc("@label:textbox", "VM Name:")
+                    placeholderText: i18n("Enter VM Name")
                     Layout.fillWidth: true
                     validator: RegularExpressionValidator {
                         regularExpression: /^[^\s]+$/ 
@@ -82,14 +86,14 @@ Kirigami.ScrollablePage {
                 }
                 FormCard.FormTextFieldDelegate {
                     id: osField
-                    label: i18nc("@label:textbox OS Variant", "OS Variant:")
-                    placeholderText: "Enter an OS Variant"
+                    label: i18nc("@label:textbox", "OS Variant:")
+                    placeholderText: i18n( "Enter an OS Variant")
                     Layout.fillWidth: true
                 }
                 
                 Dialogs.FileDialog {
                     id: fileDialog
-                    title: "Choose a disk image"
+                    title: i18nc("@label:filedialog", "Choose a disk image")
                     nameFilters: ["Disk images (*.qcow2 *.raw *.img *.iso *.vdi *.vmdk)"]
                       onAccepted: {
                     diskImageField.text = fileDialog.selectedFile.toString().replace("file://", "")
@@ -104,12 +108,12 @@ Kirigami.ScrollablePage {
                         Controls.TextField {
                             id: diskImageField
                             Layout.fillWidth: true
-                            placeholderText: "Select a disk image"
+                            placeholderText: i18n("Select a disk image")
                             readOnly: true
                         }
                         
                         Controls.Button {
-                            text: "Browse"
+                            text: i18nc("verb, look for a file in explorer", "Browse")
                             onClicked: {
                                 fileDialog.open();
 
@@ -123,7 +127,7 @@ Kirigami.ScrollablePage {
                 Layout.bottomMargin: Kirigami.Units.largeSpacing
                 FormCard.FormSpinBoxDelegate {
                     id: memorySpinBox
-                    label: "Memory (GB)"
+                    label: i18nc("@label:spinbox, RAM", "Memory (GB)")
                     value: 4
                     from: 1
                     to: 64
@@ -135,7 +139,7 @@ Kirigami.ScrollablePage {
 
                 FormCard.FormSpinBoxDelegate {
                     id: storageSpinBox
-                    label: "Disk Storage (GB)"
+                    label: i18nc("@label:spinbox", "Disk Storage (GB)")
                     from: 1
                     to: 2048
                     value: 4
@@ -148,7 +152,7 @@ Kirigami.ScrollablePage {
 
                 FormCard.FormSpinBoxDelegate {
                     id: cpuSpinBox
-                    label: "CPUs"
+                    label: i18nc("@label:spinbox, number of cpus", "CPUs")
                     from: 1
                     to: 16
                     value: 2
@@ -234,7 +238,7 @@ Kirigami.ScrollablePage {
                         Controls.Button {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                             Layout.columnSpan: 1
-                            text: "Start"
+                            text: i18nc("verb, start a VM", "Start")
                             icon.name: "media-playback-start"
                             onClicked: {
                                 Karton.startDomain(domain)
@@ -244,7 +248,7 @@ Kirigami.ScrollablePage {
                         Controls.Button {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                             Layout.columnSpan: 1
-                            text: "Stop"
+                            text: i18nc("verb, stop a VM", "Stop")
                             icon.name: "media-playback-pause"
                             onClicked: {
                                 Karton.stopDomain(domain)
@@ -254,7 +258,7 @@ Kirigami.ScrollablePage {
                         Controls.Button {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                             Layout.columnSpan: 1
-                            text: "Force Stop"
+                            text: i18nc("verb, stop a VM immediately", "Force Stop")
                             // icon.name: "process-stop"
                             onClicked: {
                                 Karton.forceStopDomain(domain)
@@ -264,7 +268,7 @@ Kirigami.ScrollablePage {
                         Controls.Button {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                             Layout.columnSpan: 1
-                            text: "View VM"
+                            text: i18nc("verb, open viewer for VM", "View VM")
                             icon.name: "computer-laptop-symbolic"
                             onClicked: {
                                 Karton.viewDomain(domain)
@@ -274,7 +278,7 @@ Kirigami.ScrollablePage {
                         Controls.Button {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                             Layout.columnSpan: 1
-                            text: "Delete"
+                            text: i18nc("verb, delete a VM", "Delete")
                             icon.name: "delete"
                             onClicked: {
                                 Karton.undefineDomain(domain)
@@ -291,8 +295,8 @@ Kirigami.ScrollablePage {
 
             visible: view.count === 0
 
-            text: "Welcome to Karton!"
-            explanation: "Create a new virtual machine to proceed."
+            text: i18nc("@title, greet user to Karton", "Welcome to Karton!")
+            explanation: i18n("Create a new virtual machine to proceed.")
             icon.name: "computer-symbolic"
         }
     }
