@@ -10,6 +10,11 @@
 #include <QObject>
 #include <iostream>
 #include <libvirt/libvirt.h>
+#include <QDomDocument>
+#include <QFile>
+#include <QTextStream>
+#include <QUuid>
+
 
 Karton::Karton(QObject *parent)
     : QObject(parent)
@@ -264,13 +269,48 @@ bool Karton::viewDomain(const Domain *domain)
 
 bool Karton::createDomain(const QString &name, const QString &osVariant, const float memoryGB, const float storageGB, const QString &diskPath, const int cpus)
 {
-    return runCommand(QStringLiteral("virt-install --noautoconsole --name %1 --memory %2 --vcpus %3 --disk size=%4 --cdrom %5 --os-variant %6")
-                          .arg(name)
-                          .arg(QString::number(memoryGB * 1024))
-                          .arg(QString::number(cpus))
-                          .arg(QString::number(storageGB))
-                          .arg(diskPath)
-                          .arg(osVariant));
+    QFile xmlDomain(QStringLiteral("xmlSample.xml"));
+    if (!xmlDomain.open(QFile::WriteOnly | QFile::Text)) {
+        qCritical() << "xmlDomain opened in another instance or something??";
+        return false;
+    }
+    
+    QDomDocument document;
+    QDomElement root = document.createElement(QStringLiteral("domain"));
+    root.setAttribute(QStringLiteral("type"), QStringLiteral("kvm"));
+    
+    virDomainPtr *domains = nullptr;
+    int numDomains = virConnectListAllDomains(m_conn, &domains, 0);
+    root.setAttribute(QStringLiteral("id"), QString::number(numDomains + 1));
+    document.appendChild(root);
+    
+    QDomElement nameElement = document.createElement(QStringLiteral("name"));
+    QDomText nameString = document.createTextNode(name);
+    nameElement.appendChild(nameString);
+    root.appendChild(nameElement);
+    
+    QDomElement uuidElement = document.createElement(QStringLiteral("uuid"));
+    QString uuidString = QUuid::createUuid().toString();
+    uuidString.remove(QLatin1Char('{'));
+    uuidString.remove(QLatin1Char('}'));
+    //alternatively
+    // virUUIDGenerate(uuid);
+    // char uuidStr[VIR_UUID_STRING_BUFLEN];
+    // virUUIDFormat(uuid, uuidStr);
+
+    QDomText uuidText = document.createTextNode(uuidString);
+    uuidElement.appendChild(uuidText);
+    root.appendChild(uuidElement);
+    
+    QString xmlString = document.toString(4);
+    QTextStream xmlContent(&xmlDomain);
+    xmlContent << xmlString;
+    
+    qDebug().noquote() << "Generated XML:";
+    qDebug().noquote() << xmlString;
+    
+    xmlDomain.close();
+    return true;
 }
 
 // Use for virsh, virt-viewer, virt-install and other CLI
