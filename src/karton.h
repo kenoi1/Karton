@@ -3,6 +3,7 @@
 #pragma once
 
 #include "domain.h"
+#include "domaininstaller.h"
 #include <QObject>
 #include <QProcess>
 #include <libvirt/libvirt.h>
