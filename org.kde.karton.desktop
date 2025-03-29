@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: CC0-1.0
 # SPDX-FileCopyrightText: 2024 Aaron Rainbolt <arraybolt3@gmail.com>
+# SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 [Desktop Entry]
 Categories=System;Tools;
-Comment=Run virtual machines
+Comment=Manage virtual machines
 Exec=/usr/bin/karton
 Name=Karton
 Icon=karton_logo
