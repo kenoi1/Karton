@@ -281,14 +281,19 @@ Kirigami.ScrollablePage {
                             text: i18nc("verb, delete a VM", "Delete")
                             icon.name: "delete"
                             onClicked: {
-                                Karton.undefineDomain(domain)
-                                showPassiveNotification("Deleting " + domain.name + "!");
+                                if (domain.state === "running") {
+                                    showPassiveNotification("Error: " + domain.name + " is still running!");
+                                    return;
+                                }
+                                deleteConfirmationDialog.domain = domain;
+                                deleteConfirmationDialog.open();
                             }
                         }
                     }
                 }
             }
         }
+
         Kirigami.PlaceholderMessage {
             anchors.centerIn: parent
             width: parent.width - (Kirigami.Units.largeSpacing * 4)
@@ -301,5 +306,63 @@ Kirigami.ScrollablePage {
         }
     }
 
-    
+    Kirigami.Dialog {
+        id: deleteConfirmationDialog
+        title: i18n("Delete '%1'?", deleteConfirmationDialog.domain.name)
+        
+        padding: Kirigami.Units.largeSpacing
+        preferredWidth: root.width - Kirigami.Units.gridUnit * 30
+        preferredHeight: root.height - Kirigami.Units.gridUnit * 30
+        
+        showCloseButton: false
+        standardButtons: Kirigami.Dialog.NoButton
+        flatFooterButtons: false
+
+        property var domain: null
+
+        Controls.Label {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: i18n("You are about to remove the virtual machine, '%1'.\n", deleteConfirmationDialog.domain.name)
+            + i18n("Would you like to remove the disk image as well?\n")
+            + i18n("This action cannot be undone.")
+        }
+
+        customFooterActions: [
+            Kirigami.Action {
+                text: i18nc("verb, close confirmation dialog", "Cancel")
+                icon.name: "dialog-cancel"
+                onTriggered: {
+                    deleteConfirmationDialog.domain = null;
+                    deleteConfirmationDialog.close();
+                }
+            },
+            Kirigami.Action {
+                text: i18nc("action, delete VM but keep disk image", "Keep File")
+                icon.name: "edit-delete-remove"
+                
+                onTriggered: {
+                    if (deleteConfirmationDialog.domain) {
+                        Karton.deleteDomain(deleteConfirmationDialog.domain, false);
+                        showPassiveNotification("Undefining " + deleteConfirmationDialog.domain.name + "!");
+                        deleteConfirmationDialog.domain = null;
+                        deleteConfirmationDialog.close();
+                    }
+                }
+            },
+            Kirigami.Action {
+                text: i18nc("action, delete VM and disk image", "Delete Disk")
+                icon.name: "delete"
+                
+                onTriggered: {
+                    if (deleteConfirmationDialog.domain) {
+                        Karton.deleteDomain(deleteConfirmationDialog.domain, true);
+                        showPassiveNotification("Deleting " + deleteConfirmationDialog.domain.name + "!");
+                        deleteConfirmationDialog.domain = null;
+                        deleteConfirmationDialog.close();
+                    }
+                }
+            }
+        ]
+    }
 }

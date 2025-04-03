@@ -8,7 +8,9 @@
 #include "karton_debug.h"
 #include <KLocalizedString>
 #include <QObject>
-#include <iostream>
+#include <QFile>
+#include <QStandardPaths>
+
 #include <libvirt/libvirt.h>
 
 Karton::Karton(QObject *parent)
@@ -161,8 +163,10 @@ void Karton::refreshDomainList()
         int maxRam = domInfo.maxMem / (1024 * 1024); // convert to MB
         int ramUsage = domInfo.memory / (1024 * 1024);
         int cpus = domInfo.nrVirtCpu;
-        QString diskPath = QStringLiteral("*WIP*"); // TODO likely requires .xml parsing
-
+        QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+        QString diskPath = QStringLiteral("%1/libvirt/images/%2.qcow2").arg(dataDir).arg(QString::fromUtf8(name));
+        // WIP better to use .xml parsing instead of hardcode
+        
         int autoFlag = 0;
         virDomainGetAutostart(domains[i], &autoFlag);
         bool autostart = (autoFlag != 0);
@@ -175,7 +179,7 @@ void Karton::refreshDomainList()
                                     maxRam,
                                     ramUsage,
                                     cpus,
-                                    diskPath, // TODO: implement retrieving path
+                                    diskPath,
                                     autostart,
                                     this);
         m_domains.emplace_back(domain);
@@ -238,7 +242,7 @@ bool Karton::forceStopDomain(const Domain *domain)
     return true;
 }
 
-bool Karton::undefineDomain(const Domain *domain)
+bool Karton::deleteDomain(const Domain *domain, const bool deleteDisk)
 {
     virDomainPtr domainPtr = domain->domainPtr();
     int result = virDomainUndefine(domainPtr);
@@ -249,6 +253,17 @@ bool Karton::undefineDomain(const Domain *domain)
         Q_EMIT errorOccurred(errorMsg);
         return false;
     }
+    
+    if (deleteDisk) {
+        if (!QFile::remove(domain->diskPath())) {
+            QString errorMsg = QStringLiteral("Failed to delete disk file: %1").arg(domain->diskPath());
+            qCWarning(KARTON_DEBUG) << errorMsg;
+            Q_EMIT errorOccurred(errorMsg);
+            return false;
+        }
+        qCInfo(KARTON_DEBUG) << "Successfully deleted disk image of " << domain->name();
+    }
+
     qCInfo(KARTON_DEBUG) << "Successfully undefined domain:" << domain->name();
     return true;
 }

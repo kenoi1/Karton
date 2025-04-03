@@ -31,7 +31,7 @@ public Q_SLOTS:
     Q_INVOKABLE bool forceStopDomain(const Domain *domain);
     Q_INVOKABLE bool
     createDomain(const QString &name, const QString &osVariant, const float memoryGB, const float storageGB, const QString &diskPath, const int cpus);
-    Q_INVOKABLE bool undefineDomain(const Domain *domain);
+    Q_INVOKABLE bool deleteDomain(const Domain *domain, const bool deleteDisk);
 
 Q_SIGNALS:
     void commandFinished(int exitCode, const QString &output);
