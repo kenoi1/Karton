@@ -15,6 +15,7 @@ target_sources(karton
     karton.cpp
     vmlistmodel.cpp
     domain.cpp
+    domainconfig.cpp
     libvirtmonitor.cpp
     libvirteventloop.cpp
     domaininstaller.cpp

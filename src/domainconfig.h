@@ -4,34 +4,58 @@
 #pragma once
 
 #include <QString>
+#include <QObject>
+
 class DomainConfig : public QObject
 {
     Q_OBJECT
-    
-    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-    Q_PROPERTY(QString uuid READ uuid WRITE setUuid NOTIFY uuidChanged)
-    Q_PROPERTY(bool isActive READ isActive WRITE setIsActive NOTIFY isActiveChanged)
-    Q_PROPERTY(QString state READ state WRITE setState NOTIFY stateChanged)
-    Q_PROPERTY(int maxRam READ maxRam WRITE setMaxRam NOTIFY maxRamChanged)
-    Q_PROPERTY(int ramUsage READ ramUsage WRITE setRamUsage NOTIFY ramUsageChanged)
-    Q_PROPERTY(int cpus READ cpus WRITE setCpus NOTIFY cpusChanged)
-    Q_PROPERTY(QString diskPath READ diskPath WRITE setDiskPath NOTIFY diskPathChanged)
-    Q_PROPERTY(bool autostart READ autostart WRITE setAutostart NOTIFY autostartChanged)
-    
+
+    // Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+    // Q_PROPERTY(QString uuid READ uuid WRITE setUuid NOTIFY uuidChanged)
+    // Q_PROPERTY(bool isActive READ isActive WRITE setIsActive NOTIFY isActiveChanged)
+    // Q_PROPERTY(QString state READ state WRITE setState NOTIFY stateChanged)
+    // Q_PROPERTY(int maxRam READ maxRam WRITE setMaxRam NOTIFY maxRamChanged)
+    // Q_PROPERTY(int ramUsage READ ramUsage WRITE setRamUsage NOTIFY ramUsageChanged)
+    // Q_PROPERTY(int cpus READ cpus WRITE setCpus NOTIFY cpusChanged)
+    // Q_PROPERTY(QString diskPath READ diskPath WRITE setDiskPath NOTIFY diskPathChanged)
+    // Q_PROPERTY(bool autostart READ autostart WRITE setAutostart NOTIFY autostartChanged)
+
+    Q_PROPERTY(QString name READ name CONSTANT)
+    Q_PROPERTY(QString uuid READ uuid CONSTANT)
+    Q_PROPERTY(bool isActive READ isActive NOTIFY isActiveChanged)
+    Q_PROPERTY(QString state READ state NOTIFY stateChanged)
+    Q_PROPERTY(int maxRam READ maxRam CONSTANT)
+    Q_PROPERTY(int ramUsage READ ramUsage NOTIFY ramUsageChanged)
+    Q_PROPERTY(int cpus READ cpus CONSTANT)
+    Q_PROPERTY(QString diskPath READ diskPath CONSTANT)
+    Q_PROPERTY(bool autostart READ autostart NOTIFY autostartChanged)
+
+
 Q_SIGNALS:
-    void nameChanged(const QString &name);
-    void uuidChanged(const QString &uuid);
+    // void nameChanged(const QString &name);
+    // void uuidChanged(const QString &uuid);
     void isActiveChanged(bool active);
     void stateChanged(const QString &state);
-    void maxRamChanged(int maxRam);
+    // void maxRamChanged(int maxRam);
     void ramUsageChanged(int ramUsage);
-    void cpusChanged(int cpus);
-    void diskPathChanged(const QString &diskPath);
+    // void cpusChanged(int cpus);
+    // void diskPathChanged(const QString &diskPath);
     void autostartChanged(bool autostart);
-    
+
 public:
     explicit DomainConfig(QObject *parent = nullptr);
+    explicit DomainConfig(const QString &name,
+                    const QString &uuid,
+                    bool isActive,
+                    QString state,
+                    int maxRam,
+                    int ramUsage,
+                    int cpus,
+                    const QString &diskPath,
+                    bool autostart,
+                    QObject *parent = nullptr);
 
+    // getters
     [[nodiscard]] QString name() const
     {
         return m_name;
@@ -84,5 +108,4 @@ private:
     int m_cpus;
     QString m_diskPath;
     bool m_autostart;
-
 };

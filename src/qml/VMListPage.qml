@@ -192,7 +192,7 @@ Kirigami.ScrollablePage {
                     ColumnLayout {
                         Kirigami.Heading {
                             level: 2
-                            text: domain.name
+                            text: domain.config.name
                         }
                         Kirigami.Separator {
                             Layout.fillWidth: true
@@ -200,37 +200,37 @@ Kirigami.ScrollablePage {
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "UUID: " + domain.uuid
+                            text: "UUID: " + domain.config.uuid
                         }
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "State: " + domain.state
+                            text: "State: " + domain.config.state
                         }
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "Memory (GB): " + domain.maxRam
+                            text: "Memory (GB): " + domain.config.maxRam
                         }
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "Memory Usage (GB): " + domain.ramUsage
+                            text: "Memory Usage (GB): " + domain.config.ramUsage
                         }
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "CPU Cores: " + domain.cpus
+                            text: "CPU Cores: " + domain.config.cpus
                         }
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "Disk: " + domain.diskPath
+                            text: "Disk: " + domain.config.diskPath
                         }
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "Autostart: " + (model.autostart ? "Enabled" : "Disabled")
+                            text: "Autostart: " + (domain.config.autostart ? "Enabled" : "Disabled")
                         }
 
                     }
@@ -242,7 +242,7 @@ Kirigami.ScrollablePage {
                             icon.name: "media-playback-start"
                             onClicked: {
                                 Karton.startDomain(domain)
-                                showPassiveNotification("Starting VM: " + domain.name + "!");
+                                showPassiveNotification("Starting VM: " + domain.config.name + "!");
                             }
                         }
                         Controls.Button {
@@ -252,7 +252,7 @@ Kirigami.ScrollablePage {
                             icon.name: "media-playback-pause"
                             onClicked: {
                                 Karton.stopDomain(domain)
-                                showPassiveNotification("Stopping VM: " + domain.name + "!");
+                                showPassiveNotification("Stopping VM: " + domain.config.name + "!");
                             }
                         }
                         Controls.Button {
@@ -262,7 +262,7 @@ Kirigami.ScrollablePage {
                             // icon.name: "process-stop"
                             onClicked: {
                                 Karton.forceStopDomain(domain)
-                                showPassiveNotification("Force-stopping VM: " + domain.name + "!");
+                                showPassiveNotification("Force-stopping VM: " + domain.config.name + "!");
                             }
                         }
                         Controls.Button {
@@ -272,7 +272,7 @@ Kirigami.ScrollablePage {
                             icon.name: "computer-laptop-symbolic"
                             onClicked: {
                                 Karton.viewDomain(domain)
-                                showPassiveNotification("Opening in virt-viewer: " + domain.name + "!");
+                                showPassiveNotification("Opening in virt-viewer: " + domain.config.name + "!");
                             }
                         }
                         Controls.Button {
@@ -281,8 +281,8 @@ Kirigami.ScrollablePage {
                             text: i18nc("verb, delete a VM", "Delete")
                             icon.name: "delete"
                             onClicked: {
-                                if (domain.state === "running") {
-                                    showPassiveNotification("Error: " + domain.name + " is still running!");
+                                if (domain.config.state === "running") {
+                                    showPassiveNotification("Error: " + domain.config.name + " is still running!");
                                     return;
                                 }
                                 deleteConfirmationDialog.domain = domain;
@@ -308,7 +308,7 @@ Kirigami.ScrollablePage {
 
     Kirigami.Dialog {
         id: deleteConfirmationDialog
-        title: i18n("Delete '%1'?", deleteConfirmationDialog.domain.name)
+        title: i18n("Delete '%1'?", deleteConfirmationDialog.domain.config.name)
         
         padding: Kirigami.Units.largeSpacing
         preferredWidth: root.width - Kirigami.Units.gridUnit * 30
@@ -323,7 +323,7 @@ Kirigami.ScrollablePage {
         Controls.Label {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: i18n("You are about to remove the virtual machine, '%1'.\n", deleteConfirmationDialog.domain.name)
+            text: i18n("You are about to remove the virtual machine, '%1'.\n", deleteConfirmationDialog.domain.config.name)
             + i18n("Would you like to remove the disk image as well?\n")
             + i18n("This action cannot be undone.")
         }
@@ -344,7 +344,7 @@ Kirigami.ScrollablePage {
                 onTriggered: {
                     if (deleteConfirmationDialog.domain) {
                         Karton.deleteDomain(deleteConfirmationDialog.domain, false);
-                        showPassiveNotification("Undefining " + deleteConfirmationDialog.domain.name + "!");
+                        showPassiveNotification("Undefining " + deleteConfirmationDialog.domain.config.name + "!");
                         deleteConfirmationDialog.domain = null;
                         deleteConfirmationDialog.close();
                     }
@@ -357,7 +357,7 @@ Kirigami.ScrollablePage {
                 onTriggered: {
                     if (deleteConfirmationDialog.domain) {
                         Karton.deleteDomain(deleteConfirmationDialog.domain, true);
-                        showPassiveNotification("Deleting " + deleteConfirmationDialog.domain.name + "!");
+                        showPassiveNotification("Deleting " + deleteConfirmationDialog.domain.config.name + "!");
                         deleteConfirmationDialog.domain = null;
                         deleteConfirmationDialog.close();
                     }

@@ -4,33 +4,35 @@
 #pragma once
 
 #include <QString>
+#include <QObject>
 #include <libvirt/libvirt.h>
-
-class DomainConfig;
+#include <domainconfig.h>
 
 class Domain : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(QString name READ name CONSTANT)
-    Q_PROPERTY(QString uuid READ uuid CONSTANT)
+    // Q_PROPERTY(QString name READ name CONSTANT)
+    // Q_PROPERTY(QString uuid READ uuid CONSTANT)
     Q_PROPERTY(bool isActive READ isActive NOTIFY isActiveChanged)
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)
-    Q_PROPERTY(int maxRam READ maxRam CONSTANT)
+    // Q_PROPERTY(int maxRam READ maxRam CONSTANT)
     Q_PROPERTY(int ramUsage READ ramUsage NOTIFY ramUsageChanged)
-    Q_PROPERTY(int cpus READ cpus CONSTANT)
-    Q_PROPERTY(QString diskPath READ diskPath CONSTANT)
+    // Q_PROPERTY(int cpus READ cpus CONSTANT)
+    // Q_PROPERTY(QString diskPath READ diskPath CONSTANT)
     Q_PROPERTY(bool autostart READ autostart NOTIFY autostartChanged)
+    Q_PROPERTY(DomainConfig *config READ config CONSTANT)
 
 Q_SIGNALS:
     void isActiveChanged(const bool active);
     void stateChanged(const QString &state);
     void ramUsageChanged(const int usage);
     void autostartChanged(const bool autostart);
+    void configChanged();
 
 public:
-    explicit Domain(QObject *parent = nullptr);
-    Domain(virDomainPtr domainPtr,
+    Domain(QObject *parent = nullptr);
+    Domain(const virDomainPtr domainPtr,
            DomainConfig *config,
            QObject *parent = nullptr);
     ~Domain();
@@ -45,7 +47,29 @@ public:
     {
         return m_config;
     }
-    
+
+    [[nodiscard]] bool isActive() const
+    {
+        return m_config->isActive();
+    }
+    [[nodiscard]] int ramUsage() const
+    {
+        return m_config->ramUsage();
+    }
+    [[nodiscard]] QString state() const
+    {
+        return m_config->state();
+    }
+    [[nodiscard]] bool autostart() const
+    {
+        return m_config->autostart();
+    }
+
+    void setActive(bool active);
+    void setState(const QString &state);
+    void setRamUsage(int ramUsage);
+    void setAutostart(bool autostart);
+    static QString uuidString(virDomainPtr domainPtr);
 
 private:
     virDomainPtr m_domainPtr;

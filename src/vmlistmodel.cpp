@@ -71,7 +71,7 @@ void VMModel::updateDomains(const virDomainPtr domainPtr)
 
     int modelIndex = -1;
     for (int i = 0; i < m_datas.size(); ++i) {
-        if (m_datas[i]->uuid() == domainUuid) {
+        if (m_datas[i]->config()->uuid() == domainUuid) {
             modelIndex = i;
             break;
         }

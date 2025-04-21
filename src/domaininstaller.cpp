@@ -78,7 +78,6 @@ void DomainInstaller::configureXML(virConnectPtr conn,
     QTextStream xmlContent(&xmlDomain);
     xmlContent << xmlString;
     qDebug().noquote() << "Generated XML:";
-    qDebug().noquote() << "Generated XML:";
     qDebug().noquote() << xmlString;
     xmlDomain.close();
 }
