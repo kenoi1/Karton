@@ -248,7 +248,7 @@ Kirigami.ScrollablePage {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                             Layout.columnSpan: 1
                             text: i18nc("verb, stop a VM", "Stop")
-                            icon.name: "media-playback-pause"
+                            icon.name: "system-shutdown"
                             onClicked: {
                                 Karton.stopDomain(domain)
                                 showPassiveNotification("Stopping VM: " + domain.config.name + "!");
