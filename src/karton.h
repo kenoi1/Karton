@@ -4,6 +4,7 @@
 
 #include "domain.h"
 #include "domaininstaller.h"
+#include "domainconfig.h"
 #include <QObject>
 #include <QProcess>
 #include <libvirt/libvirt.h>
@@ -30,8 +31,12 @@ public Q_SLOTS:
     Q_INVOKABLE bool stopDomain(const Domain *domain);
     Q_INVOKABLE bool viewDomain(const Domain *domain);
     Q_INVOKABLE bool forceStopDomain(const Domain *domain);
-    Q_INVOKABLE bool
-    createDomain(const QString &name, const QString &osVariant, const float memoryGB, const float storageGB, const QString &diskPath, const int cpus);
+    Q_INVOKABLE bool createDomain(const QString &name,
+                                const QString &osVariant, 
+                                const float memoryGB, 
+                                const float storageGB, 
+                                const QString &diskPath, 
+                                const int cpus);
     Q_INVOKABLE bool deleteDomain(const Domain *domain, const bool deleteDisk);
 
 Q_SIGNALS:

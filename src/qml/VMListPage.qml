@@ -26,13 +26,12 @@ Kirigami.ScrollablePage {
         }
     ]
     function createDomainWrapper(config) {
-        Karton.createDomain(config.name, 
+        Karton.createDomain(config.name,
                             config.osVariant,
-                            config.memoryGB, 
-                            config.storageGB, 
+                            config.memoryGB,
+                            config.storageGB,
                             config.diskImage,
-                            config.cpu
-                            );
+                            config.cpu);
     }
     Kirigami.Dialog {
         id: addDomainDialog

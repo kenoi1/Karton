@@ -3,6 +3,7 @@
 
 #include "karton.h"
 #include "domain.h"
+#include "domainconfig.h"
 #include "libvirtmonitor.h"
 
 #include "karton_debug.h"
@@ -162,14 +163,18 @@ void Karton::refreshDomainList()
         int autoFlag = 0;
         virDomainGetAutostart(domains[i], &autoFlag);
         bool autostart = (autoFlag != 0);
+        
 
+        // TODO READ EVERYTHING FROM XML?
         DomainConfig *config = new DomainConfig(QString::fromUtf8(name),
                                     Domain::uuidString(domainPtr),
+                                    QString::fromUtf8("WIP"), // osvariant
                                     isActive,
                                     state,
                                     maxRam,
                                     ramUsage,
                                     cpus,
+                                    0, // disk
                                     diskPath,
                                     autostart,
                                     this);
@@ -267,10 +272,28 @@ bool Karton::viewDomain(const Domain *domain)
     return runCommand(QStringLiteral("virt-viewer --attach ") + domain->config()->name());
 }
 
-bool Karton::createDomain(const QString &name, const QString &osVariant, const float memoryGB, const float storageGB, const QString &diskPath, const int cpus)
+bool Karton::createDomain(const QString &name,
+                                const QString &osVariant, 
+                                const float memoryGB, 
+                                const float storageGB, 
+                                const QString &diskPath, 
+                                const int cpus)
 {
     DomainInstaller installer;
-    installer.configureXML(m_conn, name, osVariant, memoryGB, storageGB, diskPath, cpus);
+    const DomainConfig *config = new DomainConfig (
+                                name,
+                                QString::fromUtf8("WIP"),
+                                osVariant,
+                                false,
+                                QString::fromUtf8("WIP"),
+                                memoryGB,
+                                memoryGB,
+                                cpus,
+                                storageGB,
+                                diskPath,
+                                false,
+                                this);
+    installer.configureXML(m_conn, config);
     return true;
 }
 

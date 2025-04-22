@@ -70,6 +70,7 @@ public:
     void setRamUsage(int ramUsage);
     void setAutostart(bool autostart);
     static QString uuidString(virDomainPtr domainPtr);
+    Q_DISABLE_COPY_MOVE(Domain)
 
 private:
     virDomainPtr m_domainPtr;

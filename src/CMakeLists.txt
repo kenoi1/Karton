@@ -54,6 +54,7 @@ target_link_libraries(karton
     KF6::CoreAddons
     KF6::IconThemes
     Libvirt::Libvirt
+    Libosinfo::Libosinfo
 )
 
 install(TARGETS karton ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})

@@ -22,11 +22,13 @@ class DomainConfig : public QObject
 
     Q_PROPERTY(QString name READ name CONSTANT)
     Q_PROPERTY(QString uuid READ uuid CONSTANT)
-    Q_PROPERTY(bool isActive READ isActive NOTIFY isActiveChanged)
+    Q_PROPERTY(QString osVariant READ osVariant CONSTANT)
+    Q_PROPERTY(bool isACtive READ isActive NOTIFY isActiveChanged)
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)
     Q_PROPERTY(int maxRam READ maxRam CONSTANT)
     Q_PROPERTY(int ramUsage READ ramUsage NOTIFY ramUsageChanged)
     Q_PROPERTY(int cpus READ cpus CONSTANT)
+    Q_PROPERTY(int maxDiskStorage READ maxDiskStorage CONSTANT)
     Q_PROPERTY(QString diskPath READ diskPath CONSTANT)
     Q_PROPERTY(bool autostart READ autostart NOTIFY autostartChanged)
 
@@ -46,11 +48,13 @@ public:
     explicit DomainConfig(QObject *parent = nullptr);
     explicit DomainConfig(const QString &name,
                     const QString &uuid,
+                    const QString &osVariant,
                     bool isActive,
                     QString state,
                     int maxRam,
                     int ramUsage,
                     int cpus,
+                    int maxDiskStorage,
                     const QString &diskPath,
                     bool autostart,
                     QObject *parent = nullptr);
@@ -63,6 +67,10 @@ public:
     [[nodiscard]] QString uuid() const
     {
         return m_uuid;
+    }
+    [[nodiscard]] QString osVariant() const
+    {
+        return m_osVariant;
     }
     [[nodiscard]] bool isActive() const
     {
@@ -84,6 +92,10 @@ public:
     {
         return m_cpus;
     }
+    [[nodiscard]] int maxDiskStorage() const
+    {
+        return m_maxDiskStorage;
+    }
     [[nodiscard]] QString diskPath() const
     {
         return m_diskPath;
@@ -101,11 +113,13 @@ public:
 private:
     QString m_name;
     QString m_uuid;
+    QString m_osVariant;
     bool m_isActive;
     QString m_state;
     int m_maxRam;
     int m_ramUsage;
     int m_cpus;
+    int m_maxDiskStorage;
     QString m_diskPath;
     bool m_autostart;
 };

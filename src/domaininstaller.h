@@ -4,6 +4,9 @@
 #pragma once
 
 #include <QObject>
+#include <QDomDocument>
+#include <QDomElement>
+#include <domainconfig.h>
 #include <libvirt/libvirt.h>
 
 class DomainInstaller : public QObject
@@ -14,8 +17,11 @@ public:
     DomainInstaller();
     ~DomainInstaller();
 
-    void configureXML(virConnectPtr conn, const QString &name, const QString &osVariant, 
-                     const float memoryGB, const float storageGB, 
-                     const QString &diskPath, const int cpus);
-
+    void configureXML(virConnectPtr conn, const DomainConfig *config);
+    void addElement(QDomDocument &doc, QDomElement &parent, const QString &name, const QString &value);
+    void addElementWithAttributes(QDomDocument &doc,
+                                              QDomElement &parent,
+                                              const QString &name,
+                                              const QString &value,
+                                              const QMap<QString, QString> &attributes);
 };
