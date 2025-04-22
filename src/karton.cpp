@@ -5,6 +5,7 @@
 #include "domain.h"
 #include "domainconfig.h"
 #include "libvirtmonitor.h"
+#include "domainviewer.h"
 #include "domainxmlreader.h"
 
 #include "karton_debug.h"
@@ -289,7 +290,9 @@ bool Karton::deleteDomain(const Domain *domain, const bool deleteDisk)
 
 bool Karton::viewDomain(const Domain *domain)
 {
-    return runCommand(QStringLiteral("virt-viewer --attach ") + domain->config()->name());
+    // return runCommand(QStringLiteral("virt-viewer --attach ") + domain->name());
+    DomainViewer viewer;
+    return viewer.connect();
 }
 
 bool Karton::createDomain(const QString &name,
