@@ -5,6 +5,7 @@
 #include "karton.h"
 #include "karton_debug.h"
 #include "vmlistmodel.h"
+#include "domainconfig.h"
 #include <KIconTheme>
 #include <KLocalizedContext>
 #include <KLocalizedString>
@@ -33,9 +34,10 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    qCDebug(KARTON_DEBUG) << "Hello! Starting application...";
+    qCInfo(KARTON_DEBUG) << "Hello! Starting Karton...";
     Karton karton;
     auto model = new VMModel(&karton);
+
     model->refreshAllDomains();
 
     engine.rootContext()->setContextProperty(QStringLiteral("Karton"), &karton);

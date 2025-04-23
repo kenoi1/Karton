@@ -2,94 +2,73 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 #include "domain.h"
+#include "domainconfig.h"
 #include <QString>
 
 #include "karton_debug.h"
 
 Domain::Domain(QObject *parent)
-    : QObject(parent)
-    , m_domainPtr(nullptr)
-    , m_name(QStringLiteral(""))
-    , m_uuid(QStringLiteral(""))
-    , m_isActive(false)
-    , m_maxRam(0)
-    , m_ramUsage(0)
-    , m_cpus(0)
-    , m_diskPath(QStringLiteral(""))
-    , m_autostart(false)
+    : QObject(parent), m_domainPtr(nullptr), m_config(new DomainConfig(this))
 {
+    connect(m_config, &DomainConfig::isActiveChanged, this, &Domain::isActiveChanged);
+    connect(m_config, &DomainConfig::stateChanged, this, &Domain::stateChanged);
+    connect(m_config, &DomainConfig::ramUsageChanged, this, &Domain::ramUsageChanged);
+    connect(m_config, &DomainConfig::autostartChanged, this, &Domain::autostartChanged);
 }
+
 Domain::Domain(const virDomainPtr domainPtr,
-               const QString &name,
-               const QString &uuid,
-               const bool isActive,
-               QString state,
-               const int maxRam,
-               const int ramUsage,
-               const int cpus,
-               const QString &diskPath,
-               bool autostart,
+               DomainConfig *config,
                QObject *parent)
-    : QObject(parent)
-    , m_domainPtr(domainPtr)
-    , m_name(name)
-    , m_uuid(uuid)
-    , m_isActive(isActive)
-    , m_state(state)
-    , m_maxRam(maxRam)
-    , m_ramUsage(ramUsage)
-    , m_cpus(cpus)
-    , m_diskPath(diskPath)
-    , m_autostart(autostart)
+    : QObject(parent), m_domainPtr(domainPtr), m_config(config)
 {
-    // qCDebug(KARTON_DEBUG) << "Created domain object:" << m_name << "UUID:" << m_uuid
-    //  << "State:" << m_state << "Active:" << m_isActive;
+    connect(m_config, &DomainConfig::isActiveChanged, this, &Domain::isActiveChanged);
+    connect(m_config, &DomainConfig::stateChanged, this, &Domain::stateChanged);
+    connect(m_config, &DomainConfig::ramUsageChanged, this, &Domain::ramUsageChanged);
+    connect(m_config, &DomainConfig::autostartChanged, this, &Domain::autostartChanged);
 }
+
 Domain::~Domain()
 {
-    virDomainFree(m_domainPtr);
+    if (m_domainPtr)
+    {
+        virDomainFree(m_domainPtr);
+    }
 }
 
 void Domain::setActive(bool active)
 {
-    if (m_isActive != active) {
-        m_isActive = active;
-        Q_EMIT isActiveChanged(active);
-    }
+    m_config->setActive(active);
+    Q_EMIT isActiveChanged(active);
 }
 
 void Domain::setState(const QString &state)
 {
-    if (m_state != state) {
-        m_state = state;
-        Q_EMIT stateChanged(state);
-    }
+    m_config->setState(state);
+    Q_EMIT stateChanged(state);
 }
 
 void Domain::setRamUsage(int ramUsage)
 {
-    if (m_ramUsage != ramUsage) {
-        m_ramUsage = ramUsage;
-        Q_EMIT ramUsageChanged(ramUsage);
-    }
+    m_config->setRamUsage(ramUsage);
+    Q_EMIT ramUsageChanged(ramUsage);
 }
 
 void Domain::setAutostart(bool autostart)
 {
-    if (m_autostart != autostart) {
-        m_autostart = autostart;
-        Q_EMIT autostartChanged(autostart);
-    }
+    m_config->setAutostart(autostart);
+    Q_EMIT autostartChanged(autostart);
 }
 
 QString Domain::uuidString(virDomainPtr domainPtr)
 {
-    if (!domainPtr) {
+    if (!domainPtr)
+    {
         return {};
     }
 
     std::array<char, VIR_UUID_STRING_BUFLEN> uuid = {};
-    if (virDomainGetUUIDString(domainPtr, uuid.data()) == -1) {
+    if (virDomainGetUUIDString(domainPtr, uuid.data()) == -1)
+    {
         qCWarning(KARTON_DEBUG) << "Failed to get UUID string for" << domainPtr;
         return {};
     }

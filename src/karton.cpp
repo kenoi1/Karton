@@ -3,6 +3,7 @@
 
 #include "karton.h"
 #include "domain.h"
+#include "domainconfig.h"
 #include "libvirtmonitor.h"
 
 #include "karton_debug.h"
@@ -12,6 +13,11 @@
 #include <QStandardPaths>
 
 #include <libvirt/libvirt.h>
+#include <QDomDocument>
+#include <QFile>
+#include <QTextStream>
+#include <QUuid>
+
 
 Karton::Karton(QObject *parent)
     : QObject(parent)
@@ -57,19 +63,6 @@ bool Karton::init()
 
     refreshDomainList();
 
-    // Print VMs when started
-    // qDebug() << "Total VMs: " << m_domains.size();
-    // for (const auto& domain : m_domains) {
-    //     qDebug() << "VM:" << domain.name()
-    //          << "\n    UUID:" << domain.uuid()
-    //          << "\n    Active:" << (domain.isActive() ? "Yes" : "No")
-    //          << "\n    State:" << domain.state()
-    //          << "\n    RAM:" << domain.maxRam() << "MB"
-    //          << "\n    RAM Usage:" << domain.ramUsage() << "MB"
-    //          << "\n    CPUs:" << domain.cpus()
-    //          << "\n    Disk Path:" << domain.diskPath()
-    //          << "\n    Autostart:" << (domain.autostart() ? "Yes" : "No");
-    // }
     return true;
 }
 
@@ -79,7 +72,7 @@ int Karton::searchDomain(const virDomainPtr domainPtr)
     QString searchUuid = Domain::uuidString(domainPtr);
 
     for (int i = 0; i < m_domains.size(); i++) {
-        if (searchUuid == m_domains[i]->uuid()) {
+        if (searchUuid == m_domains[i]->config()->uuid()) {
             return i;
         }
     }
@@ -170,17 +163,23 @@ void Karton::refreshDomainList()
         int autoFlag = 0;
         virDomainGetAutostart(domains[i], &autoFlag);
         bool autostart = (autoFlag != 0);
+        
 
-        Domain *domain = new Domain(domainPtr,
-                                    QString::fromUtf8(name),
+        // TODO READ EVERYTHING FROM XML?
+        DomainConfig *config = new DomainConfig(QString::fromUtf8(name),
                                     Domain::uuidString(domainPtr),
+                                    QString::fromUtf8("WIP"), // osvariant
                                     isActive,
                                     state,
                                     maxRam,
                                     ramUsage,
                                     cpus,
+                                    0, // disk
                                     diskPath,
                                     autostart,
+                                    this);
+        Domain *domain = new Domain(domainPtr,
+                                    config,
                                     this);
         m_domains.emplace_back(domain);
     }
@@ -198,12 +197,12 @@ bool Karton::startDomain(const Domain *domain)
     int result = virDomainCreate(domainPtr);
 
     if (result < 0) {
-        QString errorMsg = QStringLiteral("Failed to start domain: %1").arg(domain->name());
+        QString errorMsg = QStringLiteral("Failed to start domain: %1").arg(domain->config()->name());
         qCWarning(KARTON_DEBUG) << errorMsg;
         Q_EMIT errorOccurred(errorMsg);
         return false;
     }
-    qCInfo(KARTON_DEBUG) << "Successfully started domain:" << domain->name();
+    qCInfo(KARTON_DEBUG) << "Successfully started domain:" << domain->config()->name();
     return true;
 }
 
@@ -216,14 +215,14 @@ bool Karton::stopDomain(const Domain *domain)
     if (info.state == VIR_DOMAIN_RUNNING || info.state == VIR_DOMAIN_PAUSED) {
         int result = virDomainShutdown(domainPtr);
         if (result < 0) {
-            QString errorMsg = QStringLiteral("Failed to stop domain: %1").arg(domain->name());
+            QString errorMsg = QStringLiteral("Failed to stop domain: %1").arg(domain->config()->name());
             qCWarning(KARTON_DEBUG) << errorMsg;
             Q_EMIT errorOccurred(errorMsg);
             return false;
         }
     }
 
-    qCInfo(KARTON_DEBUG) << "Successfully stopped domain:" << domain->name();
+    qCInfo(KARTON_DEBUG) << "Successfully stopped domain:" << domain->config()->name();
     return true;
 }
 
@@ -233,12 +232,12 @@ bool Karton::forceStopDomain(const Domain *domain)
     int result = virDomainDestroy(domainPtr);
 
     if (result < 0) {
-        QString errorMsg = QStringLiteral("Failed to force-stop domain: %1").arg(domain->name());
+        QString errorMsg = QStringLiteral("Failed to force-stop domain: %1").arg(domain->config()->name());
         qCWarning(KARTON_DEBUG) << errorMsg;
         Q_EMIT errorOccurred(errorMsg);
         return false;
     }
-    qCInfo(KARTON_DEBUG) << "Successfully force-stopped domain:" << domain->name();
+    qCInfo(KARTON_DEBUG) << "Successfully force-stopped domain:" << domain->config()->name();
     return true;
 }
 
@@ -248,40 +247,66 @@ bool Karton::deleteDomain(const Domain *domain, const bool deleteDisk)
     int result = virDomainUndefine(domainPtr);
 
     if (result < 0) {
-        QString errorMsg = QStringLiteral("Failed to undefine domain: %1").arg(domain->name());
+        QString errorMsg = QStringLiteral("Failed to undefine domain: %1").arg(domain->config()->name());
         qCWarning(KARTON_DEBUG) << errorMsg;
         Q_EMIT errorOccurred(errorMsg);
         return false;
     }
     
     if (deleteDisk) {
-        if (!QFile::remove(domain->diskPath())) {
-            QString errorMsg = i18nc("%1 is path of the disk file", "Failed to delete disk file: %1", domain->diskPath());
+        if (!QFile::remove(domain->config()->diskPath())) {
+            QString errorMsg = QStringLiteral("Failed to delete disk file: %1").arg(domain->config()->diskPath());
             qCWarning(KARTON_DEBUG) << errorMsg;
             Q_EMIT errorOccurred(errorMsg);
             return false;
         }
-        qCInfo(KARTON_DEBUG) << "Successfully deleted disk image of " << domain->name();
+        qCInfo(KARTON_DEBUG) << "Successfully deleted disk image of " << domain->config()->name();
     }
 
-    qCInfo(KARTON_DEBUG) << "Successfully undefined domain:" << domain->name();
+    qCInfo(KARTON_DEBUG) << "Successfully undefined domain:" << domain->config()->name();
+    
+    if (deleteDisk) {
+        if (!QFile::remove(domain->config()->diskPath())) {
+            QString errorMsg = i18nc("%1 is path of the disk file", "Failed to delete disk file: %1", domain->config()->diskPath());
+            qCWarning(KARTON_DEBUG) << errorMsg;
+            Q_EMIT errorOccurred(errorMsg);
+            return false;
+        }
+        qCInfo(KARTON_DEBUG) << "Successfully deleted disk image of " << domain->config()->name();
+    }
+
+    qCInfo(KARTON_DEBUG) << "Successfully undefined domain:" << domain->config()->name();
     return true;
 }
 
 bool Karton::viewDomain(const Domain *domain)
 {
-    return runCommand(QStringLiteral("virt-viewer --attach ") + domain->name());
+    return runCommand(QStringLiteral("virt-viewer --attach ") + domain->config()->name());
 }
 
-bool Karton::createDomain(const QString &name, const QString &osVariant, const float memoryGB, const float storageGB, const QString &diskPath, const int cpus)
+bool Karton::createDomain(const QString &name,
+                                const QString &osVariant, 
+                                const float memoryGB, 
+                                const float storageGB, 
+                                const QString &diskPath, 
+                                const int cpus)
 {
-    return runCommand(QStringLiteral("virt-install --noautoconsole --name %1 --memory %2 --vcpus %3 --disk size=%4 --cdrom %5 --os-variant %6")
-                          .arg(name)
-                          .arg(QString::number(memoryGB * 1024))
-                          .arg(QString::number(cpus))
-                          .arg(QString::number(storageGB))
-                          .arg(diskPath)
-                          .arg(osVariant));
+    DomainInstaller installer;
+    const DomainConfig *config = new DomainConfig (
+                                name,
+                                QString::fromUtf8("WIP"),
+                                osVariant,
+                                false,
+                                QString::fromUtf8("WIP"),
+                                memoryGB,
+                                memoryGB,
+                                cpus,
+                                storageGB,
+                                diskPath,
+                                false,
+                                this);
+    installer.configureXML(m_conn, config);
+    return true;
 }
 
 // Use for virsh, virt-viewer, virt-install and other CLI

@@ -15,8 +15,11 @@ target_sources(karton
     karton.cpp
     vmlistmodel.cpp
     domain.cpp
+    domainconfig.cpp
     libvirtmonitor.cpp
     libvirteventloop.cpp
+    domaininstaller.cpp
+    osinfoconfig.cpp
 )
 
 ecm_target_qml_sources(karton
@@ -47,10 +50,13 @@ target_link_libraries(karton
     Qt6::Gui
     Qt6::QuickControls2
     Qt6::Widgets
+    Qt6::Xml
     KF6::I18n
     KF6::CoreAddons
     KF6::IconThemes
     Libvirt::Libvirt
+    Libosinfo::Libosinfo
+    Glib::Glib
 )
 
 install(TARGETS karton ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
