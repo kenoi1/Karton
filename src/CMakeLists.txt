@@ -19,6 +19,7 @@ target_sources(karton
     libvirtmonitor.cpp
     libvirteventloop.cpp
     domaininstaller.cpp
+    osinfoconfig.cpp
 )
 
 ecm_target_qml_sources(karton
