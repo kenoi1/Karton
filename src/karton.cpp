@@ -264,6 +264,18 @@ bool Karton::deleteDomain(const Domain *domain, const bool deleteDisk)
     }
 
     qCInfo(KARTON_DEBUG) << "Successfully undefined domain:" << domain->config()->name();
+    
+    if (deleteDisk) {
+        if (!QFile::remove(domain->diskPath())) {
+            QString errorMsg = i18nc("%1 is path of the disk file", "Failed to delete disk file: %1", domain->diskPath());
+            qCWarning(KARTON_DEBUG) << errorMsg;
+            Q_EMIT errorOccurred(errorMsg);
+            return false;
+        }
+        qCInfo(KARTON_DEBUG) << "Successfully deleted disk image of " << domain->name();
+    }
+
+    qCInfo(KARTON_DEBUG) << "Successfully undefined domain:" << domain->name();
     return true;
 }
 

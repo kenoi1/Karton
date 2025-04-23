@@ -53,7 +53,7 @@ Kirigami.ScrollablePage {
                             cpu: cpuSpinBox.value
                         };
                         createDomainWrapper(domainConfig);
-                        showPassiveNotification("Created VM: " + nameField.text);
+                        showPassiveNotification(i18nc("%1 is the name of the virtual machine", "Created VM: %1", nameField.text));
                         addDomainDialog.close();
                     }
                 }
@@ -64,7 +64,7 @@ Kirigami.ScrollablePage {
         onAccepted: {
             console.log("VM Name:", nameField.text);
             console.log("VM Type:", vmTypeComboBox.currentText);
-            showPassiveNotification("Created VM: " + nameField.text);
+            showPassiveNotification(i18nc("%1 is the name of the virtual machine", "Created VM: %1", nameField.text));
         }
             
 
@@ -241,17 +241,17 @@ Kirigami.ScrollablePage {
                             icon.name: "media-playback-start"
                             onClicked: {
                                 Karton.startDomain(domain)
-                                showPassiveNotification("Starting VM: " + domain.config.name + "!");
+                                showPassiveNotification(i18nc("%1 is the name of the virtual machine", "Starting VM: %1!", domain.name));
                             }
                         }
                         Controls.Button {
                             Layout.alignment: Qt.AlignRight|Qt.AlignVCenter
                             Layout.columnSpan: 1
                             text: i18nc("verb, stop a VM", "Stop")
-                            icon.name: "media-playback-pause"
+                            icon.name: "system-shutdown"
                             onClicked: {
                                 Karton.stopDomain(domain)
-                                showPassiveNotification("Stopping VM: " + domain.config.name + "!");
+                                showPassiveNotification(i18nc("%1 is the name of the virtual machine", "Stopping VM: %1!", domain.name));
                             }
                         }
                         Controls.Button {
@@ -261,7 +261,7 @@ Kirigami.ScrollablePage {
                             // icon.name: "process-stop"
                             onClicked: {
                                 Karton.forceStopDomain(domain)
-                                showPassiveNotification("Force-stopping VM: " + domain.config.name + "!");
+                                showPassiveNotification(i18nc("%1 is the name of the virtual machine", "Force-stopping VM: %1!", domain.name));
                             }
                         }
                         Controls.Button {
@@ -271,7 +271,7 @@ Kirigami.ScrollablePage {
                             icon.name: "computer-laptop-symbolic"
                             onClicked: {
                                 Karton.viewDomain(domain)
-                                showPassiveNotification("Opening in virt-viewer: " + domain.config.name + "!");
+                                showPassiveNotification(i18nc("%1 is the name of the virtual machine", "Opening in virt-viewer: %1!", domain.name));
                             }
                         }
                         Controls.Button {
@@ -280,8 +280,8 @@ Kirigami.ScrollablePage {
                             text: i18nc("verb, delete a VM", "Delete")
                             icon.name: "delete"
                             onClicked: {
-                                if (domain.config.state === "running") {
-                                    showPassiveNotification("Error: " + domain.config.name + " is still running!");
+                                if (domain.state === "running") {
+                                    showPassiveNotification(i18nc("%1 is the name of the virtual machine", "Error: %1 is still running!", domain.name));
                                     return;
                                 }
                                 deleteConfirmationDialog.domain = domain;
@@ -307,7 +307,7 @@ Kirigami.ScrollablePage {
 
     Kirigami.Dialog {
         id: deleteConfirmationDialog
-        title: i18n("Delete '%1'?", deleteConfirmationDialog.domain.config.name)
+        title: i18nc("Confirm deleting %1 (virtual machine name)", "Delete '%1'?", deleteConfirmationDialog.domain.name)
         
         padding: Kirigami.Units.largeSpacing
         preferredWidth: root.width - Kirigami.Units.gridUnit * 30
@@ -322,9 +322,11 @@ Kirigami.ScrollablePage {
         Controls.Label {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: i18n("You are about to remove the virtual machine, '%1'.\n", deleteConfirmationDialog.domain.config.name)
-            + i18n("Would you like to remove the disk image as well?\n")
-            + i18n("This action cannot be undone.")
+            text: i18nc("%1 is the virtual machine name",
+`You are about to remove the virtual machine, '%1'. 
+Would you like to remove the disk image as well? 
+This action cannot be undone.`, 
+            deleteConfirmationDialog.domain.name)
         }
 
         customFooterActions: [
@@ -343,7 +345,7 @@ Kirigami.ScrollablePage {
                 onTriggered: {
                     if (deleteConfirmationDialog.domain) {
                         Karton.deleteDomain(deleteConfirmationDialog.domain, false);
-                        showPassiveNotification("Undefining " + deleteConfirmationDialog.domain.config.name + "!");
+                        showPassiveNotification(i18nc("%1 is the virtual machine name", "Undefining %1!", deleteConfirmationDialog.domain.name));
                         deleteConfirmationDialog.domain = null;
                         deleteConfirmationDialog.close();
                     }
@@ -356,7 +358,7 @@ Kirigami.ScrollablePage {
                 onTriggered: {
                     if (deleteConfirmationDialog.domain) {
                         Karton.deleteDomain(deleteConfirmationDialog.domain, true);
-                        showPassiveNotification("Deleting " + deleteConfirmationDialog.domain.config.name + "!");
+                        showPassiveNotification(i18nc("%1 is the virtual machine name", "Undefining %1!", deleteConfirmationDialog.domain.name));
                         deleteConfirmationDialog.domain = null;
                         deleteConfirmationDialog.close();
                     }
