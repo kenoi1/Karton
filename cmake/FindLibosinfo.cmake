@@ -9,3 +9,4 @@ if(TARGET PkgConfig::LIBOSINFO AND NOT TARGET Libosinfo::Libosinfo)
 endif()
 
 mark_as_advanced(LIBOSINFO_INCLUDE_DIR LIBOSINFO_LIBRARY)
+

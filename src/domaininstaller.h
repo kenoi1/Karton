@@ -17,6 +17,8 @@ public:
     DomainInstaller();
     ~DomainInstaller();
 
+    void initLibosinfo();
+    QString getOsIdFromDisk(QString diskPath);
     void configureXML(virConnectPtr conn, const DomainConfig *config);
     void addElement(QDomDocument &doc, QDomElement &parent, const QString &name, const QString &value);
     void addElementWithAttributes(QDomDocument &doc,

@@ -32,8 +32,8 @@ find_package(Qt6 REQUIRED COMPONENTS
 )
 
 find_package(Libvirt REQUIRED)
-
 find_package(Libosinfo REQUIRED)
+find_package(Glib REQUIRED)
 
 find_package(KF6 REQUIRED COMPONENTS
     Kirigami
@@ -50,7 +50,6 @@ install(FILES
 	org.kde.karton.desktop
 	DESTINATION /usr/share/applications
 )
-
 
 ecm_find_qmlmodule(org.kde.kirigami REQUIRED)
 
