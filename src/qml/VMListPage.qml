@@ -53,7 +53,7 @@ Kirigami.ScrollablePage {
                             cpu: cpuSpinBox.value
                         };
                         createDomainWrapper(domainConfig);
-                        showPassiveNotification("Created VM: " + nameField.text);
+                        showPassiveNotification(i18nc("%1 is the name of the virtual machine", "Created VM: %1", nameField.text));
                         addDomainDialog.close();
                     }
                 }
@@ -64,7 +64,7 @@ Kirigami.ScrollablePage {
         onAccepted: {
             console.log("VM Name:", nameField.text);
             console.log("VM Type:", vmTypeComboBox.currentText);
-            showPassiveNotification("Created VM: " + nameField.text);
+            showPassiveNotification(i18nc("%1 is the name of the virtual machine", "Created VM: %1", nameField.text));
         }
             
 
