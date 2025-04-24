@@ -40,7 +40,9 @@ public:
     void addNetworkInterfaceDevices(QDomDocument &doc,
                                     QDomElement &parent,
                                     const QString &interfaceType,
+                                    const QString &macAddress,
                                     const QString &sourceInterfaceType,
+                                    const bool hasAddress,
                                     const QString &modelType);
     void addGraphicsDevices(QDomDocument &doc,
                             QDomElement &parent,
@@ -59,6 +61,7 @@ public:
     void addConsoleDevices(QDomDocument &doc,
                            QDomElement &parent,
                            const QString &type);
+    QString genMac();
     void addElement(QDomDocument &doc, QDomElement &parent, const QString &name, const QString &value);
     void addElementWithAttributes(QDomDocument &doc,
                                   QDomElement &parent,

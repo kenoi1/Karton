@@ -62,15 +62,16 @@ DomainInstaller::~DomainInstaller()
 
 // }
 virDomainPtr DomainInstaller::setupDomain(virConnectPtr conn,
-                                  const DomainConfig *config)
+                                          const DomainConfig *config)
 {
-    
+
     QString xmlString = generateXML(conn, config);
     QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
     QString path = QStringLiteral("%1/libvirt/kde-karton").arg(dataDir);
     qCCritical(KARTON_DEBUG) << "does this run?" << path;
     QDir dir(path);
-    if (!dir.mkpath(QStringLiteral("config"))) {
+    if (!dir.mkpath(QStringLiteral("config")))
+    {
         qCCritical(KARTON_DEBUG) << "Already Exists / Failed: " << path;
     }
     QFile domainXML(QStringLiteral("%1/config/%2_config.xml").arg(path).arg(config->name()));
@@ -82,19 +83,20 @@ virDomainPtr DomainInstaller::setupDomain(virConnectPtr conn,
     QTextStream xmlContent(&domainXML);
     xmlContent << xmlString;
     domainXML.close();
-    
+
     virDomainPtr dom = virDomainDefineXML(conn, xmlString.toStdString().c_str());
     // create?
     return dom;
 }
 QString DomainInstaller::generateXML(virConnectPtr conn,
-                                  const DomainConfig *config)
+                                     const DomainConfig *config)
 {
     OsinfoConfig osinfo;
     // const QString osId = osinfo.getOsIdFromDisk(config->isoDiskPath());f
     const QString osId = osinfo.getOsIdFromShortId(config->osVariant());
     const QString osArchitecture = osinfo.getOsArchitecture(osId);
-    if (osArchitecture.isEmpty()) {
+    if (osArchitecture.isEmpty())
+    {
         qCCritical(KARTON_DEBUG) << "Warning no specified architecture!";
         return QString();
     }
@@ -144,7 +146,7 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     QDomElement os = document.createElement(QStringLiteral("os"));
     root.appendChild(os);
     QMap<QString, QString> type;
-    type[QStringLiteral("arch")] = osArchitecture;                  // parameterize
+    type[QStringLiteral("arch")] = osArchitecture;           // parameterize
     type[QStringLiteral("machine")] = QStringLiteral("q35"); // parameterize using libos?
     // QEMU machine types see: https://people.redhat.com/~cohuck/2022/01/05/qemu-machine-types.html
     addElementWithAttributes(document, os, QStringLiteral("type"), QStringLiteral("hvm"), type);
@@ -233,8 +235,10 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     // Userspace connection https://libvirt.org/formatdomain.html#id44
     addNetworkInterfaceDevices(document,
                                devices,
-                               QStringLiteral("bridge"),
-                               QStringLiteral("br0"),
+                               QStringLiteral("user"),
+                               genMac(),
+                               QStringLiteral(""),
+                               true,
                                QStringLiteral("virtio"));
 
     // devices->graphics element
@@ -265,7 +269,7 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
 
     // write to file
     QString xmlString = document.toString(4);
-    
+
     qCInfo(KARTON_DEBUG).noquote() << "Generated XML:";
     qCInfo(KARTON_DEBUG).noquote() << xmlString;
     return xmlString;
@@ -311,20 +315,41 @@ void DomainInstaller::addDiskDevices(QDomDocument &doc, // extract to disk obj
 void DomainInstaller::addNetworkInterfaceDevices(QDomDocument &doc,
                                                  QDomElement &parent,
                                                  const QString &interfaceType,
+                                                 const QString &macAddress,
                                                  const QString &sourceInterfaceType,
+                                                 const bool hasAddress,
                                                  const QString &modelType)
 {
     QDomElement interface = doc.createElement(QStringLiteral("interface"));
     parent.appendChild(interface);
     interface.setAttribute(QStringLiteral("type"), interfaceType);
 
-    QMap<QString, QString> source;
-    source[interfaceType] = sourceInterfaceType;
-    addElementWithAttributes(doc, interface, QStringLiteral("source"), QStringLiteral(""), source);
+    if (!macAddress.isEmpty())
+    {
+        QMap<QString, QString> mac;
+        mac[QStringLiteral("address")] = macAddress;
+        addElementWithAttributes(doc, interface, QStringLiteral("mac"), QStringLiteral(""), mac);
+    }
+
+    if (!sourceInterfaceType.isEmpty())
+    {
+        QMap<QString, QString> source;
+        source[interfaceType] = sourceInterfaceType;
+        addElementWithAttributes(doc, interface, QStringLiteral("source"), QStringLiteral(""), source);
+    }
 
     QMap<QString, QString> model;
     model[QStringLiteral("type")] = modelType;
     addElementWithAttributes(doc, interface, QStringLiteral("model"), QStringLiteral(""), model);
+    if (hasAddress)
+    {
+        QMap<QString, QString> address;
+        address[QStringLiteral("type")] = QStringLiteral("pci");
+        address[QStringLiteral("domain")] = QStringLiteral("0x0000");
+        address[QStringLiteral("bus")] = QStringLiteral("0x01");
+        address[QStringLiteral("slot")] = QStringLiteral("0x00");
+        addElementWithAttributes(doc, interface, QStringLiteral("address"), QStringLiteral(""), address);
+    }
 }
 
 void DomainInstaller::addGraphicsDevices(QDomDocument &doc,
@@ -378,6 +403,21 @@ void DomainInstaller::addConsoleDevices(QDomDocument &doc,
     console.setAttribute(QStringLiteral("type"), type);
 }
 
+// TEMPORARILY GENERATE RANDOM MAC ADDRESS (unicast)...
+// eventually generate a network domain.
+QString DomainInstaller::genMac()
+{
+    int i, tp;
+
+    srand(time(NULL) + getpid());
+    QString s;
+    for (i = 0; i < 6; i++)
+    {
+        tp = rand() % 256;
+        s += QString::asprintf("%s%X%s", tp < 16 ? "0" : "", tp, i < 5 ? ":" : "");
+    }
+    return s.toLower();
+}
 void DomainInstaller::addElement(QDomDocument &doc, QDomElement &parent, const QString &name, const QString &value)
 {
     QDomElement element = doc.createElement(name);
