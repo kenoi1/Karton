@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
+
 #include "osinfoconfig.h"
 #include "karton_debug.h"
 #include <QString>
@@ -49,27 +50,27 @@ bool OsinfoConfig::initOsDb()
     return true;
 }
 
-QString OsinfoConfig::getOsIdFromDisk(const QString &diskPath)
+QString OsinfoConfig::getOsIdFromDisk(const QString &isoDiskPath)
 {
     if (!m_db) {
         qCCritical(KARTON_DEBUG) << "OS database not initialized";
         return QString();
     }
     
-    std::string str = diskPath.toStdString();
+    std::string str = isoDiskPath.toStdString();
     const gchar *location = str.c_str();
     
     GError *error = NULL;
     OsinfoMedia *osMedia = osinfo_media_create_from_location(location, NULL, &error);
     
     if (error) {
-        qCCritical(KARTON_DEBUG) << "Media creation error:" << error->message;
+        qCCritical(KARTON_DEBUG) << "os_media creation error:" << error->message;
         g_error_free(error);
         return QString();
     }
     
     if (!osinfo_db_identify_media(m_db, osMedia)) {
-        qCWarning(KARTON_DEBUG) << "Could not identify media from disk:" << diskPath;
+        qCWarning(KARTON_DEBUG) << "could not identify media from disk:" << isoDiskPath;
         g_object_unref(osMedia);
         return QString();
     }
@@ -93,7 +94,7 @@ QString OsinfoConfig::getOsArchitecture(const QString &osId)
     
     OsinfoOs *libosinfo_os = osinfo_db_get_os(m_db, os_id);
     if (!libosinfo_os) {
-        qCWarning(KARTON_DEBUG) << "Could not find OS with ID:" << osId;
+        qCWarning(KARTON_DEBUG) << "could not find OS with ID:" << osId;
         return QString();
     }
     

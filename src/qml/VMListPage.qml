@@ -224,7 +224,7 @@ Kirigami.ScrollablePage {
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "Disk: " + domain.config.diskPath
+                            text: "Disk: " + domain.config.virtualDiskPath
                         }
                         Controls.Label {
                             Layout.fillWidth: true

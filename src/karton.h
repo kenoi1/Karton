@@ -35,7 +35,7 @@ public Q_SLOTS:
                                 const QString &osVariant, 
                                 const float memoryGB, 
                                 const float storageGB, 
-                                const QString &diskPath, 
+                                const QString &isoDiskPath, 
                                 const int cpus);
     Q_INVOKABLE bool deleteDomain(const Domain *domain, const bool deleteDisk);
 

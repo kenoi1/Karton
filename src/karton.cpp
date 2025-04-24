@@ -157,7 +157,7 @@ void Karton::refreshDomainList()
         int ramUsage = domInfo.memory / (1024 * 1024);
         int cpus = domInfo.nrVirtCpu;
         QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
-        QString diskPath = QStringLiteral("%1/libvirt/images/%2.qcow2").arg(dataDir).arg(QString::fromUtf8(name));
+        QString virtualDiskPath = QStringLiteral("%1/libvirt/images/%2.qcow2").arg(dataDir).arg(QString::fromUtf8(name));
         // WIP better to use .xml parsing instead of hardcode
         
         int autoFlag = 0;
@@ -174,8 +174,9 @@ void Karton::refreshDomainList()
                                     maxRam,
                                     ramUsage,
                                     cpus,
-                                    0, // disk
-                                    diskPath,
+                                    0, // disk storage
+                                    QStringLiteral("WIP ISO DISK PATH"),
+                                    virtualDiskPath,
                                     autostart,
                                     this);
         Domain *domain = new Domain(domainPtr,
@@ -254,8 +255,8 @@ bool Karton::deleteDomain(const Domain *domain, const bool deleteDisk)
     }
     
     if (deleteDisk) {
-        if (!QFile::remove(domain->config()->diskPath())) {
-            QString errorMsg = QStringLiteral("Failed to delete disk file: %1").arg(domain->config()->diskPath());
+        if (!QFile::remove(domain->config()->isoDiskPath())) {
+            QString errorMsg = QStringLiteral("Failed to delete disk file: %1").arg(domain->config()->isoDiskPath());
             qCWarning(KARTON_DEBUG) << errorMsg;
             Q_EMIT errorOccurred(errorMsg);
             return false;
@@ -266,8 +267,8 @@ bool Karton::deleteDomain(const Domain *domain, const bool deleteDisk)
     qCInfo(KARTON_DEBUG) << "Successfully undefined domain:" << domain->config()->name();
     
     if (deleteDisk) {
-        if (!QFile::remove(domain->config()->diskPath())) {
-            QString errorMsg = i18nc("%1 is path of the disk file", "Failed to delete disk file: %1", domain->config()->diskPath());
+        if (!QFile::remove(domain->config()->isoDiskPath())) {
+            QString errorMsg = i18nc("%1 is path of the disk file", "Failed to delete disk file: %1", domain->config()->isoDiskPath());
             qCWarning(KARTON_DEBUG) << errorMsg;
             Q_EMIT errorOccurred(errorMsg);
             return false;
@@ -288,21 +289,24 @@ bool Karton::createDomain(const QString &name,
                                 const QString &osVariant, 
                                 const float memoryGB, 
                                 const float storageGB, 
-                                const QString &diskPath, 
+                                const QString &isoDiskPath,
                                 const int cpus)
 {
+    QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
     DomainInstaller installer;
     const DomainConfig *config = new DomainConfig (
                                 name,
-                                QString::fromUtf8("WIP"),
+                                QString::fromUtf8("WIP"), // uuid
                                 osVariant,
                                 false,
-                                QString::fromUtf8("WIP"),
+                                QString::fromUtf8("WIP"), // state
                                 memoryGB,
-                                memoryGB,
+                                memoryGB, // current usage
                                 cpus,
-                                storageGB,
-                                diskPath,
+                                storageGB, // max
+                                isoDiskPath,
+                                QStringLiteral("%1/libvirt/images/%2.qcow2").arg(dataDir).arg(name), 
+                                // virt disk path 
                                 false,
                                 this);
     installer.configureXML(m_conn, config);

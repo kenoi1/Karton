@@ -13,7 +13,8 @@ DomainConfig::DomainConfig(QObject *parent)
     m_maxRam(0),
     m_ramUsage(0),
     m_maxDiskStorage(0),
-    m_diskPath(QStringLiteral("")),
+    m_isoDiskPath(QStringLiteral("")),
+    m_virtualDiskPath(QStringLiteral("")),
     m_autostart(false)
 {
 }
@@ -27,7 +28,8 @@ DomainConfig::DomainConfig(const QString &name,
                            int ramUsage,
                            int cpus,
                            int maxDiskStorage,
-                           const QString &diskPath,
+                           const QString &isoDiskPath,
+                           const QString &virtualDiskPath,
                            bool autostart,
                            QObject *parent)
     : QObject(parent), 
@@ -40,7 +42,8 @@ DomainConfig::DomainConfig(const QString &name,
     m_ramUsage(ramUsage), 
     m_cpus(cpus), 
     m_maxDiskStorage(maxDiskStorage),
-    m_diskPath(diskPath), 
+    m_isoDiskPath(isoDiskPath),
+    m_virtualDiskPath(virtualDiskPath), 
     m_autostart(autostart)
 {
 }

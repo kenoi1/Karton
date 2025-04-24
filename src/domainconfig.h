@@ -23,13 +23,14 @@ class DomainConfig : public QObject
     Q_PROPERTY(QString name READ name CONSTANT)
     Q_PROPERTY(QString uuid READ uuid CONSTANT)
     Q_PROPERTY(QString osVariant READ osVariant CONSTANT)
-    Q_PROPERTY(bool isACtive READ isActive NOTIFY isActiveChanged)
+    Q_PROPERTY(bool isActive READ isActive NOTIFY isActiveChanged)
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)
     Q_PROPERTY(int maxRam READ maxRam CONSTANT)
     Q_PROPERTY(int ramUsage READ ramUsage NOTIFY ramUsageChanged)
     Q_PROPERTY(int cpus READ cpus CONSTANT)
     Q_PROPERTY(int maxDiskStorage READ maxDiskStorage CONSTANT)
-    Q_PROPERTY(QString diskPath READ diskPath CONSTANT)
+    Q_PROPERTY(QString isoDiskPath READ isoDiskPath CONSTANT)
+    Q_PROPERTY(QString virtualDiskPath READ virtualDiskPath CONSTANT)
     Q_PROPERTY(bool autostart READ autostart NOTIFY autostartChanged)
 
 
@@ -55,7 +56,8 @@ public:
                     int ramUsage,
                     int cpus,
                     int maxDiskStorage,
-                    const QString &diskPath,
+                    const QString &isoDiskPath,
+                    const QString &virtualDiskPath,
                     bool autostart,
                     QObject *parent = nullptr);
 
@@ -96,9 +98,13 @@ public:
     {
         return m_maxDiskStorage;
     }
-    [[nodiscard]] QString diskPath() const
+    [[nodiscard]] QString isoDiskPath() const
     {
-        return m_diskPath;
+        return m_isoDiskPath;
+    }
+    [[nodiscard]] QString virtualDiskPath() const
+    {
+        return m_virtualDiskPath;
     }
     [[nodiscard]] bool autostart() const
     {
@@ -120,6 +126,7 @@ private:
     int m_ramUsage;
     int m_cpus;
     int m_maxDiskStorage;
-    QString m_diskPath;
+    QString m_isoDiskPath;
+    QString m_virtualDiskPath;
     bool m_autostart;
 };

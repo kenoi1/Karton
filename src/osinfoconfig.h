@@ -17,7 +17,7 @@ public:
     OsinfoConfig();
     ~OsinfoConfig();
 
-    QString getOsIdFromDisk(const QString &diskPath);
+    QString getOsIdFromDisk(const QString &isoDiskPath);
     QString getOsArchitecture(const QString &osId);
 
 private:
