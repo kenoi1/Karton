@@ -30,37 +30,6 @@ DomainInstaller::~DomainInstaller()
 {
 }
 
-// OsinfoDb *DomainInstaller::initOsDb() {
-//     OsinfoLoader *loader = osinfo_loader_new();
-//     OsinfoDb *db = osinfo_loader_get_db(loader);
-//     osinfo_loader_process_default_path(loader, NULL);
-//     return db;
-// }
-
-// const gchar *DomainInstaller::getOsIdFromDisk(QString diskPath, OsinfoDb *db)
-// {
-//     std::string str = diskPath.toStdString();
-//     const gchar *location = str.c_str();
-//     // qCInfo(KARTON_DEBUG) << "IDGGG: " << str << ", WAA: " <<  location;
-
-//     GError *error = NULL;
-//     OsinfoMedia *osMedia = osinfo_media_create_from_location(location, NULL, &error);
-//     if (!osinfo_db_identify_media(db, osMedia)) {
-//         return "fail";
-//     }
-//     const gchar *idG = osinfo_entity_get_id(OSINFO_ENTITY(osMedia));
-//     // const gchar *idG = osinfo_media_get_system_id(osMedia);
-
-//     // qCInfo(KARTON_DEBUG) << "IDGGG: " << idG;
-//     if (error) {
-//         qCCritical(KARTON_DEBUG) << "Id Finder Error: " << error->message;
-//     }
-//     // QString id = QString::fromUtf8(idG);
-//     g_object_unref(osMedia);
-//     // g_object_unref(loader);
-//     return idG;
-
-// }
 virDomainPtr DomainInstaller::setupDomain(virConnectPtr conn,
                                           const DomainConfig *config)
 {
@@ -448,36 +417,3 @@ void DomainInstaller::addElementWithAttributes(QDomDocument &doc,
     }
     parent.appendChild(element);
 }
-
-// void DomainInstaller::initLibosinfo()
-// {
-//     // qCInfo(KARTON_DEBUG) << "E?HFWIUEHFIUWEHFIUW";
-//     OsinfoLoader *loader = osinfo_loader_new();
-//     OsinfoDb *db = osinfo_loader_get_db(loader);
-//     osinfo_loader_process_default_path(loader, NULL);
-
-//     // const gchar *osId = "";
-//     // OsinfoOS *os = osinfo_db_get_os(db, )
-
-//     // OsinfoDeviceList *devices = osinfo_db_get_device_list(db);
-//     // gint len = osinfo_list_get_length(OSINFO_LIST(devices));
-//     // for (gint i = 0; i < len; i++) {
-//     //     qCInfo(KARTON_DEBUG) << "OS DEVICE:" << osinfo_get_id(device);
-//     // }
-//     // GList *device = osinfo_db_unique_values_for_property_in_device(db, "name");
-
-//     // LISTS ALL IDS FOR OPERATING SYSTEMS IN DB
-//     OsinfoOsList *osList = osinfo_db_get_os_list(db);
-//     gint len = osinfo_list_get_length(OSINFO_LIST(osList));
-
-//     for (gint i = 0; i < len; i++)
-//     {
-//         OsinfoOs *os = OSINFO_OS(osinfo_list_get_nth(OSINFO_LIST(osList), i));
-//         const gchar *id = osinfo_entity_get_id(OSINFO_ENTITY(os));
-//         qCInfo(KARTON_DEBUG) << "OS ID:" << id;
-//     }
-
-//     g_object_unref(osList);
-//     // g_object_unref(devices);
-//     g_object_unref(loader);
-// }

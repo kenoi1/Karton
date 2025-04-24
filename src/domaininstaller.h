@@ -8,10 +8,6 @@
 #include <QDomElement>
 #include <domainconfig.h>
 #include <libvirt/libvirt.h>
-// extern "C" // due to undefined references to libosinfo stuff
-// {
-// #include <osinfo/osinfo.h>
-// }
 
 class DomainInstaller : public QObject
 {
@@ -21,10 +17,6 @@ public:
     DomainInstaller();
     ~DomainInstaller();
 
-    // void initLibosinfo();
-    // OsinfoDb *initOsDb();
-
-    // const gchar *getOsIdFromDisk(QString diskPath, OsinfoDb *db);
     virDomainPtr setupDomain(virConnectPtr conn, const DomainConfig *config);
     QString generateXML(virConnectPtr conn, const DomainConfig *config);
     void addDiskDevices(QDomDocument &doc, // extract to disk obj

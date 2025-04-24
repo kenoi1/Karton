@@ -10,16 +10,6 @@ class DomainConfig : public QObject
 {
     Q_OBJECT
 
-    // Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-    // Q_PROPERTY(QString uuid READ uuid WRITE setUuid NOTIFY uuidChanged)
-    // Q_PROPERTY(bool isActive READ isActive WRITE setIsActive NOTIFY isActiveChanged)
-    // Q_PROPERTY(QString state READ state WRITE setState NOTIFY stateChanged)
-    // Q_PROPERTY(int maxRam READ maxRam WRITE setMaxRam NOTIFY maxRamChanged)
-    // Q_PROPERTY(int ramUsage READ ramUsage WRITE setRamUsage NOTIFY ramUsageChanged)
-    // Q_PROPERTY(int cpus READ cpus WRITE setCpus NOTIFY cpusChanged)
-    // Q_PROPERTY(QString diskPath READ diskPath WRITE setDiskPath NOTIFY diskPathChanged)
-    // Q_PROPERTY(bool autostart READ autostart WRITE setAutostart NOTIFY autostartChanged)
-
     Q_PROPERTY(QString name READ name CONSTANT)
     Q_PROPERTY(QString uuid READ uuid CONSTANT)
     Q_PROPERTY(QString osVariant READ osVariant CONSTANT)
