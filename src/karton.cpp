@@ -18,18 +18,16 @@
 #include <QTextStream>
 #include <QUuid>
 
-
 Karton::Karton(QObject *parent)
-    : QObject(parent)
-    , m_conn(nullptr)
-    , m_monitor(nullptr)
+    : QObject(parent), m_conn(nullptr), m_monitor(nullptr)
 {
     init();
 }
 
 Karton::~Karton()
 {
-    if (m_conn) {
+    if (m_conn)
+    {
         virConnectClose(m_conn);
         m_conn = nullptr;
     }
@@ -51,7 +49,8 @@ bool Karton::init()
 
     // Currently set to session, but could also do system for root..
     m_conn = virConnectOpen("qemu:///session");
-    if (!m_conn) {
+    if (!m_conn)
+    {
         qCCritical(KARTON_DEBUG) << "Failed to connect to hypervisor";
         return false;
     }
@@ -71,8 +70,10 @@ int Karton::searchDomain(const virDomainPtr domainPtr)
 {
     QString searchUuid = Domain::uuidString(domainPtr);
 
-    for (int i = 0; i < m_domains.size(); i++) {
-        if (searchUuid == m_domains[i]->config()->uuid()) {
+    for (int i = 0; i < m_domains.size(); i++)
+    {
+        if (searchUuid == m_domains[i]->config()->uuid())
+        {
             return i;
         }
     }
@@ -82,7 +83,8 @@ int Karton::searchDomain(const virDomainPtr domainPtr)
 // get string from state
 static QString domainStateString(unsigned int state)
 {
-    switch (state) {
+    switch (state)
+    {
     case VIR_DOMAIN_NOSTATE:
         return i18n("no state");
     case VIR_DOMAIN_RUNNING:
@@ -108,7 +110,8 @@ static QString domainStateString(unsigned int state)
 void Karton::refreshDomain(const virDomainPtr domainPtr)
 {
     int index = searchDomain(domainPtr);
-    if (index == -1) {
+    if (index == -1)
+    {
         qCWarning(KARTON_DEBUG) << "Domain not found in list.";
         return;
     }
@@ -143,7 +146,8 @@ void Karton::refreshDomainList()
     int numDomains = virConnectListAllDomains(m_conn, &domains, 0);
     m_domains.reserve(numDomains);
 
-    for (int i = 0; i < numDomains; i++) {
+    for (int i = 0; i < numDomains; i++)
+    {
         // getting all information from libvirt
         virDomainPtr domainPtr = domains[i];
         const char *name = virDomainGetName(domains[i]);
@@ -159,26 +163,25 @@ void Karton::refreshDomainList()
         QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
         QString virtualDiskPath = QStringLiteral("%1/libvirt/images/%2.qcow2").arg(dataDir).arg(QString::fromUtf8(name));
         // WIP better to use .xml parsing instead of hardcode
-        
+
         int autoFlag = 0;
         virDomainGetAutostart(domains[i], &autoFlag);
         bool autostart = (autoFlag != 0);
-        
 
         // TODO READ EVERYTHING FROM XML?
         DomainConfig *config = new DomainConfig(QString::fromUtf8(name),
-                                    Domain::uuidString(domainPtr),
-                                    QString::fromUtf8("WIP"), // osvariant
-                                    isActive,
-                                    state,
-                                    maxRam,
-                                    ramUsage,
-                                    cpus,
-                                    0, // disk storage
-                                    QStringLiteral("WIP ISO DISK PATH"),
-                                    virtualDiskPath,
-                                    autostart,
-                                    this);
+                                                Domain::uuidString(domainPtr),
+                                                QString::fromUtf8("WIP"), // osvariant
+                                                isActive,
+                                                state,
+                                                maxRam,
+                                                ramUsage,
+                                                cpus,
+                                                0, // disk storage
+                                                QStringLiteral("WIP ISO DISK PATH"),
+                                                virtualDiskPath,
+                                                autostart,
+                                                this);
         Domain *domain = new Domain(domainPtr,
                                     config,
                                     this);
@@ -197,7 +200,8 @@ bool Karton::startDomain(const Domain *domain)
     virDomainPtr domainPtr = domain->domainPtr();
     int result = virDomainCreate(domainPtr);
 
-    if (result < 0) {
+    if (result < 0)
+    {
         QString errorMsg = QStringLiteral("Failed to start domain: %1").arg(domain->config()->name());
         qCWarning(KARTON_DEBUG) << errorMsg;
         Q_EMIT errorOccurred(errorMsg);
@@ -213,9 +217,11 @@ bool Karton::stopDomain(const Domain *domain)
     virDomainInfo info;
     virDomainGetInfo(domainPtr, &info);
 
-    if (info.state == VIR_DOMAIN_RUNNING || info.state == VIR_DOMAIN_PAUSED) {
+    if (info.state == VIR_DOMAIN_RUNNING || info.state == VIR_DOMAIN_PAUSED)
+    {
         int result = virDomainShutdown(domainPtr);
-        if (result < 0) {
+        if (result < 0)
+        {
             QString errorMsg = QStringLiteral("Failed to stop domain: %1").arg(domain->config()->name());
             qCWarning(KARTON_DEBUG) << errorMsg;
             Q_EMIT errorOccurred(errorMsg);
@@ -232,7 +238,8 @@ bool Karton::forceStopDomain(const Domain *domain)
     virDomainPtr domainPtr = domain->domainPtr();
     int result = virDomainDestroy(domainPtr);
 
-    if (result < 0) {
+    if (result < 0)
+    {
         QString errorMsg = QStringLiteral("Failed to force-stop domain: %1").arg(domain->config()->name());
         qCWarning(KARTON_DEBUG) << errorMsg;
         Q_EMIT errorOccurred(errorMsg);
@@ -247,15 +254,18 @@ bool Karton::deleteDomain(const Domain *domain, const bool deleteDisk)
     virDomainPtr domainPtr = domain->domainPtr();
     int result = virDomainUndefine(domainPtr);
 
-    if (result < 0) {
+    if (result < 0)
+    {
         QString errorMsg = QStringLiteral("Failed to undefine domain: %1").arg(domain->config()->name());
         qCWarning(KARTON_DEBUG) << errorMsg;
         Q_EMIT errorOccurred(errorMsg);
         return false;
     }
-    
-    if (deleteDisk) {
-        if (!QFile::remove(domain->config()->isoDiskPath())) {
+
+    if (deleteDisk)
+    {
+        if (!QFile::remove(domain->config()->isoDiskPath()))
+        {
             QString errorMsg = QStringLiteral("Failed to delete disk file: %1").arg(domain->config()->isoDiskPath());
             qCWarning(KARTON_DEBUG) << errorMsg;
             Q_EMIT errorOccurred(errorMsg);
@@ -265,9 +275,11 @@ bool Karton::deleteDomain(const Domain *domain, const bool deleteDisk)
     }
 
     qCInfo(KARTON_DEBUG) << "Successfully undefined domain:" << domain->config()->name();
-    
-    if (deleteDisk) {
-        if (!QFile::remove(domain->config()->isoDiskPath())) {
+
+    if (deleteDisk)
+    {
+        if (!QFile::remove(domain->config()->isoDiskPath()))
+        {
             QString errorMsg = i18nc("%1 is path of the disk file", "Failed to delete disk file: %1", domain->config()->isoDiskPath());
             qCWarning(KARTON_DEBUG) << errorMsg;
             Q_EMIT errorOccurred(errorMsg);
@@ -286,30 +298,42 @@ bool Karton::viewDomain(const Domain *domain)
 }
 
 bool Karton::createDomain(const QString &name,
-                                const QString &osVariant, 
-                                const float memoryGB, 
-                                const float storageGB, 
-                                const QString &isoDiskPath,
-                                const int cpus)
+                          const QString &osVariant,
+                          const float memoryGB,
+                          const float storageGB,
+                          const QString &isoDiskPath,
+                          const int cpus)
 {
     QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
     DomainInstaller installer;
-    const DomainConfig *config = new DomainConfig (
-                                name,
-                                QString::fromUtf8("WIP"), // uuid
-                                osVariant,
-                                false,
-                                QString::fromUtf8("WIP"), // state
-                                memoryGB,
-                                memoryGB, // current usage
-                                cpus,
-                                storageGB, // max
-                                isoDiskPath,
-                                QStringLiteral("%1/libvirt/images/%2.qcow2").arg(dataDir).arg(name), 
-                                // virt disk path 
-                                false,
-                                this);
-    installer.configureXML(m_conn, config);
+    const DomainConfig *config = new DomainConfig(
+        name,
+        QString::fromUtf8("WIP"), // uuid
+        osVariant,
+        false,
+        QString::fromUtf8("WIP"), // state
+        memoryGB,
+        memoryGB, // current usage
+        cpus,
+        storageGB, // max
+        isoDiskPath,
+        QStringLiteral("%1/libvirt/images/%2.qcow2").arg(dataDir).arg(name),
+        // virt disk path
+        false,
+        this);
+    if (!runCommand(QStringLiteral("qemu-img create -f qcow2 %1 %2G")
+                        .arg(config->virtualDiskPath())
+                        .arg(config->maxDiskStorage())))
+    {
+        return false;
+    }
+    if (!installer.setupDomain(m_conn, config))
+    {
+        qCInfo(KARTON_DEBUG) << "Failed to setup domain...";
+        return false;
+    }
+    // TODO: Use storage pool (poolcreate, gen pool xml, parse xml for location)
+    refreshDomainList();
     return true;
 }
 
@@ -318,10 +342,10 @@ bool Karton::runCommand(const QString &command)
 {
     qCDebug(KARTON_DEBUG) << "Running Command:" << command;
     auto process = new QProcess(this);
-    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [this, process](int exitCode, QProcess::ExitStatus) {
+    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [this, process](int exitCode, QProcess::ExitStatus)
+            {
         QString output = QString::fromLocal8Bit(process->readAllStandardOutput());
-        Q_EMIT commandFinished(exitCode, output);
-    });
+        Q_EMIT commandFinished(exitCode, output); });
     process->startCommand(command);
 
     return process->waitForStarted();

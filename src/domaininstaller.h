@@ -25,7 +25,8 @@ public:
     // OsinfoDb *initOsDb();
 
     // const gchar *getOsIdFromDisk(QString diskPath, OsinfoDb *db);
-    void configureXML(virConnectPtr conn, const DomainConfig *config);
+    virDomainPtr setupDomain(virConnectPtr conn, const DomainConfig *config);
+    QString generateXML(virConnectPtr conn, const DomainConfig *config);
     void addDiskDevices(QDomDocument &doc, // extract to disk obj
                         QDomElement &parent,
                         const QString &diskType,

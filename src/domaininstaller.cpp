@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QMap>
 #include <QUuid>
+#include <QString>
 #include "karton_debug.h"
 
 #include "osinfoconfig.h"
@@ -58,20 +59,30 @@ DomainInstaller::~DomainInstaller()
 //     return idG;
 
 // }
-
-void DomainInstaller::configureXML(virConnectPtr conn,
-                                   const DomainConfig *config)
+virDomainPtr DomainInstaller::setupDomain(virConnectPtr conn,
+                                  const DomainConfig *config)
 {
-    OsinfoConfig osinfo;
-    const QString os_id = osinfo.getOsIdFromDisk(config->isoDiskPath());
-    const QString os_arch = osinfo.getOsArchitecture(os_id);
-
+    QString xmlString = generateXML(conn, config);
     QFile domainXML(QStringLiteral("/home/dereklin/Downloads/%1_config.xml").arg(config->name()));
     if (!domainXML.open(QFile::WriteOnly | QFile::Text))
     {
         qCCritical(KARTON_DEBUG) << "qfile opened in another instance or something??";
-        return;
+        return NULL;
     }
+    QTextStream xmlContent(&domainXML);
+    xmlContent << xmlString;
+    domainXML.close();
+    
+    virDomainPtr dom = virDomainDefineXML(conn, xmlString.toStdString().c_str());
+    // create?
+    return dom;
+}
+QString DomainInstaller::generateXML(virConnectPtr conn,
+                                  const DomainConfig *config)
+{
+    OsinfoConfig osinfo;
+    const QString os_id = osinfo.getOsIdFromDisk(config->isoDiskPath());
+    const QString os_arch = osinfo.getOsArchitecture(os_id);
 
     QDomDocument document;
     QDomElement root = document.createElement(QStringLiteral("domain"));
@@ -204,6 +215,7 @@ void DomainInstaller::configureXML(virConnectPtr conn,
                    true);
 
     // devices->network interfaces element
+    // Userspace connection https://libvirt.org/formatdomain.html#id44
     addNetworkInterfaceDevices(document,
                                devices,
                                QStringLiteral("network"),
@@ -238,11 +250,10 @@ void DomainInstaller::configureXML(virConnectPtr conn,
 
     // write to file
     QString xmlString = document.toString(4);
-    QTextStream xmlContent(&domainXML);
-    xmlContent << xmlString;
+    
     qCInfo(KARTON_DEBUG).noquote() << "Generated XML:";
     qCInfo(KARTON_DEBUG).noquote() << xmlString;
-    domainXML.close();
+    return xmlString;
 }
 
 void DomainInstaller::addDiskDevices(QDomDocument &doc, // extract to disk obj
