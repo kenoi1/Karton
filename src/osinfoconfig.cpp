@@ -50,6 +50,28 @@ bool OsinfoConfig::initOsDb()
     return true;
 }
 
+QString OsinfoConfig::getOsIdFromShortId(const QString &short_id) {
+    if (!m_db) {
+        qCCritical(KARTON_DEBUG) << "OS database not initialized";
+        return QString();
+    }
+    OsinfoOsList *osList = osinfo_db_get_os_list(m_db);
+    gint len = osinfo_list_get_length(OSINFO_LIST(osList));
+
+    for (gint i = 0; i < len; i++)
+    {
+        OsinfoOs *os = OSINFO_OS(osinfo_list_get_nth(OSINFO_LIST(osList), i));
+        const gchar *id = osinfo_product_get_short_id(OSINFO_PRODUCT(os));
+        qCInfo(KARTON_DEBUG) << "OS SHORT ID:" << id;
+        if (id == short_id.toStdString()){
+            return QString::fromUtf8(osinfo_entity_get_id(OSINFO_ENTITY(os)));
+        }
+    }
+    qCCritical(KARTON_DEBUG) << "Could not find os by short_id.";
+    return QString();
+
+}
+
 QString OsinfoConfig::getOsIdFromDisk(const QString &isoDiskPath)
 {
     if (!m_db) {
@@ -98,15 +120,17 @@ QString OsinfoConfig::getOsArchitecture(const QString &osId)
         return QString();
     }
     
-    OsinfoFirmware *osFirmware = OSINFO_FIRMWARE(libosinfo_os);
-    if (!osFirmware) {
-        qCWarning(KARTON_DEBUG) << "OS has no firmware info:" << osId;
+    OsinfoImageList *images = osinfo_os_get_image_list(libosinfo_os);
+    
+    if (!images) {
+        qCWarning(KARTON_DEBUG) << "OS has no image info:" << osId;
         return QString();
     }
     
-    const gchar *os_arch = osinfo_firmware_get_architecture(osFirmware);
-    if (!os_arch) {
-        return QString::fromUtf8("x86_64"); // default to x86_64 if not specified
+    const gchar *os_arch = osinfo_image_get_architecture(OSINFO_IMAGE(osinfo_list_get_nth(OSINFO_LIST(images), 0)));
+    if (!os_arch) {// the above code is cursed WIP
+        qCWarning(KARTON_DEBUG) << "could not get architecture, default to x86_64.";
+        return QString::fromUtf8("x86_64");
     }
     
     return QString::fromUtf8(os_arch);

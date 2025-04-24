@@ -7,9 +7,11 @@
 #include <QDomElement>
 #include <QDomText>
 #include <QFile>
+#include <QDir>
 #include <QMap>
 #include <QUuid>
 #include <QString>
+#include <QStandardPaths>
 #include "karton_debug.h"
 
 #include "osinfoconfig.h"
@@ -62,8 +64,16 @@ DomainInstaller::~DomainInstaller()
 virDomainPtr DomainInstaller::setupDomain(virConnectPtr conn,
                                   const DomainConfig *config)
 {
+    
     QString xmlString = generateXML(conn, config);
-    QFile domainXML(QStringLiteral("/home/dereklin/Downloads/%1_config.xml").arg(config->name()));
+    QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+    QString path = QStringLiteral("%1/libvirt/kde-karton").arg(dataDir);
+    qCCritical(KARTON_DEBUG) << "does this run?" << path;
+    QDir dir(path);
+    if (!dir.mkpath(QStringLiteral("config"))) {
+        qCCritical(KARTON_DEBUG) << "Already Exists / Failed: " << path;
+    }
+    QFile domainXML(QStringLiteral("%1/config/%2_config.xml").arg(path).arg(config->name()));
     if (!domainXML.open(QFile::WriteOnly | QFile::Text))
     {
         qCCritical(KARTON_DEBUG) << "qfile opened in another instance or something??";
@@ -81,8 +91,13 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
                                   const DomainConfig *config)
 {
     OsinfoConfig osinfo;
-    const QString os_id = osinfo.getOsIdFromDisk(config->isoDiskPath());
-    const QString os_arch = osinfo.getOsArchitecture(os_id);
+    // const QString osId = osinfo.getOsIdFromDisk(config->isoDiskPath());f
+    const QString osId = osinfo.getOsIdFromShortId(config->osVariant());
+    const QString osArchitecture = osinfo.getOsArchitecture(osId);
+    if (osArchitecture.isEmpty()) {
+        qCCritical(KARTON_DEBUG) << "Warning no specified architecture!";
+        return QString();
+    }
 
     QDomDocument document;
     QDomElement root = document.createElement(QStringLiteral("domain"));
@@ -110,7 +125,7 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     // QDomElement libosinfo = document.createElement(QStringLiteral("libosinfo:libosinfo"));
     // metadata.appendChild(libosinfo);
     // QMap<QString, QString> idMap;
-    // idMap[QStringLiteral("id")] = os_id;
+    // idMap[QStringLiteral("id")] = osId;
     // addElementWithAttributes(document, libosinfo, QStringLiteral("libosinfo:os"), QStringLiteral(""), idMap);
     // // qCInfo(KARTON_DEBUG) << "OS ID:" << id;
 
@@ -129,7 +144,7 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     QDomElement os = document.createElement(QStringLiteral("os"));
     root.appendChild(os);
     QMap<QString, QString> type;
-    type[QStringLiteral("arch")] = os_arch;                  // parameterize
+    type[QStringLiteral("arch")] = osArchitecture;                  // parameterize
     type[QStringLiteral("machine")] = QStringLiteral("q35"); // parameterize using libos?
     // QEMU machine types see: https://people.redhat.com/~cohuck/2022/01/05/qemu-machine-types.html
     addElementWithAttributes(document, os, QStringLiteral("type"), QStringLiteral("hvm"), type);
@@ -218,8 +233,8 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     // Userspace connection https://libvirt.org/formatdomain.html#id44
     addNetworkInterfaceDevices(document,
                                devices,
-                               QStringLiteral("network"),
-                               QStringLiteral("default"),
+                               QStringLiteral("bridge"),
+                               QStringLiteral("br0"),
                                QStringLiteral("virtio"));
 
     // devices->graphics element
@@ -296,7 +311,7 @@ void DomainInstaller::addDiskDevices(QDomDocument &doc, // extract to disk obj
 void DomainInstaller::addNetworkInterfaceDevices(QDomDocument &doc,
                                                  QDomElement &parent,
                                                  const QString &interfaceType,
-                                                 const QString &network,
+                                                 const QString &sourceInterfaceType,
                                                  const QString &modelType)
 {
     QDomElement interface = doc.createElement(QStringLiteral("interface"));
@@ -304,7 +319,7 @@ void DomainInstaller::addNetworkInterfaceDevices(QDomDocument &doc,
     interface.setAttribute(QStringLiteral("type"), interfaceType);
 
     QMap<QString, QString> source;
-    source[QStringLiteral("network")] = network;
+    source[interfaceType] = sourceInterfaceType;
     addElementWithAttributes(doc, interface, QStringLiteral("source"), QStringLiteral(""), source);
 
     QMap<QString, QString> model;
@@ -401,7 +416,7 @@ void DomainInstaller::addElementWithAttributes(QDomDocument &doc,
 //     OsinfoDb *db = osinfo_loader_get_db(loader);
 //     osinfo_loader_process_default_path(loader, NULL);
 
-//     // const gchar *os_id = "";
+//     // const gchar *osId = "";
 //     // OsinfoOS *os = osinfo_db_get_os(db, )
 
 //     // OsinfoDeviceList *devices = osinfo_db_get_device_list(db);

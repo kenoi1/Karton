@@ -40,7 +40,7 @@ public:
     void addNetworkInterfaceDevices(QDomDocument &doc,
                                     QDomElement &parent,
                                     const QString &interfaceType,
-                                    const QString &network,
+                                    const QString &sourceInterfaceType,
                                     const QString &modelType);
     void addGraphicsDevices(QDomDocument &doc,
                             QDomElement &parent,

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
+
 #pragma once
 
 #include <QString>
@@ -16,7 +19,7 @@ class OsinfoConfig : public QObject
 public:
     OsinfoConfig();
     ~OsinfoConfig();
-
+    QString getOsIdFromShortId(const QString &short_id);
     QString getOsIdFromDisk(const QString &isoDiskPath);
     QString getOsArchitecture(const QString &osId);
 
