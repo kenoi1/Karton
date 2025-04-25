@@ -10,19 +10,22 @@ class DomainConfig : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(QString hypervisorType READ hypervisorType CONSTANT)
+    Q_PROPERTY(int indexId READ indexId CONSTANT)
     Q_PROPERTY(QString name READ name CONSTANT)
     Q_PROPERTY(QString uuid READ uuid CONSTANT)
-    Q_PROPERTY(QString osVariant READ osVariant CONSTANT)
+    Q_PROPERTY(QString shortOsId READ shortOsId CONSTANT)
+    Q_PROPERTY(QString osId READ osId CONSTANT)
     Q_PROPERTY(bool isActive READ isActive NOTIFY isActiveChanged)
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)
     Q_PROPERTY(int maxRam READ maxRam CONSTANT)
     Q_PROPERTY(int ramUsage READ ramUsage NOTIFY ramUsageChanged)
     Q_PROPERTY(int cpus READ cpus CONSTANT)
     Q_PROPERTY(int maxDiskStorage READ maxDiskStorage CONSTANT)
+    Q_PROPERTY(QString xmlConfigPath READ xmlConfigPath CONSTANT)
     Q_PROPERTY(QString isoDiskPath READ isoDiskPath CONSTANT)
     Q_PROPERTY(QString virtualDiskPath READ virtualDiskPath CONSTANT)
     Q_PROPERTY(bool autostart READ autostart NOTIFY autostartChanged)
-
 
 Q_SIGNALS:
     // void nameChanged(const QString &name);
@@ -37,21 +40,33 @@ Q_SIGNALS:
 
 public:
     explicit DomainConfig(QObject *parent = nullptr);
-    explicit DomainConfig(const QString &name,
-                    const QString &uuid,
-                    const QString &osVariant,
-                    bool isActive,
-                    QString state,
-                    int maxRam,
-                    int ramUsage,
-                    int cpus,
-                    int maxDiskStorage,
-                    const QString &isoDiskPath,
-                    const QString &virtualDiskPath,
-                    bool autostart,
-                    QObject *parent = nullptr);
+    explicit DomainConfig(const QString &hypervisorType,
+                          int indexId,
+                          const QString &name,
+                          const QString &uuid,
+                          const QString &shortOsId,
+                          const QString &osId,
+                          bool isActive,
+                          QString state,
+                          int maxRam,
+                          int ramUsage,
+                          int cpus,
+                          int maxDiskStorage,
+                          const QString &xmlConfigPath,
+                          const QString &isoDiskPath,
+                          const QString &virtualDiskPath,
+                          bool autostart,
+                          QObject *parent = nullptr);
 
     // getters
+    [[nodiscard]] QString hypervisorType() const
+    {
+        return m_hypervisorType;
+    }
+    [[nodiscard]] int indexId() const
+    {
+        return m_indexId;
+    }
     [[nodiscard]] QString name() const
     {
         return m_name;
@@ -60,9 +75,13 @@ public:
     {
         return m_uuid;
     }
-    [[nodiscard]] QString osVariant() const
+    [[nodiscard]] QString shortOsId() const
     {
-        return m_osVariant;
+        return m_shortOsId;
+    }
+    [[nodiscard]] QString osId() const
+    {
+        return m_osId;
     }
     [[nodiscard]] bool isActive() const
     {
@@ -88,6 +107,10 @@ public:
     {
         return m_maxDiskStorage;
     }
+    [[nodiscard]] QString xmlConfigPath() const
+    {
+        return m_xmlConfigPath;
+    }
     [[nodiscard]] QString isoDiskPath() const
     {
         return m_isoDiskPath;
@@ -107,15 +130,19 @@ public:
     void setAutostart(bool autostart);
 
 private:
+    QString m_hypervisorType;
+    int m_indexId;
     QString m_name;
     QString m_uuid;
-    QString m_osVariant;
+    QString m_shortOsId;
+    QString m_osId;
     bool m_isActive;
     QString m_state;
     int m_maxRam;
     int m_ramUsage;
     int m_cpus;
     int m_maxDiskStorage;
+    QString m_xmlConfigPath;
     QString m_isoDiskPath;
     QString m_virtualDiskPath;
     bool m_autostart;

@@ -27,7 +27,7 @@ Kirigami.ScrollablePage {
     ]
     function createDomainWrapper(config) {
         Karton.createDomain(config.name,
-                            config.osVariant,
+                            config.shortOsId,
                             config.memoryGB,
                             config.storageGB,
                             config.diskImage,
@@ -46,7 +46,7 @@ Kirigami.ScrollablePage {
                     onTriggered: {
                         const domainConfig = {
                             name: nameField.text.trim(),
-                            osVariant: osField.text.trim(),
+                            shortOsId: osField.text.trim(),
                             diskImage: diskImageField.text,
                             memoryGB: memorySpinBox.value,
                             storageGB: storageSpinBox.value,
@@ -224,7 +224,17 @@ Kirigami.ScrollablePage {
                         Controls.Label {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: "Disk: " + domain.config.virtualDiskPath
+                            text: "Virtual Disk: " + domain.config.virtualDiskPath
+                        }
+                        Controls.Label {
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            text: "ISO Disk: " + domain.config.isoDiskPath
+                        }
+                        Controls.Label {
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            text: "XML Path: " + domain.config.xmlConfigPath
                         }
                         Controls.Label {
                             Layout.fillWidth: true

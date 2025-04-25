@@ -20,8 +20,8 @@ This project is still in early development and will likely break existing virtua
 - Kirigami Addons
 - Qt Quick Controls
 - libvirt
-- virt-install
 - virt-viewer
+- libosinfo
 
 ## Installation
 ```

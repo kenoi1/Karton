@@ -57,12 +57,13 @@ virDomainPtr DomainInstaller::setupDomain(virConnectPtr conn,
     // create?
     return dom;
 }
+
 QString DomainInstaller::generateXML(virConnectPtr conn,
                                      const DomainConfig *config)
 {
     OsinfoConfig osinfo;
     // const QString osId = osinfo.getOsIdFromDisk(config->isoDiskPath());f
-    const QString osId = osinfo.getOsIdFromShortId(config->osVariant());
+    const QString osId = osinfo.getOsIdFromShortId(config->shortOsId());
     const QString osArchitecture = osinfo.getOsArchitecture(osId);
     if (osArchitecture.isEmpty())
     {
@@ -92,19 +93,26 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     QDomElement metadata = document.createElement(QStringLiteral("metadata"));
     root.appendChild(metadata);
 
-    // // LIBOSINFO
-    // QDomElement libosinfo = document.createElement(QStringLiteral("libosinfo:libosinfo"));
-    // metadata.appendChild(libosinfo);
-    // QMap<QString, QString> idMap;
-    // idMap[QStringLiteral("id")] = osId;
-    // addElementWithAttributes(document, libosinfo, QStringLiteral("libosinfo:os"), QStringLiteral(""), idMap);
-    // // qCInfo(KARTON_DEBUG) << "OS ID:" << id;
+    // metadata->Karton
+    QDomElement karton = document.createElement(QStringLiteral("karton:kde-karton"));
+    karton.setAttribute(QStringLiteral("xmlns:karton"), QStringLiteral("https://invent.kde.org/sitter/karton"));
+    metadata.appendChild(karton);
+
+    // metadata->LIBOSINFO
+    QDomElement libosinfo = document.createElement(QStringLiteral("libosinfo:libosinfo"));
+    libosinfo.setAttribute(QStringLiteral("xmlns:libosinfo"), QStringLiteral("http://libosinfo.org/xmlns/libvirt/domain/1.0"));
+    metadata.appendChild(libosinfo);
+    QMap<QString, QString> libosinfoId;
+    libosinfoId[QStringLiteral("id")] = osId;
+    libosinfoId[QStringLiteral("short-id")] = config->shortOsId();
+    addElementWithAttributes(document, libosinfo, QStringLiteral("libosinfo:os"), QStringLiteral(""), libosinfoId);
+    // qCInfo(KARTON_DEBUG) << "OS ID:" << id;
 
     // memory element
     QMap<QString, QString> mem;
-    mem[QStringLiteral("unit")] = QStringLiteral("GiB"); // change to gb?
-    addElementWithAttributes(document, root, QStringLiteral("memory"), QString::number(config->maxRam()), mem);
-    addElementWithAttributes(document, root, QStringLiteral("currentMemory"), QString::number(config->maxRam()), mem);
+    mem[QStringLiteral("unit")] = QStringLiteral("MiB");
+    addElementWithAttributes(document, root, QStringLiteral("memory"), QString::number(config->maxRam() * 1024), mem); // GB->MB
+    addElementWithAttributes(document, root, QStringLiteral("currentMemory"), QString::number(config->maxRam() * 1024), mem);
 
     // vpu element
     QMap<QString, QString> vcpu;
@@ -115,7 +123,7 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     QDomElement os = document.createElement(QStringLiteral("os"));
     root.appendChild(os);
     QMap<QString, QString> type;
-    type[QStringLiteral("arch")] = osArchitecture;           // parameterize
+    type[QStringLiteral("arch")] = osArchitecture;
     type[QStringLiteral("machine")] = QStringLiteral("q35"); // parameterize using libos?
     // QEMU machine types see: https://people.redhat.com/~cohuck/2022/01/05/qemu-machine-types.html
     addElementWithAttributes(document, os, QStringLiteral("type"), QStringLiteral("hvm"), type);
@@ -377,10 +385,14 @@ void DomainInstaller::addConsoleDevices(QDomDocument &doc,
 QString DomainInstaller::genMac()
 {
     int i, tp;
-
     srand(time(NULL) + getpid());
     QString s;
-    for (i = 0; i < 6; i++)
+    
+    tp = rand() % 256; // first sig. bit as unicast
+    tp &= 0xFE;  
+    s += QString::asprintf("%s%X:", tp < 16 ? "0" : "", tp);
+    
+    for (i = 1; i < 6; i++)
     {
         tp = rand() % 256;
         s += QString::asprintf("%s%X%s", tp < 16 ? "0" : "", tp, i < 5 ? ":" : "");

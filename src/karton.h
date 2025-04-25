@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QProcess>
 #include <libvirt/libvirt.h>
+#include <QXmlStreamReader>
 
 class LibvirtMonitor;
 
@@ -32,11 +33,11 @@ public Q_SLOTS:
     Q_INVOKABLE bool viewDomain(const Domain *domain);
     Q_INVOKABLE bool forceStopDomain(const Domain *domain);
     Q_INVOKABLE bool createDomain(const QString &name,
-                                const QString &osVariant, 
-                                const float memoryGB, 
-                                const float storageGB, 
-                                const QString &isoDiskPath, 
-                                const int cpus);
+                                  const QString &shortOsId,
+                                  const float memoryGB,
+                                  const float storageGB,
+                                  const QString &isoDiskPath,
+                                  const int cpus);
     Q_INVOKABLE bool deleteDomain(const Domain *domain, const bool deleteDisk);
 
 Q_SIGNALS:

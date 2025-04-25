@@ -5,6 +5,7 @@
 #include "domain.h"
 #include "domainconfig.h"
 #include "libvirtmonitor.h"
+#include "domainxmlreader.h"
 
 #include "karton_debug.h"
 #include <KLocalizedString>
@@ -13,10 +14,9 @@
 #include <QStandardPaths>
 
 #include <libvirt/libvirt.h>
-#include <QDomDocument>
 #include <QFile>
-#include <QTextStream>
-#include <QUuid>
+#include <QDir>
+#include <QXmlStreamReader>
 
 Karton::Karton(QObject *parent)
     : QObject(parent), m_conn(nullptr), m_monitor(nullptr)
@@ -160,26 +160,34 @@ void Karton::refreshDomainList()
         int maxRam = domInfo.maxMem / (1024 * 1024); // convert to MB
         int ramUsage = domInfo.memory / (1024 * 1024);
         int cpus = domInfo.nrVirtCpu;
+
+
         QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
-        QString virtualDiskPath = QStringLiteral("%1/libvirt/images/%2.qcow2").arg(dataDir).arg(QString::fromUtf8(name));
-        // WIP better to use .xml parsing instead of hardcode
+        QString xmlConfigPath = QStringLiteral("%1/libvirt/kde-karton/config/%2_config.xml").arg(dataDir).arg(QString::fromUtf8(name));
+        qCInfo(KARTON_DEBUG) << xmlConfigPath;
+        
+        DomainXmlReader *reader = new DomainXmlReader(xmlConfigPath);
 
         int autoFlag = 0;
         virDomainGetAutostart(domains[i], &autoFlag);
         bool autostart = (autoFlag != 0);
 
         // TODO READ EVERYTHING FROM XML?
-        DomainConfig *config = new DomainConfig(QString::fromUtf8(name),
+        DomainConfig *config = new DomainConfig(reader->xmlInfo.hypervisorType,
+                                                reader->xmlInfo.indexId,
+                                                QString::fromUtf8(name),
                                                 Domain::uuidString(domainPtr),
-                                                QString::fromUtf8("WIP"), // osvariant
+                                                reader->xmlInfo.shortOsId,
+                                                reader->xmlInfo.osId,
                                                 isActive,
                                                 state,
                                                 maxRam,
                                                 ramUsage,
                                                 cpus,
                                                 0, // disk storage
-                                                QStringLiteral("WIP ISO DISK PATH"),
-                                                virtualDiskPath,
+                                                xmlConfigPath,
+                                                reader->xmlInfo.isoDiskPath,
+                                                reader->xmlInfo.virtualDiskPath,
                                                 autostart,
                                                 this);
         Domain *domain = new Domain(domainPtr,
@@ -298,32 +306,43 @@ bool Karton::viewDomain(const Domain *domain)
 }
 
 bool Karton::createDomain(const QString &name,
-                          const QString &osVariant,
+                          const QString &shortOsId,
                           const float memoryGB,
                           const float storageGB,
                           const QString &isoDiskPath,
                           const int cpus)
 {
     QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+    QString path = QStringLiteral("%1/libvirt").arg(dataDir);
+    QDir dir(path);
+    if (!dir.mkpath(QStringLiteral("images"))) // generate path to virtual disk folder if not there
+    {
+        qCCritical(KARTON_DEBUG) << "Already Exists / Failed: " << path;
+    }
     DomainInstaller installer;
     const DomainConfig *config = new DomainConfig(
+        QString(), // hypervisortype
+        0,         // index
         name,
-        QString::fromUtf8("WIP"), // uuid
-        osVariant,
-        false,
-        QString::fromUtf8("WIP"), // state
-        memoryGB,
-        memoryGB, // current usage
-        cpus,
+        QString(), // uuid
+        shortOsId, // short id
+        QString(), // id
+        false,     // isActive
+        QString(), // state
+        memoryGB,  // max ram
+        memoryGB,  // current usage
+        cpus,      // vcpus
         storageGB, // max
+        QStringLiteral("%1/karton-kde/config/%2.xml").arg(path).arg(name),
         isoDiskPath,
-        QStringLiteral("%1/libvirt/images/%2.qcow2").arg(dataDir).arg(name),
+        QStringLiteral("%1/images/%2.qcow2").arg(path).arg(name),
         // virt disk path
         false,
         this);
+
     if (!runCommand(QStringLiteral("qemu-img create -f qcow2 %1 %2G")
                         .arg(config->virtualDiskPath())
-                        .arg(config->maxDiskStorage())))
+                        .arg(config->maxDiskStorage()))) // NEED TO CREATE PATH
     {
         return false;
     }

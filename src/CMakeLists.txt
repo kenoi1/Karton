@@ -20,6 +20,7 @@ target_sources(karton
     libvirteventloop.cpp
     domaininstaller.cpp
     osinfoconfig.cpp
+    domainxmlreader.cpp
 )
 
 ecm_target_qml_sources(karton
