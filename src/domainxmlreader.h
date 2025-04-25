@@ -22,6 +22,7 @@ public:
         QString shortOsId;
         QString isoDiskPath;
         QString virtualDiskPath;
+        int maxDiskStorage;
     };
     XmlInfo readConfigFile(const QString &path);
     QString retrieveDiskPath(QXmlStreamReader &xmlReader, QXmlStreamReader::TokenType token);

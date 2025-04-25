@@ -37,7 +37,6 @@ virDomainPtr DomainInstaller::setupDomain(virConnectPtr conn,
     QString xmlString = generateXML(conn, config);
     QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
     QString path = QStringLiteral("%1/libvirt/kde-karton").arg(dataDir);
-    qCCritical(KARTON_DEBUG) << "does this run?" << path;
     QDir dir(path);
     if (!dir.mkpath(QStringLiteral("config")))
     {
@@ -97,6 +96,9 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     QDomElement karton = document.createElement(QStringLiteral("karton:kde-karton"));
     karton.setAttribute(QStringLiteral("xmlns:karton"), QStringLiteral("https://invent.kde.org/sitter/karton"));
     metadata.appendChild(karton);
+    QMap<QString, QString> kartonData;
+    kartonData[QStringLiteral("maxDiskStorage")] = QString::number(config->maxDiskStorage() * 1024);
+    addElementWithAttributes(document, karton, QStringLiteral("karton:data"), QStringLiteral(""), kartonData);
 
     // metadata->LIBOSINFO
     QDomElement libosinfo = document.createElement(QStringLiteral("libosinfo:libosinfo"));

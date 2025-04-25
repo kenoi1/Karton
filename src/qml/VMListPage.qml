@@ -231,16 +231,6 @@ Kirigami.ScrollablePage {
                             wrapMode: Text.WordWrap
                             text: "ISO Disk: " + domain.config.isoDiskPath
                         }
-                        Controls.Label {
-                            Layout.fillWidth: true
-                            wrapMode: Text.WordWrap
-                            text: "XML Path: " + domain.config.xmlConfigPath
-                        }
-                        Controls.Label {
-                            Layout.fillWidth: true
-                            wrapMode: Text.WordWrap
-                            text: "Autostart: " + (domain.config.autostart ? "Enabled" : "Disabled")
-                        }
 
                     }
                     ColumnLayout{

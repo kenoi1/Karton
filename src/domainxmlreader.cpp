@@ -22,6 +22,7 @@ DomainXmlReader::XmlInfo DomainXmlReader::readConfigFile(const QString &path)
     int indexId = 0;
     QString osId = QString();
     QString shortOsId = QString();
+    int maxDiskStorage = 0;
 
     QFile xmlFile(path);
     if (!xmlFile.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -35,18 +36,21 @@ DomainXmlReader::XmlInfo DomainXmlReader::readConfigFile(const QString &path)
     {
         QXmlStreamReader::TokenType token = xmlReader.readNext();
         if (token == QXmlStreamReader::StartElement)
-        {   
+        {
             // qCInfo(KARTON_DEBUG) << xmlReader.name();
             if (xmlReader.name() == QStringLiteral("domain"))
             {
                 indexId = xmlReader.attributes().value("id").toInt();
                 hypervisorType = xmlReader.attributes().value("type").toString();
             }
-            if (xmlReader.name() == QStringLiteral("os") 
-            && xmlReader.attributes().hasAttribute(QStringLiteral("id")))
+            if (xmlReader.name() == QStringLiteral("os") && xmlReader.attributes().hasAttribute(QStringLiteral("id")))
             {
                 osId = xmlReader.attributes().value("id").toString();
                 shortOsId = xmlReader.attributes().value("short-id").toString();
+            }
+            if (xmlReader.name() == QStringLiteral("data") && xmlReader.attributes().hasAttribute(QStringLiteral("maxDiskStorage")))
+            {
+                maxDiskStorage = xmlReader.attributes().value("maxDiskStorage").toInt();
             }
             if (xmlReader.name() == QStringLiteral("disk") && xmlReader.attributes().hasAttribute(QStringLiteral("device")))
             {
@@ -68,19 +72,20 @@ DomainXmlReader::XmlInfo DomainXmlReader::readConfigFile(const QString &path)
     }
     xmlFile.close();
 
-    qCInfo(KARTON_DEBUG) << "ISO:" << isoDiskPath;
-    qCInfo(KARTON_DEBUG) << "Disk:" << virtualDiskPath;
-    qCInfo(KARTON_DEBUG) << "type:" << hypervisorType;
-    qCInfo(KARTON_DEBUG) << "id:" << indexId;
-    qCInfo(KARTON_DEBUG) << "id:" << osId;
-    qCInfo(KARTON_DEBUG) << "short:" << shortOsId;
+    // qCInfo(KARTON_DEBUG) << "ISO:" << isoDiskPath;
+    // qCInfo(KARTON_DEBUG) << "Disk:" << virtualDiskPath;
+    // qCInfo(KARTON_DEBUG) << "type:" << hypervisorType;
+    // qCInfo(KARTON_DEBUG) << "id index:" << indexId;
+    // qCInfo(KARTON_DEBUG) << "id:" << osId;
+    // qCInfo(KARTON_DEBUG) << "short:" << maxDiskStorage;
     return {
         hypervisorType,
         indexId,
         osId,
         shortOsId,
         isoDiskPath,
-        virtualDiskPath};
+        virtualDiskPath,
+        maxDiskStorage};
 
     // populate
 }

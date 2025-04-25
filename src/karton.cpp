@@ -164,7 +164,7 @@ void Karton::refreshDomainList()
 
         QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
         QString xmlConfigPath = QStringLiteral("%1/libvirt/kde-karton/config/%2_config.xml").arg(dataDir).arg(QString::fromUtf8(name));
-        qCInfo(KARTON_DEBUG) << xmlConfigPath;
+        // qCInfo(KARTON_DEBUG) << xmlConfigPath;
         
         DomainXmlReader *reader = new DomainXmlReader(xmlConfigPath);
 
@@ -184,7 +184,7 @@ void Karton::refreshDomainList()
                                                 maxRam,
                                                 ramUsage,
                                                 cpus,
-                                                0, // disk storage
+                                                reader->xmlInfo.maxDiskStorage / 1024, // disk storage
                                                 xmlConfigPath,
                                                 reader->xmlInfo.isoDiskPath,
                                                 reader->xmlInfo.virtualDiskPath,
@@ -270,25 +270,13 @@ bool Karton::deleteDomain(const Domain *domain, const bool deleteDisk)
         return false;
     }
 
-    if (deleteDisk)
-    {
-        if (!QFile::remove(domain->config()->isoDiskPath()))
-        {
-            QString errorMsg = QStringLiteral("Failed to delete disk file: %1").arg(domain->config()->isoDiskPath());
-            qCWarning(KARTON_DEBUG) << errorMsg;
-            Q_EMIT errorOccurred(errorMsg);
-            return false;
-        }
-        qCInfo(KARTON_DEBUG) << "Successfully deleted disk image of " << domain->config()->name();
-    }
-
     qCInfo(KARTON_DEBUG) << "Successfully undefined domain:" << domain->config()->name();
 
     if (deleteDisk)
     {
-        if (!QFile::remove(domain->config()->isoDiskPath()))
+        if (!QFile::remove(domain->config()->virtualDiskPath()))
         {
-            QString errorMsg = i18nc("%1 is path of the disk file", "Failed to delete disk file: %1", domain->config()->isoDiskPath());
+            QString errorMsg = i18nc("%1 is path of the disk file", "Failed to delete disk file: %1", domain->config()->virtualDiskPath());
             qCWarning(KARTON_DEBUG) << errorMsg;
             Q_EMIT errorOccurred(errorMsg);
             return false;
