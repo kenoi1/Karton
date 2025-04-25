@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 #include "karton.h"
+#include "osinfoconfig.h"
 #include "karton_debug.h"
 #include "vmlistmodel.h"
 #include "domainconfig.h"
@@ -37,11 +38,13 @@ int main(int argc, char *argv[])
     qCInfo(KARTON_DEBUG) << "Hello! Starting Karton...";
     Karton karton;
     auto model = new VMModel(&karton);
+    OsinfoConfig osInfo;
 
     model->refreshAllDomains();
 
     engine.rootContext()->setContextProperty(QStringLiteral("Karton"), &karton);
     engine.rootContext()->setContextProperty(QStringLiteral("VMModel"), model);
+    engine.rootContext()->setContextProperty(QStringLiteral("Osinfo"), &osInfo);
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.loadFromModule("org.kde.karton", "Main");

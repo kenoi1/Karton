@@ -20,7 +20,8 @@ public:
     OsinfoConfig();
     ~OsinfoConfig();
     QString getOsIdFromShortId(const QString &short_id);
-    QString getOsIdFromDisk(const QString &isoDiskPath);
+    Q_INVOKABLE QString getShortIdFromId(const QString &id);
+    Q_INVOKABLE QString getOsIdFromDisk(const QString &isoDiskPath);
     QString getOsArchitecture(const QString &osId);
 
 private:

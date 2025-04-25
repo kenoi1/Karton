@@ -25,6 +25,7 @@ Kirigami.ScrollablePage {
             }
         }
     ]
+
     function createDomainWrapper(config) {
         Karton.createDomain(config.name,
                             config.shortOsId,
@@ -33,6 +34,11 @@ Kirigami.ScrollablePage {
                             config.diskImage,
                             config.cpu);
     }
+
+    function getShortOsId(path) {
+        return Osinfo.getShortIdFromId(Osinfo.getOsIdFromDisk(path));
+    }
+    
     Kirigami.Dialog {
         id: addDomainDialog
         title: i18n("Add New Virtual Machine")
@@ -83,19 +89,21 @@ Kirigami.ScrollablePage {
                         regularExpression: /^[^\s]+$/ 
                     }
                 }
-                FormCard.FormTextFieldDelegate {
-                    id: osField
-                    label: i18nc("@label:textbox", "OS Variant:")
-                    placeholderText: i18n( "Enter an OS Variant")
-                    Layout.fillWidth: true
-                }
                 
                 Dialogs.FileDialog {
                     id: fileDialog
                     title: i18nc("@label:filedialog", "Choose a disk image")
                     nameFilters: ["Disk images (*.qcow2 *.raw *.img *.iso *.vdi *.vmdk)"]
-                      onAccepted: {
-                    diskImageField.text = fileDialog.selectedFile.toString().replace("file://", "")
+                    onAccepted: {
+                        diskImageField.text = fileDialog.selectedFile.toString().replace("file://", "");
+                        let shortOsId = getShortOsId(diskImageField.text);
+                        if (shortOsId == "") {
+                            osField.placeholderText = i18n("Could not identify the OS. Please enter an OS Variant.");
+                            osField.text = "";
+                        } else {
+                            osField.text = shortOsId;
+                            osField.placeholderText = i18n( "Enter an OS Variant");
+                        }
                     }
                 }
                 FormCard.FormDelegateSeparator {}
@@ -119,6 +127,12 @@ Kirigami.ScrollablePage {
                             }
                         }
                     }
+                }
+                FormCard.FormTextFieldDelegate {
+                    id: osField
+                    label: i18nc("@label:textbox", "OS Variant:")
+                    placeholderText: i18n( "Enter an OS Variant")
+                    Layout.fillWidth: true
                 }
             }
 
