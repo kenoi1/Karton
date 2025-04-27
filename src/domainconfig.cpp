@@ -96,9 +96,3 @@ void DomainConfig::setAutostart(bool autostart)
         Q_EMIT autostartChanged(autostart);
     }
 }
-
-// QVariantMap DomainConfig::serialize() const
-// {
-//     QVariantMap map;
-
-// }

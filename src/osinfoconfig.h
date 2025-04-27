@@ -6,7 +6,7 @@
 #include <QString>
 #include <QObject>
 
-extern "C" // due to undefined references to libosinfo stuff
+extern "C" // due to undefined references to libosinfo content
 {
 #include <osinfo/osinfo.h>
 }

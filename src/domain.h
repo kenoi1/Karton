@@ -12,14 +12,9 @@ class Domain : public QObject
 {
     Q_OBJECT
 
-    // Q_PROPERTY(QString name READ name CONSTANT)
-    // Q_PROPERTY(QString uuid READ uuid CONSTANT)
     Q_PROPERTY(bool isActive READ isActive NOTIFY isActiveChanged)
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)
-    // Q_PROPERTY(int maxRam READ maxRam CONSTANT)
     Q_PROPERTY(int ramUsage READ ramUsage NOTIFY ramUsageChanged)
-    // Q_PROPERTY(int cpus READ cpus CONSTANT)
-    // Q_PROPERTY(QString diskPath READ diskPath CONSTANT)
     Q_PROPERTY(bool autostart READ autostart NOTIFY autostartChanged)
     Q_PROPERTY(DomainConfig *config READ config CONSTANT)
 

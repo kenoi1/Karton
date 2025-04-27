@@ -164,7 +164,6 @@ void Karton::refreshDomainList()
 
         QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
         QString xmlConfigPath = QStringLiteral("%1/libvirt/kde-karton/config/%2_config.xml").arg(dataDir).arg(QString::fromUtf8(name));
-        // qCInfo(KARTON_DEBUG) << xmlConfigPath;
         
         DomainXmlReader *reader = new DomainXmlReader(xmlConfigPath);
 
@@ -172,7 +171,7 @@ void Karton::refreshDomainList()
         virDomainGetAutostart(domains[i], &autoFlag);
         bool autostart = (autoFlag != 0);
 
-        // TODO READ EVERYTHING FROM XML?
+        // TODO: add more fields to xml metadata and parse.
         DomainConfig *config = new DomainConfig(reader->xmlInfo.hypervisorType,
                                                 reader->xmlInfo.indexId,
                                                 QString::fromUtf8(name),
@@ -303,7 +302,7 @@ bool Karton::createDomain(const QString &name,
     QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
     QString path = QStringLiteral("%1/libvirt").arg(dataDir);
     QDir dir(path);
-    if (!dir.mkpath(QStringLiteral("images"))) // generate path to virtual disk folder if not there
+    if (!dir.mkpath(QStringLiteral("images"))) // generates path to virtual disk folder if not there
     {
         qCCritical(KARTON_DEBUG) << "Already Exists / Failed: " << path;
     }
@@ -330,7 +329,7 @@ bool Karton::createDomain(const QString &name,
 
     if (!runCommand(QStringLiteral("qemu-img create -f qcow2 %1 %2G")
                         .arg(config->virtualDiskPath())
-                        .arg(config->maxDiskStorage()))) // NEED TO CREATE PATH
+                        .arg(config->maxDiskStorage())))
     {
         return false;
     }

@@ -17,11 +17,6 @@
 #include "osinfoconfig.h"
 #include <glib.h>
 
-// extern "C" // due to undefined references to libosinfo stuff
-// {
-// #include <osinfo/osinfo.h>
-// }
-
 DomainInstaller::DomainInstaller()
 {
 }
@@ -382,7 +377,7 @@ void DomainInstaller::addConsoleDevices(QDomDocument &doc,
     console.setAttribute(QStringLiteral("type"), type);
 }
 
-// TEMPORARILY GENERATE RANDOM MAC ADDRESS (unicast)...
+// Temporarily: generate a random mac address (in unicast)...
 // eventually generate a network domain.
 QString DomainInstaller::genMac()
 {
@@ -390,7 +385,7 @@ QString DomainInstaller::genMac()
     srand(time(NULL) + getpid());
     QString s;
     
-    tp = rand() % 256; // first sig. bit as unicast
+    tp = rand() % 256; // first significant bit as unicast
     tp &= 0xFE;  
     s += QString::asprintf("%s%X:", tp < 16 ? "0" : "", tp);
     

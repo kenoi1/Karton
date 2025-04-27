@@ -28,14 +28,9 @@ class DomainConfig : public QObject
     Q_PROPERTY(bool autostart READ autostart NOTIFY autostartChanged)
 
 Q_SIGNALS:
-    // void nameChanged(const QString &name);
-    // void uuidChanged(const QString &uuid);
     void isActiveChanged(bool active);
     void stateChanged(const QString &state);
-    // void maxRamChanged(int maxRam);
     void ramUsageChanged(int ramUsage);
-    // void cpusChanged(int cpus);
-    // void diskPathChanged(const QString &diskPath);
     void autostartChanged(bool autostart);
 
 public:

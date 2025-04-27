@@ -5,6 +5,7 @@
 #include "domainxmlreader.h"
 #include <QFile>
 #include <QXmlStreamReader>
+
 DomainXmlReader::DomainXmlReader(const QString &path)
 {
     xmlInfo = readConfigFile(path);
@@ -37,7 +38,7 @@ DomainXmlReader::XmlInfo DomainXmlReader::readConfigFile(const QString &path)
         QXmlStreamReader::TokenType token = xmlReader.readNext();
         if (token == QXmlStreamReader::StartElement)
         {
-            // qCInfo(KARTON_DEBUG) << xmlReader.name();
+            // qCInfo(KARTON_DEBUG) << xmlReader.name(); // prints each element
             if (xmlReader.name() == QStringLiteral("domain"))
             {
                 indexId = xmlReader.attributes().value("id").toInt();
@@ -72,12 +73,13 @@ DomainXmlReader::XmlInfo DomainXmlReader::readConfigFile(const QString &path)
     }
     xmlFile.close();
 
-    // qCInfo(KARTON_DEBUG) << "ISO:" << isoDiskPath;
+    // qCInfo(KARTON_DEBUG) << "ISO:" << isoDiskPath; // check if populates correctly
     // qCInfo(KARTON_DEBUG) << "Disk:" << virtualDiskPath;
     // qCInfo(KARTON_DEBUG) << "type:" << hypervisorType;
     // qCInfo(KARTON_DEBUG) << "id index:" << indexId;
     // qCInfo(KARTON_DEBUG) << "id:" << osId;
     // qCInfo(KARTON_DEBUG) << "short:" << maxDiskStorage;
+    
     return {
         hypervisorType,
         indexId,
@@ -86,8 +88,6 @@ DomainXmlReader::XmlInfo DomainXmlReader::readConfigFile(const QString &path)
         isoDiskPath,
         virtualDiskPath,
         maxDiskStorage};
-
-    // populate
 }
 
 QString DomainXmlReader::retrieveDiskPath(QXmlStreamReader &xmlReader, QXmlStreamReader::TokenType token)

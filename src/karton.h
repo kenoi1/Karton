@@ -27,7 +27,6 @@ public:
 
 public Q_SLOTS:
     Q_INVOKABLE bool runCommand(const QString &command);
-    // bool startDomain(const virDomainPtr domain);
     Q_INVOKABLE bool startDomain(const Domain *domain);
     Q_INVOKABLE bool stopDomain(const Domain *domain);
     Q_INVOKABLE bool viewDomain(const Domain *domain);

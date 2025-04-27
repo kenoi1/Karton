@@ -5,7 +5,7 @@
 #include "karton_debug.h"
 #include <QString>
 
-extern "C" // due to undefined references to libosinfo stuff
+extern "C" // due to undefined references to libosinfo contents
 {
 #include <osinfo/osinfo.h>
 }
