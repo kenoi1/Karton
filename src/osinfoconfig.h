@@ -3,20 +3,18 @@
 
 #pragma once
 
-#include <QString>
 #include <QObject>
+#include <QString>
 
-extern "C" // due to undefined references to libosinfo content
+extern "C"  // due to undefined references to libosinfo content
 {
 #include <osinfo/osinfo.h>
 }
 
-
-class OsinfoConfig : public QObject
-{
+class OsinfoConfig : public QObject {
     Q_OBJECT
 
-public:
+   public:
     OsinfoConfig();
     ~OsinfoConfig();
     QString getOsIdFromShortId(const QString &short_id);
@@ -24,9 +22,9 @@ public:
     Q_INVOKABLE QString getOsIdFromDisk(const QString &isoDiskPath);
     QString getOsArchitecture(const QString &osId);
 
-private:
+   private:
     bool initOsDb();
-    
+
     OsinfoLoader *m_loader;
-    OsinfoDb *m_db;    
+    OsinfoDb *m_db;
 };

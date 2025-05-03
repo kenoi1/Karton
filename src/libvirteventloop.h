@@ -4,14 +4,13 @@
 
 #include <QThread>
 
-class LibvirtEventLoop : public QObject
-{
+class LibvirtEventLoop : public QObject {
     Q_OBJECT
 
-public:
+   public:
     explicit LibvirtEventLoop(QObject *parent = nullptr);
     void run();
 
-Q_SIGNALS:
+   Q_SIGNALS:
     void result(bool);
 };

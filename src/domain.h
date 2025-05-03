@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include <QString>
-#include <QObject>
-#include <libvirt/libvirt.h>
 #include <domainconfig.h>
+#include <libvirt/libvirt.h>
 
-class Domain : public QObject
-{
+#include <QObject>
+#include <QString>
+
+class Domain : public QObject {
     Q_OBJECT
 
     Q_PROPERTY(bool isActive READ isActive NOTIFY isActiveChanged)
@@ -18,14 +18,14 @@ class Domain : public QObject
     Q_PROPERTY(bool autostart READ autostart NOTIFY autostartChanged)
     Q_PROPERTY(DomainConfig *config READ config CONSTANT)
 
-Q_SIGNALS:
+   Q_SIGNALS:
     void isActiveChanged(const bool active);
     void stateChanged(const QString &state);
     void ramUsageChanged(const int usage);
     void autostartChanged(const bool autostart);
     void configChanged();
 
-public:
+   public:
     Domain(QObject *parent = nullptr);
     Domain(const virDomainPtr domainPtr,
            DomainConfig *config,
@@ -33,30 +33,24 @@ public:
     ~Domain();
 
     // getters
-    [[nodiscard]] virDomainPtr domainPtr() const
-    {
+    [[nodiscard]] virDomainPtr domainPtr() const {
         return m_domainPtr;
     }
 
-    [[nodiscard]] DomainConfig *config() const
-    {
+    [[nodiscard]] DomainConfig *config() const {
         return m_config;
     }
 
-    [[nodiscard]] bool isActive() const
-    {
+    [[nodiscard]] bool isActive() const {
         return m_config->isActive();
     }
-    [[nodiscard]] int ramUsage() const
-    {
+    [[nodiscard]] int ramUsage() const {
         return m_config->ramUsage();
     }
-    [[nodiscard]] QString state() const
-    {
+    [[nodiscard]] QString state() const {
         return m_config->state();
     }
-    [[nodiscard]] bool autostart() const
-    {
+    [[nodiscard]] bool autostart() const {
         return m_config->autostart();
     }
 
@@ -67,7 +61,7 @@ public:
     static QString uuidString(virDomainPtr domainPtr);
     Q_DISABLE_COPY_MOVE(Domain)
 
-private:
+   private:
     virDomainPtr m_domainPtr;
     DomainConfig *m_config;
 };

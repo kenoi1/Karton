@@ -3,23 +3,23 @@
 
 #pragma once
 
-#include <QObject>
-#include <QDomDocument>
-#include <QDomElement>
 #include <domainconfig.h>
 #include <libvirt/libvirt.h>
 
-class DomainInstaller : public QObject
-{
+#include <QDomDocument>
+#include <QDomElement>
+#include <QObject>
+
+class DomainInstaller : public QObject {
     Q_OBJECT
 
-public:
+   public:
     DomainInstaller();
     ~DomainInstaller();
 
     virDomainPtr setupDomain(virConnectPtr conn, const DomainConfig *config);
     QString generateXML(virConnectPtr conn, const DomainConfig *config);
-    void addDiskDevices(QDomDocument &doc, // extract to disk obj
+    void addDiskDevices(QDomDocument &doc,  // extract to disk obj
                         QDomElement &parent,
                         const QString &diskType,
                         const QString &device,

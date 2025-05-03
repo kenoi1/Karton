@@ -3,20 +3,21 @@
 
 #pragma once
 
-#include "domain.h"
-#include "karton.h"
+#include <libvirt/libvirt.h>
+
 #include <QAbstractListModel>
 #include <QByteArray>
 #include <QHash>
 #include <QModelIndex>
 #include <QObject>
 #include <QVariant>
-#include <libvirt/libvirt.h>
 
-class VMModel : public QAbstractListModel
-{
+#include "domain.h"
+#include "karton.h"
+
+class VMModel : public QAbstractListModel {
     Q_OBJECT
-public:
+   public:
     enum Roles {
         DomainRole = Qt::UserRole
     };
@@ -29,10 +30,10 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     void updateDomains(const virDomainPtr domainPtr = nullptr);
     void refreshAllDomains();
-private Q_SLOTS:
+   private Q_SLOTS:
     void onDomainsChanged(const virDomainPtr domainPtr, int event, int detail);
 
-private:
+   private:
     QList<Domain *> m_datas;
     Karton *m_karton;
 };

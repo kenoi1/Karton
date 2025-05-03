@@ -3,26 +3,26 @@
 
 #pragma once
 
-#include <QObject>
-#include <QString>
 #include <libvirt/libvirt.h>
 
-class LibvirtMonitor : public QObject
-{
+#include <QObject>
+#include <QString>
+
+class LibvirtMonitor : public QObject {
     Q_OBJECT
 
-private:
+   private:
     virConnectPtr m_conn;
     int m_callbackId;
 
-public:
+   public:
     LibvirtMonitor(QObject *parent = nullptr, virConnectPtr conn = nullptr);
     ~LibvirtMonitor();
     Q_DISABLE_COPY_MOVE(LibvirtMonitor)
 
-Q_SIGNALS:
+   Q_SIGNALS:
     void domainStateChanged(const virDomainPtr domainPtr, int event, int detail);
 
-private:
+   private:
     static int domainEventCallback(virConnectPtr conn, virDomainPtr dom, int event, int detail, void *opaque);
 };

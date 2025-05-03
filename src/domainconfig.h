@@ -3,11 +3,10 @@
 
 #pragma once
 
-#include <QString>
 #include <QObject>
+#include <QString>
 
-class DomainConfig : public QObject
-{
+class DomainConfig : public QObject {
     Q_OBJECT
 
     Q_PROPERTY(QString hypervisorType READ hypervisorType CONSTANT)
@@ -27,13 +26,13 @@ class DomainConfig : public QObject
     Q_PROPERTY(QString virtualDiskPath READ virtualDiskPath CONSTANT)
     Q_PROPERTY(bool autostart READ autostart NOTIFY autostartChanged)
 
-Q_SIGNALS:
+   Q_SIGNALS:
     void isActiveChanged(bool active);
     void stateChanged(const QString &state);
     void ramUsageChanged(int ramUsage);
     void autostartChanged(bool autostart);
 
-public:
+   public:
     explicit DomainConfig(QObject *parent = nullptr);
     explicit DomainConfig(const QString &hypervisorType,
                           int indexId,
@@ -54,68 +53,52 @@ public:
                           QObject *parent = nullptr);
 
     // getters
-    [[nodiscard]] QString hypervisorType() const
-    {
+    [[nodiscard]] QString hypervisorType() const {
         return m_hypervisorType;
     }
-    [[nodiscard]] int indexId() const
-    {
+    [[nodiscard]] int indexId() const {
         return m_indexId;
     }
-    [[nodiscard]] QString name() const
-    {
+    [[nodiscard]] QString name() const {
         return m_name;
     }
-    [[nodiscard]] QString uuid() const
-    {
+    [[nodiscard]] QString uuid() const {
         return m_uuid;
     }
-    [[nodiscard]] QString shortOsId() const
-    {
+    [[nodiscard]] QString shortOsId() const {
         return m_shortOsId;
     }
-    [[nodiscard]] QString osId() const
-    {
+    [[nodiscard]] QString osId() const {
         return m_osId;
     }
-    [[nodiscard]] bool isActive() const
-    {
+    [[nodiscard]] bool isActive() const {
         return m_isActive;
     }
-    [[nodiscard]] QString state() const
-    {
+    [[nodiscard]] QString state() const {
         return m_state;
     }
-    [[nodiscard]] int maxRam() const
-    {
+    [[nodiscard]] int maxRam() const {
         return m_maxRam;
     }
-    [[nodiscard]] int ramUsage() const
-    {
+    [[nodiscard]] int ramUsage() const {
         return m_ramUsage;
     }
-    [[nodiscard]] int cpus() const
-    {
+    [[nodiscard]] int cpus() const {
         return m_cpus;
     }
-    [[nodiscard]] int maxDiskStorage() const
-    {
+    [[nodiscard]] int maxDiskStorage() const {
         return m_maxDiskStorage;
     }
-    [[nodiscard]] QString xmlConfigPath() const
-    {
+    [[nodiscard]] QString xmlConfigPath() const {
         return m_xmlConfigPath;
     }
-    [[nodiscard]] QString isoDiskPath() const
-    {
+    [[nodiscard]] QString isoDiskPath() const {
         return m_isoDiskPath;
     }
-    [[nodiscard]] QString virtualDiskPath() const
-    {
+    [[nodiscard]] QString virtualDiskPath() const {
         return m_virtualDiskPath;
     }
-    [[nodiscard]] bool autostart() const
-    {
+    [[nodiscard]] bool autostart() const {
         return m_autostart;
     }
 
@@ -124,7 +107,7 @@ public:
     void setRamUsage(int ramUsage);
     void setAutostart(bool autostart);
 
-private:
+   private:
     QString m_hypervisorType;
     int m_indexId;
     QString m_name;

@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 #include "domainconfig.h"
+
 #include <QString>
 
 DomainConfig::DomainConfig(QObject *parent)
@@ -20,8 +21,7 @@ DomainConfig::DomainConfig(QObject *parent)
       m_xmlConfigPath(QStringLiteral("")),
       m_isoDiskPath(QStringLiteral("")),
       m_virtualDiskPath(QStringLiteral("")),
-      m_autostart(false)
-{
+      m_autostart(false) {
 }
 
 DomainConfig::DomainConfig(const QString &hypervisorType,
@@ -57,41 +57,32 @@ DomainConfig::DomainConfig(const QString &hypervisorType,
       m_xmlConfigPath(xmlConfigPath),
       m_isoDiskPath(isoDiskPath),
       m_virtualDiskPath(virtualDiskPath),
-      m_autostart(autostart)
-{
+      m_autostart(autostart) {
 }
 
-void DomainConfig::setActive(bool active)
-{
-    if (m_isActive != active)
-    {
+void DomainConfig::setActive(bool active) {
+    if (m_isActive != active) {
         m_isActive = active;
         Q_EMIT isActiveChanged(active);
     }
 }
 
-void DomainConfig::setState(const QString &state)
-{
-    if (m_state != state)
-    {
+void DomainConfig::setState(const QString &state) {
+    if (m_state != state) {
         m_state = state;
         Q_EMIT stateChanged(state);
     }
 }
 
-void DomainConfig::setRamUsage(int ramUsage)
-{
-    if (m_ramUsage != ramUsage)
-    {
+void DomainConfig::setRamUsage(int ramUsage) {
+    if (m_ramUsage != ramUsage) {
         m_ramUsage = ramUsage;
         Q_EMIT ramUsageChanged(ramUsage);
     }
 }
 
-void DomainConfig::setAutostart(bool autostart)
-{
-    if (m_autostart != autostart)
-    {
+void DomainConfig::setAutostart(bool autostart) {
+    if (m_autostart != autostart) {
         m_autostart = autostart;
         Q_EMIT autostartChanged(autostart);
     }

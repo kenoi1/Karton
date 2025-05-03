@@ -2,11 +2,8 @@
 // SPDX-FileCopyrightText: 2024 Aaron Rainbolt <arraybolt3@gmail.com>
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
-#include "karton.h"
-#include "osinfoconfig.h"
-#include "karton_debug.h"
-#include "vmlistmodel.h"
-#include "domainconfig.h"
+#include <libvirt/libvirt.h>
+
 #include <KIconTheme>
 #include <KLocalizedContext>
 #include <KLocalizedString>
@@ -17,10 +14,15 @@
 #include <QUrl>
 #include <QtQml>
 #include <iostream>
-#include <libvirt/libvirt.h>
 
-int main(int argc, char *argv[])
-{
+#include "domainconfig.h"
+#include "domainviewer.h"
+#include "karton.h"
+#include "karton_debug.h"
+#include "osinfoconfig.h"
+#include "vmlistmodel.h"
+
+int main(int argc, char *argv[]) {
     KIconTheme::initTheme();
     QApplication app(argc, argv);
     KLocalizedString::setApplicationDomain("karton");
@@ -47,6 +49,9 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("Osinfo"), &osInfo);
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
+    qmlRegisterType<DomainViewer>("org.kde.karton", 1, 0, "DomainViewer");
+    qmlRegisterType<Domain>("org.kde.karton", 1, 0, "Domain");
+
     engine.loadFromModule("org.kde.karton", "Main");
 
     if (engine.rootObjects().isEmpty()) {

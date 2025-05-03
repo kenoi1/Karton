@@ -2,26 +2,22 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 #include "vmlistmodel.h"
+
 #include "karton.h"
 #include "karton_debug.h"
 
 VMModel::VMModel(Karton *parent)
-    : QAbstractListModel(parent)
-    , m_karton(parent)
-{
+    : QAbstractListModel(parent), m_karton(parent) {
     connect(m_karton, &Karton::domainsChanged, this, &VMModel::onDomainsChanged);
 }
-int VMModel::rowCount(const QModelIndex &parent) const
-{
+int VMModel::rowCount(const QModelIndex &parent) const {
     return m_datas.size();
 }
 
-VMModel::~VMModel()
-{
+VMModel::~VMModel() {
     m_datas.clear();
 }
-QVariant VMModel::data(const QModelIndex &index, int role) const
-{
+QVariant VMModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid() || index.row() >= m_datas.size()) {
         return {};
     }
@@ -33,19 +29,16 @@ QVariant VMModel::data(const QModelIndex &index, int role) const
     }
     return {};
 }
-QHash<int, QByteArray> VMModel::roleNames() const
-{
+QHash<int, QByteArray> VMModel::roleNames() const {
     return {{DomainRole, "domain"}};
 }
 
-void VMModel::onDomainsChanged(const virDomainPtr domainPtr, int event, int detail)
-{
+void VMModel::onDomainsChanged(const virDomainPtr domainPtr, int event, int detail) {
     if (domainPtr) {
         updateDomains(domainPtr);
     }
 }
-void VMModel::refreshAllDomains()
-{
+void VMModel::refreshAllDomains() {
     qCDebug(KARTON_DEBUG) << "Refreshing all domains.";
     beginResetModel();
     m_datas.clear();
@@ -54,8 +47,7 @@ void VMModel::refreshAllDomains()
     endResetModel();
 }
 
-void VMModel::updateDomains(const virDomainPtr domainPtr)
-{
+void VMModel::updateDomains(const virDomainPtr domainPtr) {
     QString domainUuid = Domain::uuidString(domainPtr);
     qCDebug(KARTON_DEBUG) << "Domain UUID:" << domainUuid;
 
