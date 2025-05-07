@@ -93,7 +93,7 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     metadata.appendChild(karton);
     QMap<QString, QString> kartonData;
     kartonData[QStringLiteral("maxDiskStorage")] = QString::number(config->maxDiskStorage() * 1024);
-    addElementWithAttributes(document, karton, QStringLiteral("karton:data"), QStringLiteral(""), kartonData);
+    addElementWithAttributes(document, karton, QStringLiteral("karton:data"), QString(), kartonData);
 
     // metadata->LIBOSINFO
     QDomElement libosinfo = document.createElement(QStringLiteral("libosinfo:libosinfo"));
@@ -102,7 +102,7 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     QMap<QString, QString> libosinfoId;
     libosinfoId[QStringLiteral("id")] = osId;
     libosinfoId[QStringLiteral("short-id")] = config->shortOsId();
-    addElementWithAttributes(document, libosinfo, QStringLiteral("libosinfo:os"), QStringLiteral(""), libosinfoId);
+    addElementWithAttributes(document, libosinfo, QStringLiteral("libosinfo:os"), QString(), libosinfoId);
     // qCInfo(KARTON_DEBUG) << "OS ID:" << id;
 
     // memory element
@@ -128,8 +128,8 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     boot1[QStringLiteral("dev")] = QStringLiteral("cdrom");
     QMap<QString, QString> boot2;
     boot2[QStringLiteral("dev")] = QStringLiteral("hd");
-    addElementWithAttributes(document, os, QStringLiteral("boot"), QStringLiteral(""), boot1);
-    addElementWithAttributes(document, os, QStringLiteral("boot"), QStringLiteral(""), boot2);
+    addElementWithAttributes(document, os, QStringLiteral("boot"), QString(), boot1);
+    addElementWithAttributes(document, os, QStringLiteral("boot"), QString(), boot2);
 
     // features element
     QDomElement features = document.createElement(QStringLiteral("features"));
@@ -141,14 +141,14 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
 
     // QMap<QString, QString> vmport; // probably not necessary (was in virt-install)
     // vmport[QStringLiteral("state")] = QStringLiteral("off");
-    // addElementWithAttributes(document, features, QStringLiteral("vmport"), QStringLiteral(""), vmport);
+    // addElementWithAttributes(document, features, QStringLiteral("vmport"), QString(), vmport);
 
     // cpu element
     QMap<QString, QString> cpu;
     cpu[QStringLiteral("mode")] = QStringLiteral("host-passthrough");
     // cpu[QStringLiteral("check")] = QStringLiteral("none");
     // cpu[QStringLiteral("migratable")] = QStringLiteral("on");
-    addElementWithAttributes(document, root, QStringLiteral("cpu"), QStringLiteral(""), cpu);
+    addElementWithAttributes(document, root, QStringLiteral("cpu"), QString(), cpu);
 
     // clock element
     QDomElement clock = document.createElement(QStringLiteral("clock"));
@@ -157,14 +157,14 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     // QMap<QString, QString> timer; // some nodes i saw made by virt-install, maybe use in future?
     // timer[(QStringLiteral("name"))] = QStringLiteral("rtc");
     // timer[(QStringLiteral("tickpolicy"))] = QStringLiteral("catchup");
-    // addElementWithAttributes(document, clock, QStringLiteral("timer"), QStringLiteral(""), timer);
+    // addElementWithAttributes(document, clock, QStringLiteral("timer"), QString(), timer);
     // timer[(QStringLiteral("name"))] = QStringLiteral("pit");
     // timer[(QStringLiteral("tickpolicy"))] = QStringLiteral("delay");
-    // addElementWithAttributes(document, clock, QStringLiteral("timer"), QStringLiteral(""), timer);
+    // addElementWithAttributes(document, clock, QStringLiteral("timer"), QString(), timer);
     // QMap<QString, QString> timer2;
     // timer2[(QStringLiteral("name"))] = QStringLiteral("hept");
     // timer2[(QStringLiteral("present"))] = QStringLiteral("no");
-    // addElementWithAttributes(document, clock, QStringLiteral("timer"), QStringLiteral(""), timer2);
+    // addElementWithAttributes(document, clock, QStringLiteral("timer"), QString(), timer2);
 
     // // off elements
     // addElement(document, root, QStringLiteral("on_poweroff"), QStringLiteral("destroy"));
@@ -176,8 +176,8 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
     // root.appendChild(pm);
     // QMap<QString, QString> suspend;
     // suspend[QStringLiteral("enabled")] = QStringLiteral("no");
-    // addElementWithAttributes(document, pm, QStringLiteral("suspend-to-mem"), QStringLiteral(""), suspend);
-    // addElementWithAttributes(document, pm, QStringLiteral("suspend-to-disk"), QStringLiteral(""), suspend);
+    // addElementWithAttributes(document, pm, QStringLiteral("suspend-to-mem"), QString(), suspend);
+    // addElementWithAttributes(document, pm, QStringLiteral("suspend-to-disk"), QString(), suspend);
 
     // devices element
     QDomElement devices = document.createElement(QStringLiteral("devices"));
@@ -211,7 +211,7 @@ QString DomainInstaller::generateXML(virConnectPtr conn,
                                devices,
                                QStringLiteral("user"),
                                genMac(),
-                               QStringLiteral(""),
+                               QString(),
                                true,
                                QStringLiteral("virtio"));
 
@@ -269,20 +269,20 @@ void DomainInstaller::addDiskDevices(QDomDocument &doc, // extract to disk obj
     QMap<QString, QString> driver;
     driver[QStringLiteral("name")] = name;
     driver[QStringLiteral("type")] = driverType;
-    addElementWithAttributes(doc, disk, QStringLiteral("driver"), QStringLiteral(""), driver);
+    addElementWithAttributes(doc, disk, QStringLiteral("driver"), QString(), driver);
 
     QMap<QString, QString> source;
     source[QStringLiteral("file")] = file;
-    addElementWithAttributes(doc, disk, QStringLiteral("source"), QStringLiteral(""), source);
+    addElementWithAttributes(doc, disk, QStringLiteral("source"), QString(), source);
 
     QMap<QString, QString> target;
     target[QStringLiteral("dev")] = dev;
     target[QStringLiteral("bus")] = bus;
-    addElementWithAttributes(doc, disk, QStringLiteral("target"), QStringLiteral(""), target);
+    addElementWithAttributes(doc, disk, QStringLiteral("target"), QString(), target);
 
     if (readOnly)
     {
-        addElement(doc, disk, QStringLiteral("readonly"), QStringLiteral(""));
+        addElement(doc, disk, QStringLiteral("readonly"), QString());
     }
 }
 
@@ -302,19 +302,19 @@ void DomainInstaller::addNetworkInterfaceDevices(QDomDocument &doc,
     {
         QMap<QString, QString> mac;
         mac[QStringLiteral("address")] = macAddress;
-        addElementWithAttributes(doc, interface, QStringLiteral("mac"), QStringLiteral(""), mac);
+        addElementWithAttributes(doc, interface, QStringLiteral("mac"), QString(), mac);
     }
 
     if (!sourceInterfaceType.isEmpty())
     {
         QMap<QString, QString> source;
         source[interfaceType] = sourceInterfaceType;
-        addElementWithAttributes(doc, interface, QStringLiteral("source"), QStringLiteral(""), source);
+        addElementWithAttributes(doc, interface, QStringLiteral("source"), QString(), source);
     }
 
     QMap<QString, QString> model;
     model[QStringLiteral("type")] = modelType;
-    addElementWithAttributes(doc, interface, QStringLiteral("model"), QStringLiteral(""), model);
+    addElementWithAttributes(doc, interface, QStringLiteral("model"), QString(), model);
     if (hasAddress)
     {
         QMap<QString, QString> address;
@@ -322,7 +322,7 @@ void DomainInstaller::addNetworkInterfaceDevices(QDomDocument &doc,
         address[QStringLiteral("domain")] = QStringLiteral("0x0000");
         address[QStringLiteral("bus")] = QStringLiteral("0x01");
         address[QStringLiteral("slot")] = QStringLiteral("0x00");
-        addElementWithAttributes(doc, interface, QStringLiteral("address"), QStringLiteral(""), address);
+        addElementWithAttributes(doc, interface, QStringLiteral("address"), QString(), address);
     }
 }
 
@@ -339,7 +339,7 @@ void DomainInstaller::addGraphicsDevices(QDomDocument &doc,
 
     QMap<QString, QString> listen;
     listen[QStringLiteral("type")] = listenType;
-    addElementWithAttributes(doc, graphics, QStringLiteral("listen"), QStringLiteral(""), listen);
+    addElementWithAttributes(doc, graphics, QStringLiteral("listen"), QString(), listen);
 }
 
 void DomainInstaller::addVideoDevices(QDomDocument &doc,
@@ -354,7 +354,7 @@ void DomainInstaller::addVideoDevices(QDomDocument &doc,
     model[QStringLiteral("type")] = modelType;
     model[QStringLiteral("heads")] = heads;
     model[QStringLiteral("primary")] = primary;
-    addElementWithAttributes(doc, video, QStringLiteral("model"), QStringLiteral(""), model);
+    addElementWithAttributes(doc, video, QStringLiteral("model"), QString(), model);
 }
 
 void DomainInstaller::addInputDevices(QDomDocument &doc,

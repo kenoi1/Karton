@@ -80,7 +80,7 @@ QString OsinfoConfig::getShortIdFromId(const QString &id)
 {
     OsinfoOs *os = OSINFO_OS(osinfo_db_get_os(m_db, id.toStdString().c_str()));
     if (!os) {
-        return QStringLiteral("");
+        return QString();
     }
     const gchar *idG = osinfo_product_get_short_id(OSINFO_PRODUCT(os));
     QString short_id = QString::fromUtf8(idG);

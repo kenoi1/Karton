@@ -6,20 +6,20 @@
 
 DomainConfig::DomainConfig(QObject *parent)
     : QObject(parent),
-      m_hypervisorType(QStringLiteral("")),
+      m_hypervisorType(QString()),
       m_indexId(0),
-      m_name(QStringLiteral("")),
-      m_uuid(QStringLiteral("")),
-      m_shortOsId(QStringLiteral("")),
-      m_osId(QStringLiteral("")),
+      m_name(QString()),
+      m_uuid(QString()),
+      m_shortOsId(QString()),
+      m_osId(QString()),
       m_isActive(false),
-      m_state(QStringLiteral("")),
+      m_state(QString()),
       m_maxRam(0),
       m_ramUsage(0),
       m_maxDiskStorage(0),
-      m_xmlConfigPath(QStringLiteral("")),
-      m_isoDiskPath(QStringLiteral("")),
-      m_virtualDiskPath(QStringLiteral("")),
+      m_xmlConfigPath(QString()),
+      m_isoDiskPath(QString()),
+      m_virtualDiskPath(QString()),
       m_autostart(false)
 {
 }
