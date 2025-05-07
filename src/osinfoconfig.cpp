@@ -21,6 +21,9 @@ OsinfoConfig::OsinfoConfig()
 
 OsinfoConfig::~OsinfoConfig()
 {
+    if (m_db) {
+        g_object_unref(m_db);
+    }
     if (m_loader) {
         g_object_unref(m_loader);
     }
