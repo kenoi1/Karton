@@ -2,20 +2,22 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 #include "domaininstaller.h"
-#include "domainconfig.h"
+
+#include <glib.h>
+
+#include <QDir>
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomText>
 #include <QFile>
-#include <QDir>
 #include <QMap>
-#include <QUuid>
-#include <QString>
 #include <QStandardPaths>
-#include "karton_debug.h"
+#include <QString>
+#include <QUuid>
 
+#include "domainconfig.h"
+#include "karton_debug.h"
 #include "osinfoconfig.h"
-#include <glib.h>
 
 DomainInstaller::DomainInstaller()
 {
@@ -25,21 +27,17 @@ DomainInstaller::~DomainInstaller()
 {
 }
 
-virDomainPtr DomainInstaller::setupDomain(virConnectPtr conn,
-                                          const DomainConfig *config)
+virDomainPtr DomainInstaller::setupDomain(virConnectPtr conn, const DomainConfig *config)
 {
-
     QString xmlString = generateXML(conn, config);
     QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
     QString path = QStringLiteral("%1/libvirt/kde-karton").arg(dataDir);
     QDir dir(path);
-    if (!dir.mkpath(QStringLiteral("config")))
-    {
+    if (!dir.mkpath(QStringLiteral("config"))) {
         qCCritical(KARTON_DEBUG) << "Already Exists / Failed: " << path;
     }
     QFile domainXML(QStringLiteral("%1/config/%2_config.xml").arg(path).arg(config->name()));
-    if (!domainXML.open(QFile::WriteOnly | QFile::Text))
-    {
+    if (!domainXML.open(QFile::WriteOnly | QFile::Text)) {
         qCCritical(KARTON_DEBUG) << "qfile opened in another instance or something??";
         return NULL;
     }
@@ -52,15 +50,13 @@ virDomainPtr DomainInstaller::setupDomain(virConnectPtr conn,
     return dom;
 }
 
-QString DomainInstaller::generateXML(virConnectPtr conn,
-                                     const DomainConfig *config)
+QString DomainInstaller::generateXML(virConnectPtr conn, const DomainConfig *config)
 {
     OsinfoConfig osinfo;
     // const QString osId = osinfo.getOsIdFromDisk(config->isoDiskPath());f
     const QString osId = osinfo.getOsIdFromShortId(config->shortOsId());
     const QString osArchitecture = osinfo.getOsArchitecture(osId);
-    if (osArchitecture.isEmpty())
-    {
+    if (osArchitecture.isEmpty()) {
         qCCritical(KARTON_DEBUG) << "Warning no specified architecture!";
         return QString();
     }
@@ -260,7 +256,6 @@ void DomainInstaller::addDiskDevices(QDomDocument &doc, // extract to disk obj
                                      const QString &bus,
                                      const bool readOnly)
 {
-
     QDomElement disk = doc.createElement(QStringLiteral("disk"));
     parent.appendChild(disk);
     disk.setAttribute(QStringLiteral("type"), diskType);
@@ -280,8 +275,7 @@ void DomainInstaller::addDiskDevices(QDomDocument &doc, // extract to disk obj
     target[QStringLiteral("bus")] = bus;
     addElementWithAttributes(doc, disk, QStringLiteral("target"), QString(), target);
 
-    if (readOnly)
-    {
+    if (readOnly) {
         addElement(doc, disk, QStringLiteral("readonly"), QString());
     }
 }
@@ -298,15 +292,13 @@ void DomainInstaller::addNetworkInterfaceDevices(QDomDocument &doc,
     parent.appendChild(interface);
     interface.setAttribute(QStringLiteral("type"), interfaceType);
 
-    if (!macAddress.isEmpty())
-    {
+    if (!macAddress.isEmpty()) {
         QMap<QString, QString> mac;
         mac[QStringLiteral("address")] = macAddress;
         addElementWithAttributes(doc, interface, QStringLiteral("mac"), QString(), mac);
     }
 
-    if (!sourceInterfaceType.isEmpty())
-    {
+    if (!sourceInterfaceType.isEmpty()) {
         QMap<QString, QString> source;
         source[interfaceType] = sourceInterfaceType;
         addElementWithAttributes(doc, interface, QStringLiteral("source"), QString(), source);
@@ -315,8 +307,7 @@ void DomainInstaller::addNetworkInterfaceDevices(QDomDocument &doc,
     QMap<QString, QString> model;
     model[QStringLiteral("type")] = modelType;
     addElementWithAttributes(doc, interface, QStringLiteral("model"), QString(), model);
-    if (hasAddress)
-    {
+    if (hasAddress) {
         QMap<QString, QString> address;
         address[QStringLiteral("type")] = QStringLiteral("pci");
         address[QStringLiteral("domain")] = QStringLiteral("0x0000");
@@ -342,11 +333,7 @@ void DomainInstaller::addGraphicsDevices(QDomDocument &doc,
     addElementWithAttributes(doc, graphics, QStringLiteral("listen"), QString(), listen);
 }
 
-void DomainInstaller::addVideoDevices(QDomDocument &doc,
-                                      QDomElement &parent,
-                                      const QString &modelType,
-                                      const QString &heads,
-                                      const QString &primary)
+void DomainInstaller::addVideoDevices(QDomDocument &doc, QDomElement &parent, const QString &modelType, const QString &heads, const QString &primary)
 {
     QDomElement video = doc.createElement(QStringLiteral("video"));
     parent.appendChild(video);
@@ -357,10 +344,7 @@ void DomainInstaller::addVideoDevices(QDomDocument &doc,
     addElementWithAttributes(doc, video, QStringLiteral("model"), QString(), model);
 }
 
-void DomainInstaller::addInputDevices(QDomDocument &doc,
-                                      QDomElement &parent,
-                                      const QString &type,
-                                      const QString &bus)
+void DomainInstaller::addInputDevices(QDomDocument &doc, QDomElement &parent, const QString &type, const QString &bus)
 {
     QDomElement input = doc.createElement(QStringLiteral("input"));
     parent.appendChild(input);
@@ -368,9 +352,7 @@ void DomainInstaller::addInputDevices(QDomDocument &doc,
     input.setAttribute(QStringLiteral("bus"), bus);
 }
 
-void DomainInstaller::addConsoleDevices(QDomDocument &doc,
-                                        QDomElement &parent,
-                                        const QString &type)
+void DomainInstaller::addConsoleDevices(QDomDocument &doc, QDomElement &parent, const QString &type)
 {
     QDomElement console = doc.createElement(QStringLiteral("console"));
     parent.appendChild(console);
@@ -384,13 +366,12 @@ QString DomainInstaller::genMac()
     int i, tp;
     srand(time(NULL) + getpid());
     QString s;
-    
+
     tp = rand() % 256; // first significant bit as unicast
-    tp &= 0xFE;  
+    tp &= 0xFE;
     s += QString::asprintf("%s%X:", tp < 16 ? "0" : "", tp);
-    
-    for (i = 1; i < 6; i++)
-    {
+
+    for (i = 1; i < 6; i++) {
         tp = rand() % 256;
         s += QString::asprintf("%s%X%s", tp < 16 ? "0" : "", tp, i < 5 ? ":" : "");
     }
@@ -399,8 +380,7 @@ QString DomainInstaller::genMac()
 void DomainInstaller::addElement(QDomDocument &doc, QDomElement &parent, const QString &name, const QString &value)
 {
     QDomElement element = doc.createElement(name);
-    if (!value.isEmpty())
-    {
+    if (!value.isEmpty()) {
         QDomText textNode = doc.createTextNode(value);
         element.appendChild(textNode);
     }
@@ -414,14 +394,12 @@ void DomainInstaller::addElementWithAttributes(QDomDocument &doc,
                                                const QMap<QString, QString> &attributes)
 {
     QDomElement element = doc.createElement(name);
-    if (!value.isEmpty())
-    {
+    if (!value.isEmpty()) {
         QDomText textNode = doc.createTextNode(value);
         element.appendChild(textNode);
     }
 
-    for (auto i = attributes.cbegin(), end = attributes.cend(); i != end; i++)
-    {
+    for (auto i = attributes.cbegin(), end = attributes.cend(); i != end; i++) {
         element.setAttribute(i.key(), i.value());
     }
     parent.appendChild(element);

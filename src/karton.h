@@ -2,12 +2,14 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 #pragma once
 
-#include "domain.h"
-#include "domainconfig.h"
+#include <libvirt/libvirt.h>
+
 #include <QObject>
 #include <QProcess>
-#include <libvirt/libvirt.h>
 #include <QXmlStreamReader>
+
+#include "domain.h"
+#include "domainconfig.h"
 
 class LibvirtMonitor;
 

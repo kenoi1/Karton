@@ -3,9 +3,10 @@
 
 #pragma once
 
+#include <libvirt/libvirt.h>
+
 #include <QObject>
 #include <QString>
-#include <libvirt/libvirt.h>
 
 class LibvirtMonitor : public QObject
 {

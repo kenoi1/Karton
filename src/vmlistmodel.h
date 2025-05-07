@@ -3,15 +3,17 @@
 
 #pragma once
 
-#include "domain.h"
-#include "karton.h"
+#include <libvirt/libvirt.h>
+
 #include <QAbstractListModel>
 #include <QByteArray>
 #include <QHash>
 #include <QModelIndex>
 #include <QObject>
 #include <QVariant>
-#include <libvirt/libvirt.h>
+
+#include "domain.h"
+#include "karton.h"
 
 class VMModel : public QAbstractListModel
 {

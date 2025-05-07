@@ -3,10 +3,11 @@
 
 #pragma once
 
-#include <QString>
-#include <QObject>
-#include <libvirt/libvirt.h>
 #include <domainconfig.h>
+#include <libvirt/libvirt.h>
+
+#include <QObject>
+#include <QString>
 
 class Domain : public QObject
 {

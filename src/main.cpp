@@ -2,11 +2,8 @@
 // SPDX-FileCopyrightText: 2024 Aaron Rainbolt <arraybolt3@gmail.com>
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
-#include "karton.h"
-#include "osinfoconfig.h"
-#include "karton_debug.h"
-#include "vmlistmodel.h"
-#include "domainconfig.h"
+#include <libvirt/libvirt.h>
+
 #include <KIconTheme>
 #include <KLocalizedContext>
 #include <KLocalizedString>
@@ -17,7 +14,12 @@
 #include <QUrl>
 #include <QtQml>
 #include <iostream>
-#include <libvirt/libvirt.h>
+
+#include "domainconfig.h"
+#include "karton.h"
+#include "karton_debug.h"
+#include "osinfoconfig.h"
+#include "vmlistmodel.h"
 
 int main(int argc, char *argv[])
 {

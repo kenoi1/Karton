@@ -2,10 +2,13 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 #include "libvirteventloop.h"
-#include "karton_debug.h"
+
+#include <libvirt/libvirt.h>
+
 #include <QTimer>
 #include <iostream>
-#include <libvirt/libvirt.h>
+
+#include "karton_debug.h"
 
 LibvirtEventLoop::LibvirtEventLoop(QObject *parent)
     : QObject(parent)

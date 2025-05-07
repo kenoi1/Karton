@@ -3,11 +3,12 @@
 
 #pragma once
 
-#include <QObject>
-#include <QDomDocument>
-#include <QDomElement>
 #include <domainconfig.h>
 #include <libvirt/libvirt.h>
+
+#include <QDomDocument>
+#include <QDomElement>
+#include <QObject>
 
 class DomainInstaller : public QObject
 {

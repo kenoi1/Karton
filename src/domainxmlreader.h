@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <QString>
 #include <QObject>
+#include <QString>
 #include <QXmlStreamReader>
 
 class DomainXmlReader : public QObject
@@ -14,8 +14,7 @@ class DomainXmlReader : public QObject
 public:
     DomainXmlReader(const QString &path);
     ~DomainXmlReader();
-    struct XmlInfo
-    {
+    struct XmlInfo {
         QString hypervisorType;
         int indexId;
         QString osId;

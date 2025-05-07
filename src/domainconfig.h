@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <QString>
 #include <QObject>
+#include <QString>
 
 class DomainConfig : public QObject
 {

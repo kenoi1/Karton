@@ -47,8 +47,8 @@ install(FILES
     DESTINATION /usr/share/icons/hicolor/scalable/apps
 )
 install(FILES
-	org.kde.karton.desktop
-	DESTINATION /usr/share/applications
+    org.kde.karton.desktop
+    DESTINATION /usr/share/applications
 )
 
 ecm_find_qmlmodule(org.kde.kirigami REQUIRED)

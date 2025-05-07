@@ -3,14 +3,13 @@
 
 #pragma once
 
-#include <QString>
 #include <QObject>
+#include <QString>
 
 extern "C" // due to undefined references to libosinfo content
 {
 #include <osinfo/osinfo.h>
 }
-
 
 class OsinfoConfig : public QObject
 {
@@ -26,7 +25,7 @@ public:
 
 private:
     bool initOsDb();
-    
+
     OsinfoLoader *m_loader;
-    OsinfoDb *m_db;    
+    OsinfoDb *m_db;
 };

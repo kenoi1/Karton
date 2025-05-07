@@ -2,13 +2,16 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 #include "domain.h"
-#include "domainconfig.h"
+
 #include <QString>
 
+#include "domainconfig.h"
 #include "karton_debug.h"
 
 Domain::Domain(QObject *parent)
-    : QObject(parent), m_domainPtr(nullptr), m_config(new DomainConfig(this))
+    : QObject(parent)
+    , m_domainPtr(nullptr)
+    , m_config(new DomainConfig(this))
 {
     connect(m_config, &DomainConfig::isActiveChanged, this, &Domain::isActiveChanged);
     connect(m_config, &DomainConfig::stateChanged, this, &Domain::stateChanged);
@@ -16,10 +19,10 @@ Domain::Domain(QObject *parent)
     connect(m_config, &DomainConfig::autostartChanged, this, &Domain::autostartChanged);
 }
 
-Domain::Domain(const virDomainPtr domainPtr,
-               DomainConfig *config,
-               QObject *parent)
-    : QObject(parent), m_domainPtr(domainPtr), m_config(config)
+Domain::Domain(const virDomainPtr domainPtr, DomainConfig *config, QObject *parent)
+    : QObject(parent)
+    , m_domainPtr(domainPtr)
+    , m_config(config)
 {
     connect(m_config, &DomainConfig::isActiveChanged, this, &Domain::isActiveChanged);
     connect(m_config, &DomainConfig::stateChanged, this, &Domain::stateChanged);
@@ -29,8 +32,7 @@ Domain::Domain(const virDomainPtr domainPtr,
 
 Domain::~Domain()
 {
-    if (m_domainPtr)
-    {
+    if (m_domainPtr) {
         virDomainFree(m_domainPtr);
     }
 }
@@ -61,14 +63,12 @@ void Domain::setAutostart(bool autostart)
 
 QString Domain::uuidString(virDomainPtr domainPtr)
 {
-    if (!domainPtr)
-    {
+    if (!domainPtr) {
         return {};
     }
 
     std::array<char, VIR_UUID_STRING_BUFLEN> uuid = {};
-    if (virDomainGetUUIDString(domainPtr, uuid.data()) == -1)
-    {
+    if (virDomainGetUUIDString(domainPtr, uuid.data()) == -1) {
         qCWarning(KARTON_DEBUG) << "Failed to get UUID string for" << domainPtr;
         return {};
     }

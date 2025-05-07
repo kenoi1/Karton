@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
 #include "vmlistmodel.h"
+
 #include "karton.h"
 #include "karton_debug.h"
 

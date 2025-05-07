@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 
-#include "karton_debug.h"
 #include "domainxmlreader.h"
+
 #include <QFile>
 #include <QXmlStreamReader>
+
+#include "karton_debug.h"
 
 DomainXmlReader::DomainXmlReader(const QString &path)
 {
@@ -26,49 +28,39 @@ DomainXmlReader::XmlInfo DomainXmlReader::readConfigFile(const QString &path)
     int maxDiskStorage = 0;
 
     QFile xmlFile(path);
-    if (!xmlFile.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
+    if (!xmlFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qCInfo(KARTON_DEBUG) << "Could not open reader!!";
         return {};
     }
     QXmlStreamReader xmlReader(&xmlFile);
 
-    while (!xmlReader.atEnd() && !xmlReader.hasError())
-    {
+    while (!xmlReader.atEnd() && !xmlReader.hasError()) {
         QXmlStreamReader::TokenType token = xmlReader.readNext();
-        if (token == QXmlStreamReader::StartElement)
-        {
+        if (token == QXmlStreamReader::StartElement) {
             // qCInfo(KARTON_DEBUG) << xmlReader.name(); // prints each element
-            if (xmlReader.name() == QStringLiteral("domain"))
-            {
+            if (xmlReader.name() == QStringLiteral("domain")) {
                 indexId = xmlReader.attributes().value("id").toInt();
                 hypervisorType = xmlReader.attributes().value("type").toString();
             }
-            if (xmlReader.name() == QStringLiteral("os") && xmlReader.attributes().hasAttribute(QStringLiteral("id")))
-            {
+            if (xmlReader.name() == QStringLiteral("os") && xmlReader.attributes().hasAttribute(QStringLiteral("id"))) {
                 osId = xmlReader.attributes().value("id").toString();
                 shortOsId = xmlReader.attributes().value("short-id").toString();
             }
-            if (xmlReader.name() == QStringLiteral("data") && xmlReader.attributes().hasAttribute(QStringLiteral("maxDiskStorage")))
-            {
+            if (xmlReader.name() == QStringLiteral("data") && xmlReader.attributes().hasAttribute(QStringLiteral("maxDiskStorage"))) {
                 maxDiskStorage = xmlReader.attributes().value("maxDiskStorage").toInt();
             }
-            if (xmlReader.name() == QStringLiteral("disk") && xmlReader.attributes().hasAttribute(QStringLiteral("device")))
-            {
-                if (xmlReader.attributes().value(QStringLiteral("device")) == QStringLiteral("disk"))
-                {
+            if (xmlReader.name() == QStringLiteral("disk") && xmlReader.attributes().hasAttribute(QStringLiteral("device"))) {
+                if (xmlReader.attributes().value(QStringLiteral("device")) == QStringLiteral("disk")) {
                     virtualDiskPath = retrieveDiskPath(xmlReader, token);
                 }
-                if (xmlReader.attributes().value(QStringLiteral("device")) == QStringLiteral("cdrom"))
-                {
+                if (xmlReader.attributes().value(QStringLiteral("device")) == QStringLiteral("cdrom")) {
                     isoDiskPath = retrieveDiskPath(xmlReader, token);
                 }
             }
         }
     }
 
-    if (xmlReader.hasError())
-    {
+    if (xmlReader.hasError()) {
         qCWarning(KARTON_DEBUG) << "XML parsing error:" << xmlReader.errorString();
     }
     xmlFile.close();
@@ -79,7 +71,7 @@ DomainXmlReader::XmlInfo DomainXmlReader::readConfigFile(const QString &path)
     // qCInfo(KARTON_DEBUG) << "id index:" << indexId;
     // qCInfo(KARTON_DEBUG) << "id:" << osId;
     // qCInfo(KARTON_DEBUG) << "short:" << maxDiskStorage;
-    
+
     return {
         hypervisorType,
         indexId,
@@ -92,11 +84,9 @@ DomainXmlReader::XmlInfo DomainXmlReader::readConfigFile(const QString &path)
 
 QString DomainXmlReader::retrieveDiskPath(QXmlStreamReader &xmlReader, QXmlStreamReader::TokenType token)
 {
-    while (!xmlReader.atEnd())
-    {
+    while (!xmlReader.atEnd()) {
         token = xmlReader.readNext();
-        if (token == QXmlStreamReader::StartElement && xmlReader.name() == QStringLiteral("source"))
-        {
+        if (token == QXmlStreamReader::StartElement && xmlReader.name() == QStringLiteral("source")) {
             return xmlReader.attributes().value("file").toString();
         }
     }
