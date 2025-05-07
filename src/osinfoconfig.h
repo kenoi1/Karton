@@ -17,7 +17,7 @@ class OsinfoConfig : public QObject
 
 public:
     OsinfoConfig();
-    ~OsinfoConfig();
+    ~OsinfoConfig() override;
     QString getOsIdFromShortId(const QString &short_id);
     Q_INVOKABLE QString getShortIdFromId(const QString &id);
     Q_INVOKABLE QString getOsIdFromDisk(const QString &isoDiskPath);
