@@ -10,7 +10,7 @@
 
 DomainXmlReader::DomainXmlReader(const QString &path)
 {
-    xmlInfo = readConfigFile(path);
+    m_xmlInfo = readConfigFile(path);
 }
 
 DomainXmlReader::~DomainXmlReader()

@@ -167,21 +167,21 @@ void Karton::refreshDomainList()
         bool autostart = (autoFlag != 0);
 
         // TODO: add more fields to xml metadata and parse.
-        DomainConfig *config = new DomainConfig(reader->xmlInfo.hypervisorType,
-                                                reader->xmlInfo.indexId,
+        DomainConfig *config = new DomainConfig(reader->m_xmlInfo.hypervisorType,
+                                                reader->m_xmlInfo.indexId,
                                                 QString::fromUtf8(name),
                                                 Domain::uuidString(domainPtr),
-                                                reader->xmlInfo.shortOsId,
-                                                reader->xmlInfo.osId,
+                                                reader->m_xmlInfo.shortOsId,
+                                                reader->m_xmlInfo.osId,
                                                 isActive,
                                                 state,
                                                 maxRam,
                                                 ramUsage,
                                                 cpus,
-                                                reader->xmlInfo.maxDiskStorage / 1024, // disk storage
+                                                reader->m_xmlInfo.maxDiskStorage / 1024, // disk storage
                                                 xmlConfigPath,
-                                                reader->xmlInfo.isoDiskPath,
-                                                reader->xmlInfo.virtualDiskPath,
+                                                reader->m_xmlInfo.isoDiskPath,
+                                                reader->m_xmlInfo.virtualDiskPath,
                                                 autostart,
                                                 this);
         Domain *domain = new Domain(domainPtr,

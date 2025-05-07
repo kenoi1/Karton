@@ -12,7 +12,7 @@ extern "C" // due to undefined references to libosinfo contents
 #include <osinfo/osinfo.h>
 }
 
-OsinfoConfig::OsinfoConfig()
+OsinfoConfig::OsinfoConfig(QObject *parent)
     : m_loader(nullptr)
     , m_db(nullptr)
 {
