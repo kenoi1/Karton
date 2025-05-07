@@ -4,6 +4,7 @@
 #include "karton.h"
 #include "domain.h"
 #include "domainconfig.h"
+#include "domaininstaller.h"
 #include "libvirtmonitor.h"
 #include "domainxmlreader.h"
 
@@ -292,12 +293,7 @@ bool Karton::viewDomain(const Domain *domain)
     return runCommand(QStringLiteral("virt-viewer --attach ") + domain->config()->name());
 }
 
-bool Karton::createDomain(const QString &name,
-                          const QString &shortOsId,
-                          const float memoryGB,
-                          const float storageGB,
-                          const QString &isoDiskPath,
-                          const int cpus)
+bool Karton::createDomain(const QVariantMap &config)
 {
     QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
     QString path = QStringLiteral("%1/libvirt").arg(dataDir);
@@ -307,33 +303,33 @@ bool Karton::createDomain(const QString &name,
         qCCritical(KARTON_DEBUG) << "Already Exists / Failed: " << path;
     }
     DomainInstaller installer;
-    const DomainConfig *config = new DomainConfig(
+    const DomainConfig *newConfig = new DomainConfig(
         QString(), // hypervisortype
         0,         // index
-        name,
+        config.value(QStringLiteral("name")).toString(),
         QString(), // uuid
-        shortOsId, // short id
+        config.value(QStringLiteral("shortOsId")).toString(), // short id
         QString(), // id
         false,     // isActive
         QString(), // state
-        memoryGB,  // max ram
-        memoryGB,  // current usage
-        cpus,      // vcpus
-        storageGB, // max
-        QStringLiteral("%1/karton-kde/config/%2.xml").arg(path).arg(name),
-        isoDiskPath,
-        QStringLiteral("%1/images/%2.qcow2").arg(path).arg(name),
+        config.value(QStringLiteral("memoryGB")).toInt(),  // max ram
+        config.value(QStringLiteral("memoryGB")).toInt(),  // current usage
+        config.value(QStringLiteral("cpus")).toInt(),      // vcpus
+        config.value(QStringLiteral("storageGB")).toInt(), // max
+        QDir(path).filePath(QStringLiteral("karton-kde/config/%1.xml").arg(config.value(QStringLiteral("name")).toString())),
+        config.value(QStringLiteral("isoDiskPath")).toString(),
+        QDir(path).filePath(QStringLiteral("images/%1.qcow2").arg(config.value(QStringLiteral("name")).toString())),
         // virt disk path
         false,
         this);
 
     if (!runCommand(QStringLiteral("qemu-img create -f qcow2 %1 %2G")
-                        .arg(config->virtualDiskPath())
-                        .arg(config->maxDiskStorage())))
+                        .arg(newConfig->virtualDiskPath())
+                        .arg(newConfig->maxDiskStorage())))
     {
         return false;
     }
-    if (!installer.setupDomain(m_conn, config))
+    if (!installer.setupDomain(m_conn, newConfig))
     {
         qCInfo(KARTON_DEBUG) << "Failed to setup domain...";
         return false;

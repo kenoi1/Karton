@@ -26,15 +26,6 @@ Kirigami.ScrollablePage {
         }
     ]
 
-    function createDomainWrapper(config) {
-        Karton.createDomain(config.name,
-                            config.shortOsId,
-                            config.memoryGB,
-                            config.storageGB,
-                            config.diskImage,
-                            config.cpu);
-    }
-
     function getShortOsId(path) {
         return Osinfo.getShortIdFromId(Osinfo.getOsIdFromDisk(path));
     }
@@ -53,12 +44,12 @@ Kirigami.ScrollablePage {
                         const domainConfig = {
                             name: nameField.text.trim(),
                             shortOsId: osField.text.trim(),
-                            diskImage: diskImageField.text,
+                            isoDiskPath: diskImageField.text,
                             memoryGB: memorySpinBox.value,
                             storageGB: storageSpinBox.value,
-                            cpu: cpuSpinBox.value
+                            cpus: cpuSpinBox.value
                         };
-                        createDomainWrapper(domainConfig);
+                        Karton.createDomain(domainConfig);
                         showPassiveNotification(i18nc("%1 is the name of the virtual machine", "Created VM: %1", nameField.text));
                         addDomainDialog.close();
                     }
