@@ -25,5 +25,5 @@ public:
     };
     XmlInfo readConfigFile(const QString &path);
     QString retrieveDiskPath(QXmlStreamReader &xmlReader, QXmlStreamReader::TokenType token);
-    XmlInfo xmlInfo;
+    XmlInfo m_xmlInfo;
 };
