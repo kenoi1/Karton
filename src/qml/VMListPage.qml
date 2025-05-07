@@ -88,7 +88,7 @@ Kirigami.ScrollablePage {
                     onAccepted: {
                         diskImageField.text = fileDialog.selectedFile.toString().replace("file://", "");
                         let shortOsId = getShortOsId(diskImageField.text);
-                        if (shortOsId == "") {
+                        if (shortOsId === "") {
                             osField.placeholderText = i18n("Could not identify the OS. Please enter an OS Variant.");
                             osField.text = "";
                         } else {
