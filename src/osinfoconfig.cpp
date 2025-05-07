@@ -94,9 +94,7 @@ QString OsinfoConfig::getOsIdFromDisk(const QString &isoDiskPath)
         qCCritical(KARTON_DEBUG) << "OS database not initialized";
         return QString();
     }
-
-    std::string str = isoDiskPath.toStdString();
-    const gchar *location = str.c_str();
+    const gchar *location = qUtf8Printable(isoDiskPath);
 
     GError *error = NULL;
     OsinfoMedia *osMedia = osinfo_media_create_from_location(location, NULL, &error);
