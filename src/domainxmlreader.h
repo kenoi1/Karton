@@ -16,12 +16,12 @@ public:
     ~DomainXmlReader();
     struct XmlInfo {
         QString hypervisorType;
-        int indexId;
+        int indexId = 0;
         QString osId;
         QString shortOsId;
         QString isoDiskPath;
         QString virtualDiskPath;
-        int maxDiskStorage;
+        int maxDiskStorage = 0;
     };
     XmlInfo readConfigFile(const QString &path);
     QString retrieveDiskPath(QXmlStreamReader &xmlReader, QXmlStreamReader::TokenType token);
