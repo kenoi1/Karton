@@ -28,10 +28,9 @@ Q_SIGNALS:
 
 public:
     Domain(QObject *parent = nullptr);
-    Domain(const virDomainPtr domainPtr,
-           DomainConfig *config,
-           QObject *parent = nullptr);
-    ~Domain();
+    Domain(const virDomainPtr domainPtr, DomainConfig *config, QObject *parent = nullptr);
+    Q_DISABLE_COPY_MOVE(Domain);
+    ~Domain() override;
 
     // getters
     [[nodiscard]] virDomainPtr domainPtr() const
@@ -66,7 +65,6 @@ public:
     void setRamUsage(int ramUsage);
     void setAutostart(bool autostart);
     static QString uuidString(virDomainPtr domainPtr);
-    Q_DISABLE_COPY_MOVE(Domain)
 
 private:
     virDomainPtr m_domainPtr;
