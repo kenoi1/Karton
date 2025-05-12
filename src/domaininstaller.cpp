@@ -19,14 +19,6 @@
 #include "karton_debug.h"
 #include "osinfoconfig.h"
 
-DomainInstaller::DomainInstaller()
-{
-}
-
-DomainInstaller::~DomainInstaller()
-{
-}
-
 virDomainPtr DomainInstaller::setupDomain(virConnectPtr conn, const DomainConfig *config)
 {
     QString xmlString = generateXML(conn, config);
