@@ -195,39 +195,17 @@ QString DomainInstaller::generateXML(virConnectPtr conn, const DomainConfig *con
 
     // devices->network interfaces element
     // Userspace connection https://libvirt.org/formatdomain.html#id44
-    addNetworkInterfaceDevices(document,
-                               devices,
-                               QStringLiteral("user"),
-                               genMac(),
-                               QString(),
-                               true,
-                               QStringLiteral("virtio"));
+    addNetworkInterfaceDevices(document, devices, QStringLiteral("user"), genMac(), QString(), true, QStringLiteral("virtio"));
 
     // devices->graphics element
-    addGraphicsDevices(document,
-                       devices,
-                       QStringLiteral("spice"),
-                       QStringLiteral("yes"),
-                       QStringLiteral("address"));
+    addGraphicsDevices(document, devices, QStringLiteral("spice"), QStringLiteral("yes"), QStringLiteral("address"));
 
     // devices->video element
-    addVideoDevices(document,
-                    devices,
-                    QStringLiteral("virtio"),
-                    QStringLiteral("1"),
-                    QStringLiteral("yes"));
+    addVideoDevices(document, devices, QStringLiteral("virtio"), QStringLiteral("1"), QStringLiteral("yes"));
 
-    addInputDevices(document,
-                    devices,
-                    QStringLiteral("tablet"),
-                    QStringLiteral("usb"));
-    addInputDevices(document,
-                    devices,
-                    QStringLiteral("keyboard"),
-                    QStringLiteral("usb"));
-    addConsoleDevices(document,
-                      devices,
-                      QStringLiteral("pty"));
+    addInputDevices(document, devices, QStringLiteral("tablet"), QStringLiteral("usb"));
+    addInputDevices(document, devices, QStringLiteral("keyboard"), QStringLiteral("usb"));
+    addConsoleDevices(document, devices, QStringLiteral("pty"));
 
     // write to file
     QString xmlString = document.toString(4);
@@ -391,8 +369,9 @@ void DomainInstaller::addElementWithAttributes(QDomDocument &doc,
         element.appendChild(textNode);
     }
 
-    for (auto i = attributes.cbegin(), end = attributes.cend(); i != end; i++) {
-        element.setAttribute(i.key(), i.value());
+    for (const auto &[key, value] : attributes.asKeyValueRange()) {
+        element.setAttribute(key, value);
     }
+
     parent.appendChild(element);
 }
