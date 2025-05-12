@@ -63,6 +63,7 @@ DomainXmlReader::XmlInfo DomainXmlReader::readConfigFile(const QString &path)
 
     if (xmlReader.hasError()) {
         qCWarning(KARTON_DEBUG) << "XML parsing error:" << xmlReader.errorString();
+        return {};
     }
     xmlFile.close();
 
