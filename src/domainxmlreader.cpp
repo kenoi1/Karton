@@ -9,6 +9,7 @@
 #include "karton_debug.h"
 
 DomainXmlReader::DomainXmlReader(const QString &path)
+: m_xmlInfo = readConfigFile(path)
 {
     m_xmlInfo = readConfigFile(path);
 }
