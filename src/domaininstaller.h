@@ -15,8 +15,7 @@ class DomainInstaller : public QObject
     Q_OBJECT
 
 public:
-    DomainInstaller();
-    ~DomainInstaller();
+    using QObject::Object;
 
     virDomainPtr setupDomain(virConnectPtr conn, const DomainConfig *config);
     QString generateXML(virConnectPtr conn, const DomainConfig *config);
