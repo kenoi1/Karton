@@ -43,11 +43,10 @@ bool OsinfoConfig::initOsDb()
         return false;
     }
 
-    GError *error = NULL;
+    g_autoptr(GError) error = nullptr;
     osinfo_loader_process_default_path(m_loader, &error);
     if (error) {
         qCCritical(KARTON_DEBUG) << "failed to process default path:" << error->message;
-        g_error_free(error);
         return false;
     }
 
@@ -94,12 +93,11 @@ QString OsinfoConfig::getOsIdFromDisk(const QString &isoDiskPath)
     }
     const gchar *location = qUtf8Printable(isoDiskPath);
 
-    GError *error = NULL;
+    g_autoptr(GError) error = nullptr;
     OsinfoMedia *osMedia = osinfo_media_create_from_location(location, NULL, &error);
 
     if (error) {
         qCCritical(KARTON_DEBUG) << "os_media creation error:" << error->message;
-        g_error_free(error);
         return QString();
     }
 
