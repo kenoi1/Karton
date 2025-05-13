@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty(QStringLiteral("Karton"), &karton);
     engine.rootContext()->setContextProperty(QStringLiteral("VMModel"), model);
-    engine.rootContext()->setContextProperty(QStringLiteral("Osinfo"), &osInfo);
+    engine.rootContext()->setContextProperty(QStringLiteral("Osinfo"), QVariant::fromValue(osInfo));
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.loadFromModule("org.kde.karton", "Main");

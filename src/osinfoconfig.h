@@ -11,13 +11,13 @@ extern "C" // due to undefined references to libosinfo content
 #include <osinfo/osinfo.h>
 }
 
-class OsinfoConfig : public QObject
+class OsinfoConfig
 {
-    Q_OBJECT
+    Q_GADGET
 
 public:
-    explicit OsinfoConfig(QObject *parent = nullptr);
-    ~OsinfoConfig() override;
+    explicit OsinfoConfig();
+    ~OsinfoConfig();
     QString getOsIdFromShortId(const QString &short_id);
     Q_INVOKABLE QString getShortIdFromId(const QString &id);
     Q_INVOKABLE QString getOsIdFromDisk(const QString &isoDiskPath);
