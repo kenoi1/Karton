@@ -11,9 +11,11 @@
 #include <QDomText>
 #include <QFile>
 #include <QMap>
+#include <QRandomGenerator>
 #include <QStandardPaths>
 #include <QString>
 #include <QUuid>
+#include <net/ethernet.h>
 
 #include "domainconfig.h"
 #include "karton_debug.h"
@@ -333,19 +335,13 @@ void DomainInstaller::addConsoleDevices(QDomDocument &doc, QDomElement &parent, 
 // eventually generate a network domain.
 QString DomainInstaller::genMac()
 {
-    int i, tp;
-    srand(time(NULL) + getpid());
-    QString s;
-
-    tp = rand() % 256; // first significant bit as unicast
-    tp &= 0xFE;
-    s += QString::asprintf("%s%X:", tp < 16 ? "0" : "", tp);
-
-    for (i = 1; i < 6; i++) {
-        tp = rand() % 256;
-        s += QString::asprintf("%s%X%s", tp < 16 ? "0" : "", tp, i < 5 ? ":" : "");
-    }
-    return s.toLower();
+    QByteArray data(ETH_ALEN, Qt::Uninitialized);
+    QRandomGenerator::global()->generate(data.begin(), data.end());
+    constexpr auto CLEAR_MULTICAST_BIT = static_cast<char>(0xFE);
+    data[0] &= CLEAR_MULTICAST_BIT;
+    constexpr auto SET_LOCAL_ASSIGNMENT_BIT = static_cast<char>(0x02);
+    data[0] |= SET_LOCAL_ASSIGNMENT_BIT;
+    return QString::fromLatin1(data.toHex(':')).toLower();
 }
 void DomainInstaller::addElement(QDomDocument &doc, QDomElement &parent, const QString &name, const QString &value)
 {
