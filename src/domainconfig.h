@@ -34,7 +34,27 @@ Q_SIGNALS:
     void autostartChanged(bool autostart);
 
 public:
+    struct DomainConfigData {
+        QString hypervisorType;
+        int indexId;
+        QString name;
+        QString uuid;
+        QString shortOsId;
+        QString osId;
+        bool isActive;
+        QString state;
+        int maxRam;
+        int ramUsage;
+        int cpus;
+        int maxDiskStorage;
+        QString xmlConfigPath;
+        QString isoDiskPath;
+        QString virtualDiskPath;
+        bool autostart;
+        QObject *parent = nullptr;
+    };
     explicit DomainConfig(QObject *parent = nullptr);
+    explicit DomainConfig(const DomainConfigData &data);
     explicit DomainConfig(const QString &hypervisorType,
                           int indexId,
                           const QString &name,

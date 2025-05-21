@@ -167,26 +167,26 @@ void Karton::refreshDomainList()
         bool autostart = (autoFlag != 0);
 
         // TODO: add more fields to xml metadata and parse.
-        DomainConfig *config = new DomainConfig(reader->m_xmlInfo.hypervisorType,
-                                                reader->m_xmlInfo.indexId,
-                                                QString::fromUtf8(name),
-                                                Domain::uuidString(domainPtr),
-                                                reader->m_xmlInfo.shortOsId,
-                                                reader->m_xmlInfo.osId,
-                                                isActive,
-                                                state,
-                                                maxRam,
-                                                ramUsage,
-                                                cpus,
-                                                reader->m_xmlInfo.maxDiskStorage / 1024, // disk storage
-                                                xmlConfigPath,
-                                                reader->m_xmlInfo.isoDiskPath,
-                                                reader->m_xmlInfo.virtualDiskPath,
-                                                autostart,
-                                                this);
-        Domain *domain = new Domain(domainPtr,
-                                    config,
-                                    this);
+        DomainConfigData data = {.hypervisorType = reader->m_xmlInfo.hypervisorType,
+                                 .index = reader->m_xmlInfo.indexId,
+                                 .name = QString::fromUtf8(name),
+                                 .uuid = Domain::uuidString(domainPtr),
+                                 .shortOsId = reader->m_xmlInfo.shortOsId,
+                                 .id = reader->m_xmlInfo.osId,
+                                 .isActive = isActive,
+                                 .state = state,
+                                 .maxMemory = maxRam,
+                                 .currentMemory = ramUsage,
+                                 .vcpus = cpus,
+                                 .storage = reader->m_xmlInfo.maxDiskStorage / 1024,
+                                 .configPath = xmlConfigPath,
+                                 .isoDiskPath = reader->m_xmlInfo.isoDiskPath,
+                                 .virtDiskPath = reader->m_xmlInfo.virtualDiskPath,
+                                 .autostart = autostart,
+                                 .parent = this};
+
+        DomainConfig *config = new DomainConfig(data);
+        Domain *domain = new Domain(domainPtr, config, this);
         m_domains.emplace_back(domain);
     }
     free(domains);
@@ -289,26 +289,28 @@ bool Karton::createDomain(const QVariantMap &config)
     {
         qCCritical(KARTON_DEBUG) << "Already Exists / Failed: " << path;
     }
+
     DomainInstaller installer;
-    const DomainConfig *newConfig =
-        new DomainConfig(QString(), // hypervisortype
-                         0, // index
-                         config.value(QStringLiteral("name")).toString(),
-                         QString(), // uuid
-                         config.value(QStringLiteral("shortOsId")).toString(), // short id
-                         QString(), // id
-                         false, // isActive
-                         QString(), // state
-                         config.value(QStringLiteral("memoryGB")).toInt(), // max ram
-                         config.value(QStringLiteral("memoryGB")).toInt(), // current usage
-                         config.value(QStringLiteral("cpus")).toInt(), // vcpus
-                         config.value(QStringLiteral("storageGB")).toInt(), // max
-                         QDir(path).filePath(QStringLiteral("karton-kde/config/%1.xml").arg(config.value(QStringLiteral("name")).toString())),
-                         config.value(QStringLiteral("isoDiskPath")).toString(),
-                         QDir(path).filePath(QStringLiteral("images/%1.qcow2").arg(config.value(QStringLiteral("name")).toString())),
-                         // virt disk path
-                         false,
-                         this);
+    DomainConfigData configData = {.hypervisorType = QString(),
+                                   .index = 0,
+                                   .name = config.value(QStringLiteral("name")).toString(),
+                                   .uuid = QString(),
+                                   .shortOsId = config.value(QStringLiteral("shortOsId")).toString(),
+                                   .id = QString(),
+                                   .isActive = false,
+                                   .state = QString(),
+                                   .maxMemory = config.value(QStringLiteral("memoryGB")).toInt(),
+                                   .currentMemory = config.value(QStringLiteral("memoryGB")).toInt(),
+                                   .vcpus = config.value(QStringLiteral("cpus")).toInt(),
+                                   .storage = config.value(QStringLiteral("storageGB")).toInt(),
+                                   .configPath =
+                                       QDir(path).filePath(QStringLiteral("karton-kde/config/%1.xml").arg(config.value(QStringLiteral("name")).toString())),
+                                   .isoDiskPath = config.value(QStringLiteral("isoDiskPath")).toString(),
+                                   .virtDiskPath = QDir(path).filePath(QStringLiteral("images/%1.qcow2").arg(config.value(QStringLiteral("name")).toString())),
+                                   .someFlag = false,
+                                   .parent = this};
+
+    const DomainConfig *config = new DomainConfig(configData);
 
     if (!runCommand(QStringLiteral("qemu-img create -f qcow2 %1 %2G").arg(newConfig->virtualDiskPath()).arg(newConfig->maxDiskStorage()))) {
         return false;

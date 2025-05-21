@@ -25,6 +25,27 @@ DomainConfig::DomainConfig(QObject *parent)
 {
 }
 
+DomainConfig::DomainConfig(const DomainConfigData &data)
+    : DomainConfig(data.hypervisorType,
+                   data.indexId,
+                   data.name,
+                   data.uuid,
+                   data.shortOsId,
+                   data.osId,
+                   data.isActive,
+                   data.state,
+                   data.maxRam,
+                   data.ramUsage,
+                   data.cpus,
+                   data.maxDiskStorage,
+                   data.xmlConfigPath,
+                   data.isoDiskPath,
+                   data.virtualDiskPath,
+                   data.autostart,
+                   data.parent)
+{
+}
+
 DomainConfig::DomainConfig(const QString &hypervisorType,
                            const int indexId,
                            const QString &name,
