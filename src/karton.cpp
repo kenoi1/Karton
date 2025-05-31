@@ -158,7 +158,7 @@ void Karton::refreshDomainList()
         int cpus = domInfo.nrVirtCpu;
 
         QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
-        QString xmlConfigPath = QStringLiteral("%1/libvirt/kde-karton/config/%2_config.xml").arg(dataDir).arg(QString::fromUtf8(name));
+        QString xmlConfigPath = getXmlConfigPath(QString::fromUtf8(name));
 
         DomainXmlReader *reader = new DomainXmlReader(xmlConfigPath);
 
@@ -166,26 +166,26 @@ void Karton::refreshDomainList()
         virDomainGetAutostart(domains[i], &autoFlag);
         bool autostart = (autoFlag != 0);
 
-        // TODO: add more fields to xml metadata and parse.
-        DomainConfigData data = {.hypervisorType = reader->m_xmlInfo.hypervisorType,
-                                 .index = reader->m_xmlInfo.indexId,
-                                 .name = QString::fromUtf8(name),
-                                 .uuid = Domain::uuidString(domainPtr),
-                                 .shortOsId = reader->m_xmlInfo.shortOsId,
-                                 .id = reader->m_xmlInfo.osId,
-                                 .isActive = isActive,
-                                 .state = state,
-                                 .maxMemory = maxRam,
-                                 .currentMemory = ramUsage,
-                                 .vcpus = cpus,
-                                 .storage = reader->m_xmlInfo.maxDiskStorage / 1024,
-                                 .configPath = xmlConfigPath,
-                                 .isoDiskPath = reader->m_xmlInfo.isoDiskPath,
-                                 .virtDiskPath = reader->m_xmlInfo.virtualDiskPath,
-                                 .autostart = autostart,
-                                 .parent = this};
+        using DomainConfigData = DomainConfig::DomainConfigData;
+        DomainConfigData configData = {.hypervisorType = reader->m_xmlInfo.hypervisorType,
+                                       .indexId = reader->m_xmlInfo.indexId,
+                                       .name = QString::fromUtf8(name),
+                                       .uuid = Domain::uuidString(domainPtr),
+                                       .shortOsId = reader->m_xmlInfo.shortOsId,
+                                       .osId = reader->m_xmlInfo.osId,
+                                       .isActive = isActive,
+                                       .state = state,
+                                       .maxRam = maxRam,
+                                       .ramUsage = ramUsage,
+                                       .cpus = cpus,
+                                       .maxDiskStorage = reader->m_xmlInfo.maxDiskStorage / 1024,
+                                       .xmlConfigPath = xmlConfigPath,
+                                       .isoDiskPath = reader->m_xmlInfo.isoDiskPath,
+                                       .virtualDiskPath = reader->m_xmlInfo.virtualDiskPath,
+                                       .autostart = autostart,
+                                       .parent = this};
 
-        DomainConfig *config = new DomainConfig(data);
+        DomainConfig *config = new DomainConfig(configData);
         Domain *domain = new Domain(domainPtr, config, this);
         m_domains.emplace_back(domain);
     }
@@ -283,35 +283,35 @@ bool Karton::viewDomain(const Domain *domain)
 bool Karton::createDomain(const QVariantMap &config)
 {
     QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
-    QString path = QStringLiteral("%1/libvirt").arg(dataDir);
-    QDir dir(path);
-    if (!dir.mkpath(QStringLiteral("images"))) // generates path to virtual disk folder if not there
-    {
-        qCCritical(KARTON_DEBUG) << "Already Exists / Failed: " << path;
+    QString basePath = QStringLiteral("%1/libvirt").arg(dataDir);
+    QDir baseDir(basePath); // generate directory if not there
+    if (!baseDir.mkpath(QStringLiteral("images")) || !baseDir.mkpath(QStringLiteral("kde-karton/config"))) {
+        qCCritical(KARTON_DEBUG) << "Failed to create directory for images and config: " << basePath;
+        return false;
     }
 
-    DomainInstaller installer;
+    using DomainConfigData = DomainConfig::DomainConfigData;
     DomainConfigData configData = {.hypervisorType = QString(),
-                                   .index = 0,
+                                   .indexId = 0,
                                    .name = config.value(QStringLiteral("name")).toString(),
                                    .uuid = QString(),
                                    .shortOsId = config.value(QStringLiteral("shortOsId")).toString(),
-                                   .id = QString(),
+                                   .osId = QString(),
                                    .isActive = false,
                                    .state = QString(),
-                                   .maxMemory = config.value(QStringLiteral("memoryGB")).toInt(),
-                                   .currentMemory = config.value(QStringLiteral("memoryGB")).toInt(),
-                                   .vcpus = config.value(QStringLiteral("cpus")).toInt(),
-                                   .storage = config.value(QStringLiteral("storageGB")).toInt(),
-                                   .configPath =
-                                       QDir(path).filePath(QStringLiteral("karton-kde/config/%1.xml").arg(config.value(QStringLiteral("name")).toString())),
+                                   .maxRam = config.value(QStringLiteral("memoryGB")).toInt(),
+                                   .ramUsage = config.value(QStringLiteral("memoryGB")).toInt(),
+                                   .cpus = config.value(QStringLiteral("cpus")).toInt(),
+                                   .maxDiskStorage = config.value(QStringLiteral("storageGB")).toInt(),
+                                   .xmlConfigPath = getXmlConfigPath(config.value(QStringLiteral("name")).toString()),
                                    .isoDiskPath = config.value(QStringLiteral("isoDiskPath")).toString(),
-                                   .virtDiskPath = QDir(path).filePath(QStringLiteral("images/%1.qcow2").arg(config.value(QStringLiteral("name")).toString())),
-                                   .someFlag = false,
+                                   .virtualDiskPath = getVirtualDiskPath(config.value(QStringLiteral("name")).toString()),
+                                   .autostart = false,
                                    .parent = this};
 
     auto domainConfig = std::make_unique<DomainConfig>(configData);
 
+    DomainInstaller installer;
     if (!runCommand(QStringLiteral("qemu-img create -f qcow2 %1 %2G").arg(domainConfig->virtualDiskPath()).arg(domainConfig->maxDiskStorage()))) {
         return false;
     }
@@ -322,6 +322,18 @@ bool Karton::createDomain(const QVariantMap &config)
     // TODO: Use storage pool (poolcreate, gen pool xml, parse xml for location)
     refreshDomainList();
     return true;
+}
+
+QString Karton::getXmlConfigPath(const QString &domainName)
+{
+    QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+    return QStringLiteral("%1/libvirt/kde-karton/config/%2_config.xml").arg(dataDir, domainName);
+}
+
+QString Karton::getVirtualDiskPath(const QString &domainName)
+{
+    QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+    return QStringLiteral("%1/libvirt/images/%2.qcow2").arg(dataDir, domainName);
 }
 
 // Use for virsh, virt-viewer, virt-install and other CLI

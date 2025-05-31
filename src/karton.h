@@ -25,6 +25,8 @@ public:
     void refreshDomain(const virDomainPtr domainPtr);
     int searchDomain(virDomainPtr domainPtr);
     void refreshDomainList();
+    QString getVirtualDiskPath(const QString &domainName);
+    QString getXmlConfigPath(const QString &domainName);
 
 public Q_SLOTS:
     Q_INVOKABLE bool runCommand(const QString &command);
