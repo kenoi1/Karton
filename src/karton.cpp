@@ -310,12 +310,12 @@ bool Karton::createDomain(const QVariantMap &config)
                                    .someFlag = false,
                                    .parent = this};
 
-    const DomainConfig *config = new DomainConfig(configData);
+    auto domainConfig = std::make_unique<DomainConfig>(configData);
 
-    if (!runCommand(QStringLiteral("qemu-img create -f qcow2 %1 %2G").arg(newConfig->virtualDiskPath()).arg(newConfig->maxDiskStorage()))) {
+    if (!runCommand(QStringLiteral("qemu-img create -f qcow2 %1 %2G").arg(domainConfig->virtualDiskPath()).arg(domainConfig->maxDiskStorage()))) {
         return false;
     }
-    if (!installer.setupDomain(m_conn, newConfig)) {
+    if (!installer.setupDomain(m_conn, domainConfig.get())) {
         qCInfo(KARTON_DEBUG) << "Failed to setup domain...";
         return false;
     }
