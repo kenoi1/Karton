@@ -12,6 +12,7 @@
 
 #include "domain.h"
 #include "domainconfig.h"
+#include "domainviewer.h"
 #include <qqmlintegration.h>
 
 class LibvirtMonitor;
@@ -25,6 +26,7 @@ class Karton : public QObject
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
+    Q_PROPERTY(Domain *currentDomain READ currentDomain NOTIFY currentDomainChanged)
 
 public:
     explicit Karton(QObject *parent = nullptr);
@@ -39,6 +41,25 @@ public:
     void refreshDomainList();
     QString getVirtualDiskPath(const QString &domainName);
     QString getXmlConfigPath(const QString &domainName);
+
+    void cleanupDomainViewer();
+
+    void setCurrentDomain(Domain *domain)
+    {
+        if (m_currentDomain != domain) {
+            m_currentDomain = domain;
+            Q_EMIT currentDomainChanged();
+        }
+    }
+    Domain *currentDomain()
+    {
+        if (!m_currentDomain)
+            qWarning() << "Warning: currentDomain is null!";
+        return m_currentDomain;
+    }
+
+Q_SIGNALS:
+    void currentDomainChanged();
 
 public Q_SLOTS:
     Q_INVOKABLE bool runCommand(const QString &command);
@@ -61,6 +82,9 @@ private:
     virConnectPtr m_conn;
     QVector<Domain *> m_domains;
     LibvirtMonitor *m_monitor;
+
+    DomainViewer *m_domainViewer = nullptr;
+    Domain *m_currentDomain = nullptr;
 
     bool init();
 };

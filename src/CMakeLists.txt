@@ -19,6 +19,7 @@ target_sources(karton
     domainconfig.cpp
     libvirtmonitor.cpp
     libvirteventloop.cpp
+    domainviewer.cpp
     domaininstaller.cpp
     osinfoconfig.cpp
     domainxmlreader.cpp
@@ -57,6 +58,7 @@ target_link_libraries(karton
     KF6::CoreAddons
     KF6::IconThemes
     Libvirt::Libvirt
+    Spiceglib::Spiceglib
     Libosinfo::Libosinfo
     Glib::Glib
 )

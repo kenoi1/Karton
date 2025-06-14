@@ -35,6 +35,10 @@ find_package(Libvirt REQUIRED)
 find_package(Libosinfo REQUIRED)
 find_package(Glib REQUIRED)
 
+find_package(Spiceglib REQUIRED)
+
+# find_package(Glib2 REQUIRED)
+
 find_package(KF6 REQUIRED COMPONENTS
     Kirigami
     I18n
@@ -52,6 +56,12 @@ install(FILES
 )
 
 ecm_find_qmlmodule(org.kde.kirigami REQUIRED)
+
+ecm_use_find_modules(
+    DIR "${CMAKE_BINARY_DIR}/cmake"
+    MODULES FindGLIB2.cmake
+)
+set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}/cmake") # glib
 
 add_subdirectory(src)
 

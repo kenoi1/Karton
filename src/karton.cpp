@@ -15,6 +15,7 @@
 #include "domain.h"
 #include "domainconfig.h"
 #include "domaininstaller.h"
+#include "domainviewer.h"
 #include "domainxmlreader.h"
 #include "karton_debug.h"
 #include "libvirtmonitor.h"
@@ -23,6 +24,8 @@ Karton::Karton(QObject *parent)
     : QObject(parent)
     , m_conn(nullptr)
     , m_monitor(nullptr)
+    , m_domainViewer(nullptr)
+    , m_currentDomain(nullptr)
 {
     init();
 }
@@ -33,6 +36,7 @@ Karton::~Karton()
         virConnectClose(m_conn);
         m_conn = nullptr;
     }
+    cleanupDomainViewer();
 }
 
 Karton *Karton::self()
@@ -200,6 +204,10 @@ void Karton::refreshDomainList()
         Domain *domain = new Domain(domainPtr, config, this);
         m_domains.emplace_back(domain);
     }
+
+    if (!m_domains.isEmpty()) {
+        setCurrentDomain(m_domains.first());
+    }
     free(domains);
 }
 
@@ -286,11 +294,6 @@ bool Karton::deleteDomain(const Domain *domain, const bool deleteDisk)
     return true;
 }
 
-bool Karton::viewDomain(const Domain *domain)
-{
-    return runCommand(QStringLiteral("virt-viewer --attach ") + domain->config()->name());
-}
-
 bool Karton::createDomain(const QVariantMap &config)
 {
     QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
@@ -345,6 +348,23 @@ QString Karton::getVirtualDiskPath(const QString &domainName)
 {
     QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
     return QStringLiteral("%1/libvirt/images/%2.qcow2").arg(dataDir, domainName);
+}
+
+void Karton::cleanupDomainViewer()
+{
+    if (m_domainViewer) {
+        m_domainViewer->disconnectFromSpice();
+        delete m_domainViewer;
+        m_domainViewer = nullptr;
+    }
+}
+bool Karton::viewDomain(const Domain *domain)
+
+{
+    m_currentDomain = const_cast<Domain *>(domain);
+    Q_EMIT currentDomainChanged();
+
+    return true;
 }
 
 // Use for virsh, virt-viewer, virt-install and other CLI
