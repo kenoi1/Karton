@@ -41,8 +41,6 @@ int main(int argc, char *argv[])
     qCInfo(KARTON_DEBUG) << "Hello! Starting Karton...";
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
-    qmlRegisterType<DomainViewer>("org.kde.karton", 1, 0, "DomainViewer");
-    qmlRegisterType<Domain>("org.kde.karton", 1, 0, "Domain");
 
     engine.loadFromModule("org.kde.karton", "Main");
 

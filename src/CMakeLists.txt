@@ -29,6 +29,7 @@ ecm_target_qml_sources(karton
     SOURCES
     qml/Main.qml
     qml/VMListPage.qml
+    qml/VMViewerWindow.qml
 )
 
 ecm_qt_declare_logging_category(

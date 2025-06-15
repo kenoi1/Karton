@@ -19,10 +19,10 @@
 class DomainViewer : public QQuickItem
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(Domain *domain READ domain WRITE setDomain NOTIFY domainChanged)
     Q_PROPERTY(QString host READ host WRITE setHost NOTIFY hostChanged)
     Q_PROPERTY(int port READ port WRITE setPort NOTIFY portChanged)
-    static void channel_new_cb(SpiceSession *session, SpiceChannel *channel, gpointer user_data);
 
 public:
     DomainViewer(QQuickItem *parent = nullptr);
@@ -39,9 +39,6 @@ public:
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *) override;
     bool connectToSpice();
     void disconnectFromSpice();
-    static void
-    display_primary_create_callback(SpiceChannel *channel, gint format, gint width, gint height, gint stride, gint shmid, gpointer imgdata, gpointer user_data);
-    static void display_invalidate_callback(SpiceDisplayChannel *channel, gint x, gint y, gint width, gint height, gpointer user_data);
 
     void updateTexture();
 
@@ -83,6 +80,11 @@ Q_SIGNALS:
     void hostChanged();
 
 private:
+    static void channel_new_cb(SpiceSession *session, SpiceChannel *channel, gpointer user_data);
+    static void
+    display_primary_create_callback(SpiceChannel *channel, gint format, gint width, gint height, gint stride, gint shmid, gpointer imgdata, gpointer user_data);
+    static void display_invalidate_callback(SpiceDisplayChannel *channel, gint x, gint y, gint width, gint height, gpointer user_data);
+
     QColor m_color;
     Domain *m_domain;
     bool m_connected = false;

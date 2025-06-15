@@ -172,35 +172,38 @@ Kirigami.ScrollablePage {
         }
         
     }
-    Kirigami.Dialog {
-        id: vmViewer
-        title: i18n("VM Visualization")
-        modal: true
-        standardButtons: Dialog.Close
+    // Kirigami.Dialog {
+    //     id: vmViewer
+    //     title: i18n("VM Visualization")
+    //     modal: true
+    //     standardButtons: Dialog.Close
         
-        width: 800
-        height: 800
+    //     width: 800
+    //     height: 800
         
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
+    //     x: (parent.width - width) / 2
+    //     y: (parent.height - height) / 2
         
-        DomainViewer {
-            id: vmSquare
-            anchors.centerIn: parent
-            width: 800
-            height: 600
-            domain: Karton.currentDomain
-            host: "localhost"  // Set explicitly
-            port: 5900   
-            // domain: {
-                // console.log("DomainViewer domain property binding called with:", Karton.currentDomain)
-                // return Karton.currentDomain !== null ? Karton.currentDomain : undefined
-            // }
-            // onDomainChanged: {
-                // console.log("DomainViewer's domain changed to:", domain ? domain.config.name : "null")
-            // }
-        }
-        
+    //     DomainViewer {
+    //         id: vmSquare
+    //         anchors.centerIn: parent
+    //         width: 800
+    //         height: 600
+    //         domain: Karton.currentDomain
+    //         host: "localhost"  // Set explicitly
+    //         port: 5900   
+    //         // domain: {
+    //             // console.log("DomainViewer domain property binding called with:", Karton.currentDomain)
+    //             // return Karton.currentDomain !== null ? Karton.currentDomain : undefined
+    //         // }
+    //         // onDomainChanged: {
+    //             // console.log("DomainViewer's domain changed to:", domain ? domain.config.name : "null")
+    //         // }
+    //     }    
+    // }
+    Component {
+        id: vmViewerWindowComponent
+        VMViewerWindow {}
     }
 
     Kirigami.CardsListView {
@@ -307,9 +310,14 @@ Kirigami.ScrollablePage {
                             text: i18nc("verb, open viewer for VM", "View VM")
                             icon.name: "computer-laptop-symbolic"
                             onClicked: {
-                                // Karton.viewDomain(domain)
-                                vmViewer.open()
-                                showPassiveNotification(i18nc("%1 is the name of the virtual machine", "Opening in virt-viewer: %1!", domain.config.name));
+                                let component = Qt.createComponent("VMViewerWindow.qml")
+                                if (component.status === Component.Ready) {
+                                    let window = component.createObject(null, {domain: domain})
+                                    if (window) {
+                                        window.show()
+                                        showPassiveNotification(i18nc("%1 is the name of the virtual machine", "Opening viewer for: %1", domain.config.name))
+                                    }
+                                }
                             }
                         }
                         Controls.Button {
