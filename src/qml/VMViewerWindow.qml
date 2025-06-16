@@ -1,4 +1,6 @@
-// VMViewerWindow.qml
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
+
 import QtQuick
 import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
