@@ -87,7 +87,10 @@ private:
     Domain *m_domain;
     bool m_connected = false;
 
-    QImage m_frameBuffer;
+    int m_imageWidth;
+    int m_imageHeight;
+    QImage m_frame;
+    uchar *m_frameBuffer = nullptr;
     QMutex m_frameLock;
     bool m_frameUpdated = false;
 

@@ -68,12 +68,12 @@ void DomainViewer::componentComplete()
 QSGNode *DomainViewer::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
     QMutexLocker locker(&m_frameLock);
-    qCInfo(KARTON_DEBUG) << "updatePaintNode received frame: size proport." << m_frameBuffer.size() << ", is this null??:" << m_frameBuffer.isNull();
+    qCInfo(KARTON_DEBUG) << "updatePaintNode received frame: size proport." << m_frame.size() << ", is this null??:" << m_frame.isNull();
 
     // checkChannelStatus();
 
     // prevent render if not updated or valid
-    if (!m_frameUpdated || m_frameBuffer.isNull() || m_frameBuffer.width() <= 0 || m_frameBuffer.height() <= 0) {
+    if (!m_frameUpdated || m_frame.isNull() || m_frame.width() <= 0 || m_frame.height() <= 0) {
         delete oldNode;
         return nullptr;
     }
@@ -85,7 +85,7 @@ QSGNode *DomainViewer::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         node->setOwnsTexture(true);
     }
 
-    QSGTexture *texture = window()->createTextureFromImage(m_frameBuffer);
+    QSGTexture *texture = window()->createTextureFromImage(m_frame);
     if (texture) {
         node->setTexture(texture);
         node->setRect(boundingRect());
@@ -169,7 +169,11 @@ void DomainViewer::display_primary_create_callback(SpiceChannel *channel,
     // item->m_frameBuffer = QImage(QStringLiteral("/home/dereklin/Pictures/picture_2025-05-17_23-14-40.jpg")).convertToFormat(QImage::Format_RGB32); // WORKS
     // GOOD
 
-    item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_RGB888); // Black/white but good opacity, weird render because 24b
+    item->m_frameBuffer = static_cast<uchar *>(imgdata);
+    item->m_imageWidth = width;
+    item->m_imageHeight = height;
+    item->m_frame = QImage(width, height, QImage::Format_RGB32);
+    // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_RGB888); // Black/white but good opacity, weird render because 24b
     // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_RGBX8888);
     // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_ARGB32_Premultiplied); // good color, weird brightness
     // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_BGR888).copy();
@@ -183,6 +187,14 @@ void DomainViewer::display_invalidate_callback(SpiceDisplayChannel *channel, gin
 {
     DomainViewer *item = static_cast<DomainViewer *>(user_data);
     item->m_frameUpdated = true;
+
+    // Copy from spice-glib framebuffer to the QImage to render
+    uint *source = reinterpret_cast<uint *>(item->m_frameBuffer);
+    for (int i = y; i < y + height; ++i) {
+        for (int j = x; j < x + width; ++j) {
+            item->m_frame.setPixel(j, i, source[item->m_imageWidth * i + j]);
+        }
+    }
 
     QMetaObject::invokeMethod(item, "update", Qt::QueuedConnection);
 }
