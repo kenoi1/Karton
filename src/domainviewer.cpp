@@ -65,7 +65,7 @@ void DomainViewer::componentComplete()
 QSGNode *DomainViewer::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
     QMutexLocker locker(&m_frameLock);
-    qCInfo(KARTON_DEBUG) << "updatePaintNode: size proport." << m_frameBuffer.size() << ", is this null??:" << m_frameBuffer.isNull();
+    qCInfo(KARTON_DEBUG) << "updatePaintNode received frame: size proport." << m_frameBuffer.size() << ", is this null??:" << m_frameBuffer.isNull();
 
     // checkChannelStatus();
 
@@ -134,10 +134,9 @@ void DomainViewer::disconnectFromSpice()
 
 void DomainViewer::channel_new_cb(SpiceSession *session, SpiceChannel *channel, gpointer user_data)
 {
-    // QMutexLocker locker(&m_frameLock);
     DomainViewer *item = static_cast<DomainViewer *>(user_data);
 
-    // checkChannelStatus();
+    // checkChannelStatus(); // debug msgs.
     if (SPICE_IS_DISPLAY_CHANNEL(channel)) {
         qCInfo(KARTON_DEBUG) << "SPICE:";
 
@@ -167,27 +166,19 @@ void DomainViewer::display_primary_create_callback(SpiceChannel *channel,
     // item->m_frameBuffer = QImage(QStringLiteral("/home/dereklin/Pictures/picture_2025-05-17_23-14-40.jpg")).convertToFormat(QImage::Format_RGB32); // WORKS
     // GOOD
 
-    // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_RGB888);
+    item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_RGB888); // Black/white but good opacity, weird render because 24b
     // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_RGBX8888);
-    // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_ARGB32_Premultiplied);
+    // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_ARGB32_Premultiplied); // good color, weird brightness
     // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_BGR888).copy();
 
-    item->m_imgdata = imgdata;
-    item->m_width = width;
-    item->m_height = height;
-    item->m_stride = stride;
-    item->m_format = format;
-
     item->m_frameUpdated = true;
-    // QMetaObject::invokeMethod(item, "frameUpdated", Qt::DirectConnection);
+    QMetaObject::invokeMethod(item, "frameUpdated", Qt::DirectConnection); // could also do queued
     QMetaObject::invokeMethod(item, "update", Qt::DirectConnection);
 }
 
 void DomainViewer::display_invalidate_callback(SpiceDisplayChannel *channel, gint x, gint y, gint width, gint height, gpointer user_data)
 {
     DomainViewer *item = static_cast<DomainViewer *>(user_data);
-    // NOW create the QImage - the data should be valid
-    item->m_frameBuffer = QImage((uchar *)item->m_imgdata, item->m_width, item->m_height, item->m_stride, QImage::Format_RGB32);
     item->m_frameUpdated = true;
 
     QMetaObject::invokeMethod(item, "update", Qt::QueuedConnection);
