@@ -25,10 +25,11 @@ DomainViewer::DomainViewer(QQuickItem *parent)
     , m_frameUpdated(false)
 {
     setFlag(ItemHasContents, true);
-    qDebug() << "DomainViewer constructor - default host:" << m_host << "port:" << m_port;
     setAcceptedMouseButtons(Qt::AllButtons);
     setAcceptHoverEvents(true);
-    setFocus(true);
+    setFlag(ItemIsFocusScope, true);
+
+    qDebug() << "DomainViewer constructor - default host:" << m_host << "port:" << m_port;
 }
 
 DomainViewer::~DomainViewer()
@@ -56,6 +57,66 @@ void DomainViewer::setDomain(Domain *domain)
     }
 }
 
+void DomainViewer::mouseMoveEvent(QMouseEvent *event)
+{ // todo
+    static int moveCounter = 0;
+    if (++moveCounter % 5 == 0) {
+        qCInfo(KARTON_DEBUG) << "Mouse Drag: at (" << event->position().x() << "," << event->position().y() << ")";
+    }
+    event->accept();
+}
+
+void DomainViewer::hoverMoveEvent(QHoverEvent *event)
+{
+    static int hoverCounter = 0;
+    if (++hoverCounter % 20 == 0) {
+        qCInfo(KARTON_DEBUG) << "Mouse hover at (" << event->position().x() << "," << event->position().y() << ")";
+    }
+    // send to spice
+    if (m_inputs_channel && m_connected) {
+        int x = event->position().x();
+        int y = event->position().y();
+
+        if (m_imageWidth > 0 && m_imageHeight > 0 && width() > 0 && height() > 0) {
+            x = (x * m_imageWidth) / width();
+            y = (y * m_imageHeight) / height();
+        }
+
+        spice_inputs_position(m_inputs_channel, x, y, 0, 0);
+    }
+}
+
+void DomainViewer::mousePressEvent(QMouseEvent *event)
+{ // todo
+    qCInfo(KARTON_DEBUG) << "Mouse click at (" << event->position().x() << "," << event->position().y() << ") button:" << event->button();
+    setFocus(true);
+    int button = 0;
+    switch (event->button()) {
+    case Qt::LeftButton:
+        button = SPICE_MOUSE_BUTTON_LEFT;
+        break;
+    case Qt::RightButton:
+        button = SPICE_MOUSE_BUTTON_RIGHT;
+        break;
+    case Qt::MiddleButton:
+        button = SPICE_MOUSE_BUTTON_MIDDLE;
+        break;
+    default:
+        return;
+    }
+
+    int button_mask = 0;
+    if (event->buttons() & Qt::LeftButton)
+        button_mask |= SPICE_MOUSE_BUTTON_MASK_LEFT;
+    if (event->buttons() & Qt::MiddleButton)
+        button_mask |= SPICE_MOUSE_BUTTON_MASK_MIDDLE;
+    if (event->buttons() & Qt::RightButton)
+        button_mask |= SPICE_MOUSE_BUTTON_MASK_RIGHT;
+
+    spice_inputs_button_press(m_inputs_channel, button, button_mask);
+    event->accept();
+}
+
 void DomainViewer::componentComplete()
 {
     qCCritical(KARTON_DEBUG) << "run?!";
@@ -68,7 +129,7 @@ void DomainViewer::componentComplete()
 QSGNode *DomainViewer::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
     QMutexLocker locker(&m_frameLock);
-    qCInfo(KARTON_DEBUG) << "updatePaintNode received frame: size proport." << m_frame.size() << ", is this null??:" << m_frame.isNull();
+    // qCInfo(KARTON_DEBUG) << "updatePaintNode received frame: size proport." << m_frame.size() << ", is this null??:" << m_frame.isNull();
 
     // checkChannelStatus();
 
@@ -141,13 +202,17 @@ void DomainViewer::channel_new_cb(SpiceSession *session, SpiceChannel *channel, 
 
     // checkChannelStatus(); // debug msgs.
     if (SPICE_IS_DISPLAY_CHANNEL(channel)) {
-        qCInfo(KARTON_DEBUG) << "SPICE:";
+        qCInfo(KARTON_DEBUG) << "SPICE display connected";
 
         spice_channel_connect(channel);
         item->m_display_channel = channel;
 
         g_signal_connect(channel, "display-primary-create", G_CALLBACK(display_primary_create_callback), item);
         g_signal_connect(channel, "display-invalidate", G_CALLBACK(display_invalidate_callback), item);
+    } else if (SPICE_IS_INPUTS_CHANNEL(channel)) {
+        qCInfo(KARTON_DEBUG) << "SPICE: Inputs connected";
+        spice_channel_connect(channel);
+        item->m_inputs_channel = SPICE_INPUTS_CHANNEL(channel);
     }
 }
 void DomainViewer::display_primary_create_callback(SpiceChannel *channel,

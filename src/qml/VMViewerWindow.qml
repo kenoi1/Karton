@@ -22,8 +22,25 @@ Kirigami.ApplicationWindow {
         DomainViewer {
             anchors.fill: parent
             domain: viewerWindow.domain
-            host: "localhost"
-            port: 5900
+            host: "localhost" // hardcoded TODO
+            port: 5900 // hardcoded TODO
+
+            focus: true
+            activeFocusOnTab: true
+            onActiveFocusChanged: {
+                console.log("domainviewer focus changed to:", activeFocus)
+            }
+            onFocusChanged: {
+                console.log("DomainViewer focus property changed to:", focus)
+            }
+            MouseArea {
+                anchors.fill: parent
+                onPressed: {
+                    console.log("MouseArea click. giving focus to domainviewer")
+                    parent.forceActiveFocus()
+                    mouse.accepted = false
+                }
+            }
         }
     }
 }

@@ -42,8 +42,9 @@ public:
 
     void checkChannelStatus();
 
-    void handleMouseEvent(QMouseEvent *event);
-    void handleKeyEvent(QKeyEvent *event);
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void hoverMoveEvent(QHoverEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
     QString host() const
     {
@@ -96,6 +97,8 @@ private:
 
     SpiceSession *m_session = nullptr;
     SpiceChannel *m_display_channel = nullptr;
+    SpiceInputsChannel *m_inputs_channel = nullptr;
+
     QString m_host;
     int m_port = 0;
     QString m_password;
