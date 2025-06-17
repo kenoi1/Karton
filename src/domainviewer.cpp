@@ -179,8 +179,8 @@ void DomainViewer::display_primary_create_callback(SpiceChannel *channel,
     // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_BGR888).copy();
 
     item->m_frameUpdated = true;
-    QMetaObject::invokeMethod(item, "frameUpdated", Qt::DirectConnection); // could also do queued
-    QMetaObject::invokeMethod(item, "update", Qt::DirectConnection);
+    QMetaObject::invokeMethod(item, "frameUpdated", Qt::QueuedConnection); // could also do queued
+    QMetaObject::invokeMethod(item, "update", Qt::QueuedConnection);
 }
 
 void DomainViewer::display_invalidate_callback(SpiceDisplayChannel *channel, gint x, gint y, gint width, gint height, gpointer user_data)

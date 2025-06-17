@@ -13,8 +13,8 @@ Kirigami.ApplicationWindow {
     
     title: domain ? i18n("VM Viewer - %1", domain.config.name) : i18n("VM Viewer")
     
-    width: 800
-    height: 600
+    width: 1008
+    height: 630
     
     pageStack.initialPage: Kirigami.Page {
         title: viewerWindow.title
