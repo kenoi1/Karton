@@ -19,8 +19,7 @@ DomainViewer::DomainViewer(QQuickItem *parent)
     : QQuickItem(parent)
     , m_domain(nullptr)
     , m_host(QStringLiteral("localhost"))
-    , // Default host
-    m_port(5900)
+    , m_port(5900)
     , m_connected(false)
     , m_frameUpdated(false)
 {
@@ -87,7 +86,7 @@ void DomainViewer::hoverMoveEvent(QHoverEvent *event)
 }
 
 void DomainViewer::mousePressEvent(QMouseEvent *event)
-{ // todo
+{
     qCInfo(KARTON_DEBUG) << "Mouse click at (" << event->position().x() << "," << event->position().y() << ") button:" << event->button();
     setFocus(true);
     int button = 0;
@@ -253,7 +252,7 @@ void DomainViewer::display_invalidate_callback(SpiceDisplayChannel *channel, gin
     DomainViewer *item = static_cast<DomainViewer *>(user_data);
     item->m_frameUpdated = true;
 
-    // Copy from spice-glib framebuffer to the QImage to render
+    // Copy from spice-glib framebuffer to the QImage to render - inefficient, might want to switch to another approach (partial render?)
     uint *source = reinterpret_cast<uint *>(item->m_frameBuffer);
     for (int i = y; i < y + height; ++i) {
         for (int j = x; j < x + width; ++j) {
