@@ -5,7 +5,7 @@ SPDX-FileCopyrightText: 2025 Derek Lin <derekhongdalin@gmail.com>
 -->
 
 # Karton <img src="img/karton_logo.png" width="40"/>
-A Libvirt-based Virtual Machine Manager for KDE.
+A libvirt-based Virtual Machine Manager for KDE.
 
 ## WARNING
 This project is still in early development and will likely break existing virtual machines.
@@ -20,7 +20,7 @@ This project is still in early development and will likely break existing virtua
 - Kirigami Addons
 - Qt Quick Controls
 - libvirt
-- virt-viewer
+- spice-client-glib
 - libosinfo
 
 ## Installation
