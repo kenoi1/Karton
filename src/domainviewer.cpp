@@ -38,20 +38,21 @@ DomainViewer::~DomainViewer()
 
 void DomainViewer::setDomain(Domain *domain)
 {
-    if (m_domain != domain) {
+    if (m_domain == domain) {
+        return;
+    }
+    if (m_domain) {
+        disconnectFromSpice();
+    }
+
+    m_domain = domain;
+    Q_EMIT domainChanged();
+
+    if (isComponentComplete() && m_domain) {
         if (m_domain) {
-            disconnectFromSpice();
-        }
-
-        m_domain = domain;
-        Q_EMIT domainChanged();
-
-        if (isComponentComplete() && m_domain) {
-            if (m_domain) {
-                connectToSpice();
-            } else {
-                qCDebug(KARTON_DEBUG) << "setDomain(): null domain assigned";
-            }
+            connectToSpice();
+        } else {
+            qCDebug(KARTON_DEBUG) << "setDomain(): null domain assigned";
         }
     }
 }
@@ -101,7 +102,7 @@ void DomainViewer::mousePressEvent(QMouseEvent *event)
         button = SPICE_MOUSE_BUTTON_MIDDLE;
         break;
     default:
-        return;
+        qCWarn(KARTON_DEBUG) << "mousepressevent: Unknown button click" return;
     }
 
     int button_mask = 0;
@@ -228,19 +229,10 @@ void DomainViewer::display_primary_create_callback(SpiceChannel *channel,
     qCInfo(KARTON_DEBUG) << "SPICE: format is:" << format;
     QMutexLocker locker(&item->m_frameLock);
 
-    // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_RGB32); // TRANSPARENT
-    // item->m_frameBuffer = item->processSpiceImage(format, width, height, stride, imgdata); // GIVES BLACK IMAGE
-    // item->m_frameBuffer = QImage(QStringLiteral("/home/dereklin/Pictures/picture_2025-05-17_23-14-40.jpg")).convertToFormat(QImage::Format_RGB32); // WORKS
-    // GOOD
-
     item->m_frameBuffer = static_cast<uchar *>(imgdata);
     item->m_imageWidth = width;
     item->m_imageHeight = height;
     item->m_frame = QImage(width, height, QImage::Format_RGB32);
-    // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_RGB888); // Black/white but good opacity, weird render because 24b
-    // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_RGBX8888);
-    // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_ARGB32_Premultiplied); // good color, weird brightness
-    // item->m_frameBuffer = QImage((uchar *)imgdata, width, height, stride, QImage::Format_BGR888).copy();
 
     item->m_frameUpdated = true;
     QMetaObject::invokeMethod(item, "frameUpdated", Qt::QueuedConnection); // could also do queued
