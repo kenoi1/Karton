@@ -38,6 +38,7 @@ build
 .vscode
 configuration
 .clang-format
+.cache
 # qtcreator generated files
 *.pro.user*
 CMakeLists.txt.user*

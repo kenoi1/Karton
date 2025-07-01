@@ -28,7 +28,7 @@ Kirigami.ApplicationWindow {
             focus: true
             activeFocusOnTab: true
             onActiveFocusChanged: {
-                console.log("domainviewer focus changed to:", activeFocus)
+                console.log("DomainViewer focus changed to:", activeFocus)
             }
             onFocusChanged: {
                 console.log("DomainViewer focus property changed to:", focus)

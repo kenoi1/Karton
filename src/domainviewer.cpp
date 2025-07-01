@@ -5,11 +5,10 @@
 
 #include <spice-client.h>
 
-#include <QPainter>
+#include <QGuiApplication>
 #include <QQuickWindow>
 #include <QSGSimpleTextureNode>
 #include <QString>
-#include <QTimer>
 
 #include "domain.h"
 #include "glib.h"
@@ -57,13 +56,115 @@ void DomainViewer::setDomain(Domain *domain)
     }
 }
 
+uint8_t DomainViewer::evdevToPcXt(uint32_t evdev_scancode)
+{
+    static const QHash<uint32_t, uint8_t> scancode_map = {
+        {KEY_RESERVED, 0x00},   {KEY_ESC, 0x01},        {KEY_1, 0x02},         {KEY_2, 0x03},          {KEY_3, 0x04},          {KEY_4, 0x05},
+        {KEY_5, 0x06},          {KEY_6, 0x07},          {KEY_7, 0x08},         {KEY_8, 0x09},          {KEY_9, 0x0A},          {KEY_0, 0x0B},
+        {KEY_MINUS, 0x0C},      {KEY_EQUAL, 0x0D},      {KEY_BACKSPACE, 0x0E}, {KEY_TAB, 0x0F},        {KEY_Q, 0x10},          {KEY_W, 0x11},
+        {KEY_E, 0x12},          {KEY_R, 0x13},          {KEY_T, 0x14},         {KEY_Y, 0x15},          {KEY_U, 0x16},          {KEY_I, 0x17},
+        {KEY_O, 0x18},          {KEY_P, 0x19},          {KEY_LEFTBRACE, 0x1A}, {KEY_RIGHTBRACE, 0x1B}, {KEY_ENTER, 0x1C},      {KEY_LEFTCTRL, 0x1D},
+        {KEY_A, 0x1E},          {KEY_S, 0x1F},          {KEY_D, 0x20},         {KEY_F, 0x21},          {KEY_G, 0x22},          {KEY_H, 0x23},
+        {KEY_J, 0x24},          {KEY_K, 0x25},          {KEY_L, 0x26},         {KEY_SEMICOLON, 0x27},  {KEY_APOSTROPHE, 0x28}, {KEY_GRAVE, 0x29},
+        {KEY_LEFTSHIFT, 0x2A},  {KEY_BACKSLASH, 0x2B},  {KEY_Z, 0x2C},         {KEY_X, 0x2D},          {KEY_C, 0x2E},          {KEY_V, 0x2F},
+        {KEY_B, 0x30},          {KEY_N, 0x31},          {KEY_M, 0x32},         {KEY_COMMA, 0x33},      {KEY_DOT, 0x34},        {KEY_SLASH, 0x35},
+        {KEY_RIGHTSHIFT, 0x36}, {KEY_KPASTERISK, 0x37}, {KEY_LEFTALT, 0x38},   {KEY_SPACE, 0x39},      {KEY_CAPSLOCK, 0x3A},   {KEY_F1, 0x3B},
+        {KEY_F2, 0x3C},         {KEY_F3, 0x3D},         {KEY_F4, 0x3E},        {KEY_F5, 0x3F},         {KEY_F6, 0x40},         {KEY_F7, 0x41},
+        {KEY_F8, 0x42},         {KEY_F9, 0x43},         {KEY_F10, 0x44},       {KEY_NUMLOCK, 0x45},    {KEY_SCROLLLOCK, 0x46}, {KEY_KP7, 0x47},
+        {KEY_KP8, 0x48},        {KEY_KP9, 0x49},        {KEY_KPMINUS, 0x4A},   {KEY_KP4, 0x4B},        {KEY_KP5, 0x4C},        {KEY_KP6, 0x4D},
+        {KEY_KPPLUS, 0x4E},     {KEY_KP1, 0x4F},        {KEY_KP2, 0x50},       {KEY_KP3, 0x51},        {KEY_KP0, 0x52},        {KEY_KPDOT, 0x53},
+        {KEY_F11, 0x57},        {KEY_F12, 0x58}};
+
+    auto it = scancode_map.find(evdev_scancode);
+    if (it != scancode_map.end()) {
+        qCDebug(KARTON_DEBUG) << "Mapped evdev" << evdev_scancode << "to PC XT" << QString::number(it.value(), 16);
+        return it.value();
+    }
+
+    qCWarning(KARTON_DEBUG) << "Unknown evdev scancode:" << evdev_scancode;
+    return 0;
+}
+
+void DomainViewer::keyPressEvent(QKeyEvent *event)
+{
+    event->accept();
+    quint32 evdev_scancode;
+    if (QGuiApplication::platformName() == QStringLiteral("xcb")) { // check if x11
+        evdev_scancode = event->nativeScanCode();
+    } else { // wayland probably
+        evdev_scancode = event->nativeScanCode() - x11_wayland_evdev_offset;
+    }
+
+    uint8_t pcxt_scancode = DomainViewer::evdevToPcXt(evdev_scancode); // spice accepts PC XT: see inputs channel docs
+    qCDebug(KARTON_DEBUG) << "key press: " << event->text() << evdev_scancode << pcxt_scancode;
+
+    if (m_inputs_channel && m_connected && pcxt_scancode != 0) {
+        spice_inputs_channel_key_press(m_inputs_channel, pcxt_scancode);
+    }
+}
+
+void DomainViewer::keyReleaseEvent(QKeyEvent *event)
+{
+    event->accept();
+
+    quint32 evdev_scancode;
+    if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
+        evdev_scancode = event->nativeScanCode();
+    } else {
+        evdev_scancode = event->nativeScanCode() - x11_wayland_evdev_offset;
+    }
+
+    uint8_t pcxt_scancode = DomainViewer::evdevToPcXt(evdev_scancode);
+
+    if (m_inputs_channel && m_connected && pcxt_scancode != 0) {
+        spice_inputs_channel_key_release(m_inputs_channel, pcxt_scancode);
+    }
+}
+
+void DomainViewer::wheelEvent(QWheelEvent *event)
+{
+    event->accept();
+
+    if (!m_inputs_channel || !m_connected) {
+        return;
+    }
+    int x = event->position().x();
+    int y = event->position().y();
+
+    if (m_imageWidth > 0 && m_imageHeight > 0 && width() > 0 && height() > 0) {
+        x = (x * m_imageWidth) / width();
+        y = (y * m_imageHeight) / height();
+    }
+
+    spice_inputs_channel_position(m_inputs_channel, x, y, 0, 0);
+
+    QPoint angleDelta = event->angleDelta();
+
+    if (angleDelta.y() > 0) { // scroll up
+        spice_inputs_channel_button_press(m_inputs_channel, SPICE_MOUSE_BUTTON_UP, 0);
+        spice_inputs_channel_button_release(m_inputs_channel, SPICE_MOUSE_BUTTON_UP, 0);
+    } else if (angleDelta.y() < 0) { // scroll down
+        spice_inputs_channel_button_press(m_inputs_channel, SPICE_MOUSE_BUTTON_DOWN, 0);
+        spice_inputs_channel_button_release(m_inputs_channel, SPICE_MOUSE_BUTTON_DOWN, 0);
+    }
+
+    if (angleDelta.x() > 0) { // scroll right
+        spice_inputs_channel_button_press(m_inputs_channel, SPICE_MOUSE_BUTTON_RIGHT, 0);
+        spice_inputs_channel_button_release(m_inputs_channel, SPICE_MOUSE_BUTTON_RIGHT, 0);
+    } else if (angleDelta.x() < 0) { // scroll left
+        spice_inputs_channel_button_press(m_inputs_channel, SPICE_MOUSE_BUTTON_LEFT, 0);
+        spice_inputs_channel_button_release(m_inputs_channel, SPICE_MOUSE_BUTTON_LEFT, 0);
+    }
+
+    qCDebug(KARTON_DEBUG) << "wheel event at (" << x << "," << y << ") delta:" << angleDelta;
+}
 void DomainViewer::mouseMoveEvent(QMouseEvent *event)
 { // todo
+    event->accept();
     static int moveCounter = 0;
     if (++moveCounter % 5 == 0) {
         qCInfo(KARTON_DEBUG) << "Mouse Drag: at (" << event->position().x() << "," << event->position().y() << ")";
     }
-    event->accept();
 }
 
 void DomainViewer::hoverMoveEvent(QHoverEvent *event)
@@ -82,7 +183,7 @@ void DomainViewer::hoverMoveEvent(QHoverEvent *event)
             y = (y * m_imageHeight) / height();
         }
 
-        spice_inputs_position(m_inputs_channel, x, y, 0, 0);
+        spice_inputs_channel_position(m_inputs_channel, x, y, 0, 0);
     }
 }
 
@@ -102,7 +203,8 @@ void DomainViewer::mousePressEvent(QMouseEvent *event)
         button = SPICE_MOUSE_BUTTON_MIDDLE;
         break;
     default:
-        qCWarn(KARTON_DEBUG) << "mousepressevent: Unknown button click" return;
+        qCWarning(KARTON_DEBUG) << "mousepressevent: Unknown button click";
+        return;
     }
 
     int button_mask = 0;
@@ -113,7 +215,7 @@ void DomainViewer::mousePressEvent(QMouseEvent *event)
     if (event->buttons() & Qt::RightButton)
         button_mask |= SPICE_MOUSE_BUTTON_MASK_RIGHT;
 
-    spice_inputs_button_press(m_inputs_channel, button, button_mask);
+    spice_inputs_channel_button_press(m_inputs_channel, button, button_mask);
     event->accept();
 }
 

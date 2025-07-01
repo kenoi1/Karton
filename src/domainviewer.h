@@ -3,8 +3,10 @@
 
 #pragma once
 
+#include <linux/input-event-codes.h>
 #include <spice-client.h>
 
+#include <QHash>
 #include <QImage>
 #include <QMutex>
 #include <QObject>
@@ -23,7 +25,7 @@ class DomainViewer : public QQuickItem
     Q_PROPERTY(int port READ port WRITE setPort NOTIFY portChanged)
 
 public:
-    DomainViewer(QQuickItem *parent = nullptr);
+    explicit DomainViewer(QQuickItem *parent = nullptr);
     ~DomainViewer();
 
     Domain *domain() const
@@ -45,6 +47,9 @@ public:
     void mouseMoveEvent(QMouseEvent *event) override;
     void hoverMoveEvent(QHoverEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
     QString host() const
     {
@@ -83,6 +88,7 @@ private:
     static void
     display_primary_create_callback(SpiceChannel *channel, gint format, gint width, gint height, gint stride, gint shmid, gpointer imgdata, gpointer user_data);
     static void display_invalidate_callback(SpiceDisplayChannel *channel, gint x, gint y, gint width, gint height, gpointer user_data);
+    static uint8_t evdevToPcXt(uint32_t evdev_scancode);
 
     QColor m_color;
     Domain *m_domain;
@@ -102,4 +108,8 @@ private:
     QString m_host;
     int m_port = 0;
     QString m_password;
+
+    static constexpr quint32 x11_wayland_evdev_offset = 8;
+    // difference of 8 between x11 wayland.
+    // see: https://wayland-devel.freedesktop.narkive.com/6dOtsFGc/gtk-hardware-scancodes-for-wayland-detecting-xwayland
 };
