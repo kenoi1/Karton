@@ -56,6 +56,7 @@ void DomainViewer::setDomain(Domain *domain)
     }
 }
 
+// maps qt provided scancode to pcxt
 uint8_t DomainViewer::evdevToPcXt(uint32_t evdev_scancode)
 {
     static const QHash<uint32_t, uint8_t> scancode_map = {
@@ -159,7 +160,7 @@ void DomainViewer::wheelEvent(QWheelEvent *event)
     qCDebug(KARTON_DEBUG) << "wheel event at (" << x << "," << y << ") delta:" << angleDelta;
 }
 void DomainViewer::mouseMoveEvent(QMouseEvent *event)
-{ // todo
+{ // todo send spice
     event->accept();
     static int moveCounter = 0;
     if (++moveCounter % 5 == 0) {
@@ -173,7 +174,6 @@ void DomainViewer::hoverMoveEvent(QHoverEvent *event)
     if (++hoverCounter % 20 == 0) {
         qCInfo(KARTON_DEBUG) << "Mouse hover at (" << event->position().x() << "," << event->position().y() << ")";
     }
-    // send to spice
     if (m_inputs_channel && m_connected) {
         int x = event->position().x();
         int y = event->position().y();
