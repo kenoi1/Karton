@@ -140,7 +140,7 @@ void DomainViewer::wheelEvent(QWheelEvent *event)
     spice_inputs_channel_position(m_inputs_channel, x, y, 0, 0);
 
     QPoint angleDelta = event->angleDelta();
-
+    // for more info on constants see: (Inputs channel definition) https://www.spice-space.org/spice-protocol.html
     if (angleDelta.y() > 0) { // scroll up
         spice_inputs_channel_button_press(m_inputs_channel, SPICE_MOUSE_BUTTON_UP, 0);
         spice_inputs_channel_button_release(m_inputs_channel, SPICE_MOUSE_BUTTON_UP, 0);
