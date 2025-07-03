@@ -74,7 +74,7 @@ uint8_t DomainViewer::evdevToPcXt(uint32_t evdev_scancode)
         {KEY_F8, 0x42},         {KEY_F9, 0x43},         {KEY_F10, 0x44},       {KEY_NUMLOCK, 0x45},    {KEY_SCROLLLOCK, 0x46}, {KEY_KP7, 0x47},
         {KEY_KP8, 0x48},        {KEY_KP9, 0x49},        {KEY_KPMINUS, 0x4A},   {KEY_KP4, 0x4B},        {KEY_KP5, 0x4C},        {KEY_KP6, 0x4D},
         {KEY_KPPLUS, 0x4E},     {KEY_KP1, 0x4F},        {KEY_KP2, 0x50},       {KEY_KP3, 0x51},        {KEY_KP0, 0x52},        {KEY_KPDOT, 0x53},
-        {KEY_F11, 0x57},        {KEY_F12, 0x58}};
+        {KEY_F11, 0x57},        {KEY_F12, 0x58},        {KEY_UP, 0x48},        {KEY_DOWN, 0x50},       {KEY_LEFT, 0x4B},       {KEY_RIGHT, 0x4D}};
 
     auto it = scancode_map.find(evdev_scancode);
     if (it != scancode_map.end()) {
