@@ -14,16 +14,37 @@ Kirigami.ApplicationWindow {
     title: domain ? i18n("VM Viewer - %1", domain.config.name) : i18n("VM Viewer")
     
     width: 1008
-    height: 630
+    height: 680
     
+    Controls.Button { // full screen
+        anchors.top: parent.top + 0.5
+        anchors.right: parent.right
+        anchors.margins: 10
+        
+        icon.name: "view-fullscreen"
+        onClicked: {
+            if (viewerWindow.visibility === Window.FullScreen) {
+                viewerWindow.showNormal()
+            } else {
+                viewerWindow.showFullScreen()
+            }
+        }
+    }
+
     pageStack.initialPage: Kirigami.Page {
         title: viewerWindow.title
-        
+        padding: 0 
+
+
         DomainViewer {
-            anchors.fill: parent
+            anchors.centerIn: parent
             domain: viewerWindow.domain
             host: "localhost" // hardcoded TODO
             port: 5900 // hardcoded TODO
+
+            width: 1008
+            height: 630
+            scale: Math.min(parent.width / width, parent.height / height)
 
             focus: true
             activeFocusOnTab: true
@@ -42,5 +63,6 @@ Kirigami.ApplicationWindow {
                 }
             }
         }
+
     }
 }

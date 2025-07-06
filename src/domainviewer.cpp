@@ -231,7 +231,7 @@ void DomainViewer::componentComplete()
 QSGNode *DomainViewer::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
     QMutexLocker locker(&m_frameLock);
-    // qCInfo(KARTON_DEBUG) << "updatePaintNode received frame: size proport." << m_frame.size() << ", is this null??:" << m_frame.isNull();
+    qCInfo(KARTON_DEBUG) << "updatePaintNode received frame: size proport." << m_frame.size() << ", is this null??:" << m_frame.isNull();
 
     // checkChannelStatus();
 
