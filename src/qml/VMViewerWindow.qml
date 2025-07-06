@@ -43,7 +43,7 @@ Kirigami.ApplicationWindow {
             port: 5900 // hardcoded TODO
 
             width: 1008
-            height: 630
+            height: 640
             scale: Math.min(parent.width / width, parent.height / height)
 
             focus: true
