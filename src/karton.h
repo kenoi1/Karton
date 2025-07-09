@@ -26,7 +26,7 @@ class Karton : public QObject
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
-    Q_PROPERTY(Domain *currentDomain READ currentDomain NOTIFY currentDomainChanged)
+    Q_PROPERTY(Domain *currentDomain READ currentDomain NOTIFY currentDomainChanged) // TODO extract
 
 public:
     explicit Karton(QObject *parent = nullptr);

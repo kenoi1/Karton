@@ -43,7 +43,7 @@ Kirigami.ApplicationWindow {
             port: 5900 // hardcoded TODO
 
             width: 1008
-            height: 640
+            height: 640 // todo expose m_imageStuffs
             scale: Math.min(parent.width / width, parent.height / height)
 
             focus: true
@@ -63,6 +63,5 @@ Kirigami.ApplicationWindow {
                 }
             }
         }
-
     }
 }
