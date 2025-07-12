@@ -359,7 +359,6 @@ void Karton::cleanupDomainViewer()
     }
 }
 bool Karton::viewDomain(const Domain *domain)
-
 {
     m_currentDomain = const_cast<Domain *>(domain);
     Q_EMIT currentDomainChanged();
