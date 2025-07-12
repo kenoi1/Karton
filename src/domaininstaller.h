@@ -3,9 +3,8 @@
 
 #pragma once
 
-#include <domainconfig.h>
+#include "domainconfig.h"
 #include <libvirt/libvirt.h>
-#include <linux/input-event-codes.h>
 
 #include <QDomDocument>
 #include <QDomElement>

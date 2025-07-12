@@ -14,6 +14,7 @@
 #include <QSGNode>
 #include <QSGTexture>
 
+#include "commandrunner.h"
 #include "domain.h"
 
 class DomainViewer : public QQuickItem
@@ -37,6 +38,7 @@ public:
     void componentComplete() override;
 
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *) override;
+    bool setupSpiceSession();
     bool connectToSpice();
     void disconnectFromSpice();
 
@@ -83,12 +85,17 @@ Q_SIGNALS:
     void portChanged();
     void hostChanged();
 
+private Q_SLOTS:
+    void handleHostPort(int exitCode, const QString &output);
+
 private:
     static void channel_new_cb(SpiceSession *session, SpiceChannel *channel, gpointer user_data);
     static void
     display_primary_create_callback(SpiceChannel *channel, gint format, gint width, gint height, gint stride, gint shmid, gpointer imgdata, gpointer user_data);
     static void display_invalidate_callback(SpiceDisplayChannel *channel, gint x, gint y, gint width, gint height, gpointer user_data);
     static uint8_t evdevToPcXt(uint32_t evdev_scancode);
+
+    CommandRunner *m_commandRunner;
 
     QColor m_color;
     Domain *m_domain;

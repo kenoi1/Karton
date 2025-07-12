@@ -10,8 +10,8 @@
 #include <QQmlEngine>
 #include <QXmlStreamReader>
 
+#include "commandrunner.h"
 #include "domain.h"
-#include "domainconfig.h"
 #include "domainviewer.h"
 #include <qqmlintegration.h>
 
@@ -60,9 +60,9 @@ public:
 
 Q_SIGNALS:
     void currentDomainChanged();
+    void commandFinished(int exitCode, const QString &output);
 
 public Q_SLOTS:
-    Q_INVOKABLE bool runCommand(const QString &command);
     Q_INVOKABLE bool startDomain(const Domain *domain);
     Q_INVOKABLE bool stopDomain(const Domain *domain);
     Q_INVOKABLE bool viewDomain(const Domain *domain);
@@ -71,7 +71,6 @@ public Q_SLOTS:
     Q_INVOKABLE bool deleteDomain(const Domain *domain, const bool deleteDisk);
 
 Q_SIGNALS:
-    void commandFinished(int exitCode, const QString &output);
     void domainsChanged(const virDomainPtr domainPtr, int event, int detail);
     void errorOccurred(const QString &errorMessage);
 
@@ -80,6 +79,7 @@ private Q_SLOTS:
 
 private:
     virConnectPtr m_conn;
+    CommandRunner *m_commandRunner;
     QVector<Domain *> m_domains;
     LibvirtMonitor *m_monitor;
 

@@ -9,6 +9,7 @@
 #include <QQuickWindow>
 #include <QSGSimpleTextureNode>
 #include <QString>
+#include <QUrl>
 
 #include "domain.h"
 #include "glib.h"
@@ -21,13 +22,15 @@ DomainViewer::DomainViewer(QQuickItem *parent)
     , m_port(5900)
     , m_connected(false)
     , m_frameUpdated(false)
+    , m_commandRunner(new CommandRunner(this))
 {
     setFlag(ItemHasContents, true);
     setAcceptedMouseButtons(Qt::AllButtons);
     setAcceptHoverEvents(true);
     setFlag(ItemIsFocusScope, true);
 
-    qDebug() << "DomainViewer constructor - default host:" << m_host << "port:" << m_port;
+    connect(m_commandRunner, &CommandRunner::commandFinished, this, &DomainViewer::handleHostPort);
+    qCDebug(KARTON_DEBUG) << "DomainViewer constructor - setting default host:" << m_host << "port:" << m_port;
 }
 
 DomainViewer::~DomainViewer()
@@ -49,11 +52,174 @@ void DomainViewer::setDomain(Domain *domain)
 
     if (isComponentComplete() && m_domain) {
         if (m_domain) {
-            connectToSpice();
+            setupSpiceSession();
         } else {
             qCDebug(KARTON_DEBUG) << "setDomain(): null domain assigned";
         }
     }
+}
+
+void DomainViewer::componentComplete()
+{
+    qCCritical(KARTON_DEBUG) << "run?!";
+    QQuickItem::componentComplete();
+    if (m_domain) {
+        setupSpiceSession();
+    }
+}
+
+QSGNode *DomainViewer::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
+{
+    QMutexLocker locker(&m_frameLock);
+    // qCInfo(KARTON_DEBUG) << "updatePaintNode received frame: size proport." << m_frame.size() << ", is this null??:" << m_frame.isNull();
+
+    // checkChannelStatus();
+
+    // prevent render if not updated or valid
+    if (!m_frameUpdated || m_frame.isNull() || m_frame.width() <= 0 || m_frame.height() <= 0) {
+        delete oldNode;
+        return nullptr;
+    }
+
+    QSGSimpleTextureNode *node = static_cast<QSGSimpleTextureNode *>(oldNode);
+
+    if (!node) {
+        node = new QSGSimpleTextureNode();
+        node->setOwnsTexture(true);
+    }
+
+    QSGTexture *texture = window()->createTextureFromImage(m_frame);
+    if (texture) {
+        node->setTexture(texture);
+        node->setRect(boundingRect());
+        m_frameUpdated = false;
+    }
+
+    return node;
+}
+
+void DomainViewer::handleHostPort(int exitCode, const QString &output)
+{
+    qCInfo(KARTON_DEBUG) << "finished running command hostport";
+    if (exitCode == 0 && !output.isEmpty()) {
+        QUrl url(output.trimmed());
+
+        if (url.isValid()) {
+            QString host = url.host();
+            int port = url.port();
+
+            m_host = host;
+            m_port = port;
+            qCInfo(KARTON_DEBUG) << "setting host-port to " << host << ", " << port;
+            bool temp = connectToSpice(); // TODO: make this func a bool so return errors, but its async rn so its pain.
+        }
+    }
+}
+bool DomainViewer::setupSpiceSession()
+{
+    // once finished, handleHostPort() will set the host and port provided by the output.
+    m_commandRunner->runCommand(QStringLiteral("virsh domdisplay %1").arg(m_domain->config()->name()));
+    return true; // TODO proper errors
+}
+bool DomainViewer::connectToSpice()
+{
+    qCCritical(KARTON_DEBUG) << "Running connection to spice! host- " << m_host << ", Port is:" << m_port;
+    if (!m_domain) {
+        qCCritical(KARTON_DEBUG) << "connectToSpice() called but domain is null!";
+        return false;
+    }
+
+    disconnectFromSpice();
+
+    m_session = spice_session_new();
+
+    QString uri = QString::fromUtf8("spice://%1:%2").arg(m_host).arg(m_port);
+
+    qCInfo(KARTON_DEBUG) << "Connecting to URI! -" << uri;
+    g_object_set(m_session, "uri", uri.toUtf8().constData(), NULL);
+    // could use SpiceURI directly also
+
+    g_signal_connect(m_session, "channel-new", G_CALLBACK(DomainViewer::channel_new_cb), this);
+
+    if (!spice_session_connect(m_session)) {
+        g_object_unref(m_session);
+        m_session = nullptr;
+        return false;
+    }
+    qCInfo(KARTON_DEBUG) << "yay! connected to " << domain()->config()->name();
+    m_connected = true;
+
+    return true;
+}
+
+void DomainViewer::disconnectFromSpice()
+{
+    if (m_session) {
+        spice_session_disconnect(m_session);
+        g_object_unref(m_session);
+        m_session = nullptr;
+        m_display_channel = nullptr;
+        m_connected = false;
+    }
+}
+
+void DomainViewer::channel_new_cb(SpiceSession *session, SpiceChannel *channel, gpointer user_data)
+{
+    DomainViewer *item = static_cast<DomainViewer *>(user_data);
+
+    // checkChannelStatus(); // debug msgs.
+    if (SPICE_IS_DISPLAY_CHANNEL(channel)) {
+        qCInfo(KARTON_DEBUG) << "SPICE display connected";
+
+        spice_channel_connect(channel);
+        item->m_display_channel = channel;
+
+        g_signal_connect(channel, "display-primary-create", G_CALLBACK(display_primary_create_callback), item);
+        g_signal_connect(channel, "display-invalidate", G_CALLBACK(display_invalidate_callback), item);
+    } else if (SPICE_IS_INPUTS_CHANNEL(channel)) {
+        qCInfo(KARTON_DEBUG) << "SPICE: Inputs connected";
+        spice_channel_connect(channel);
+        item->m_inputs_channel = SPICE_INPUTS_CHANNEL(channel);
+    }
+}
+void DomainViewer::display_primary_create_callback(SpiceChannel *channel,
+                                                   gint format,
+                                                   gint width,
+                                                   gint height,
+                                                   gint stride,
+                                                   gint shmid,
+                                                   gpointer imgdata,
+                                                   gpointer user_data)
+{
+    DomainViewer *item = static_cast<DomainViewer *>(user_data);
+    qCInfo(KARTON_DEBUG) << "SPICE: primary framebuffer received! size:" << width << "x" << height;
+    qCInfo(KARTON_DEBUG) << "SPICE: format is:" << format;
+    QMutexLocker locker(&item->m_frameLock);
+
+    item->m_frameBuffer = static_cast<uchar *>(imgdata);
+    item->m_imageWidth = width;
+    item->m_imageHeight = height;
+    item->m_frame = QImage(width, height, QImage::Format_RGB32);
+
+    item->m_frameUpdated = true;
+    QMetaObject::invokeMethod(item, "frameUpdated", Qt::QueuedConnection); // could also do queued
+    QMetaObject::invokeMethod(item, "update", Qt::QueuedConnection);
+}
+
+void DomainViewer::display_invalidate_callback(SpiceDisplayChannel *channel, gint x, gint y, gint width, gint height, gpointer user_data)
+{
+    DomainViewer *item = static_cast<DomainViewer *>(user_data);
+    item->m_frameUpdated = true;
+
+    // Copy from spice-glib framebuffer to the QImage to render - inefficient, might want to switch to another approach (partial render?)
+    uint *source = reinterpret_cast<uint *>(item->m_frameBuffer);
+    for (int i = y; i < y + height; ++i) {
+        for (int j = x; j < x + width; ++j) {
+            item->m_frame.setPixel(j, i, source[item->m_imageWidth * i + j]);
+        }
+    }
+
+    QMetaObject::invokeMethod(item, "update", Qt::QueuedConnection);
 }
 
 // maps qt provided scancode to pcxt
@@ -217,144 +383,6 @@ void DomainViewer::mousePressEvent(QMouseEvent *event)
 
     spice_inputs_channel_button_press(m_inputs_channel, button, button_mask);
     event->accept();
-}
-
-void DomainViewer::componentComplete()
-{
-    qCCritical(KARTON_DEBUG) << "run?!";
-    QQuickItem::componentComplete();
-    if (m_domain) {
-        connectToSpice();
-    }
-}
-
-QSGNode *DomainViewer::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
-{
-    QMutexLocker locker(&m_frameLock);
-    qCInfo(KARTON_DEBUG) << "updatePaintNode received frame: size proport." << m_frame.size() << ", is this null??:" << m_frame.isNull();
-
-    // checkChannelStatus();
-
-    // prevent render if not updated or valid
-    if (!m_frameUpdated || m_frame.isNull() || m_frame.width() <= 0 || m_frame.height() <= 0) {
-        delete oldNode;
-        return nullptr;
-    }
-
-    QSGSimpleTextureNode *node = static_cast<QSGSimpleTextureNode *>(oldNode);
-
-    if (!node) {
-        node = new QSGSimpleTextureNode();
-        node->setOwnsTexture(true);
-    }
-
-    QSGTexture *texture = window()->createTextureFromImage(m_frame);
-    if (texture) {
-        node->setTexture(texture);
-        node->setRect(boundingRect());
-        m_frameUpdated = false;
-    }
-
-    return node;
-}
-
-bool DomainViewer::connectToSpice()
-{
-    qCCritical(KARTON_DEBUG) << "Running connecte to spice! " << m_host << ", Port is:" << m_port;
-    if (!m_domain) {
-        qCCritical(KARTON_DEBUG) << "connectToSpice() called but domain is null!";
-        return false;
-    }
-
-    disconnectFromSpice();
-
-    m_session = spice_session_new();
-
-    QString uri = QString::fromUtf8("spice://%1:%2").arg(m_host).arg(m_port);
-    g_object_set(m_session, "uri", uri.toUtf8().constData(), NULL);
-    // could use SpiceURI directly also
-
-    g_signal_connect(m_session, "channel-new", G_CALLBACK(DomainViewer::channel_new_cb), this);
-
-    if (!spice_session_connect(m_session)) {
-        g_object_unref(m_session);
-        m_session = nullptr;
-        return false;
-    }
-    qCInfo(KARTON_DEBUG) << "yay! connected to " << domain()->config()->name();
-    m_connected = true;
-
-    return true;
-}
-
-void DomainViewer::disconnectFromSpice()
-{
-    if (m_session) {
-        spice_session_disconnect(m_session);
-        g_object_unref(m_session);
-        m_session = nullptr;
-        m_display_channel = nullptr;
-        m_connected = false;
-    }
-}
-
-void DomainViewer::channel_new_cb(SpiceSession *session, SpiceChannel *channel, gpointer user_data)
-{
-    DomainViewer *item = static_cast<DomainViewer *>(user_data);
-
-    // checkChannelStatus(); // debug msgs.
-    if (SPICE_IS_DISPLAY_CHANNEL(channel)) {
-        qCInfo(KARTON_DEBUG) << "SPICE display connected";
-
-        spice_channel_connect(channel);
-        item->m_display_channel = channel;
-
-        g_signal_connect(channel, "display-primary-create", G_CALLBACK(display_primary_create_callback), item);
-        g_signal_connect(channel, "display-invalidate", G_CALLBACK(display_invalidate_callback), item);
-    } else if (SPICE_IS_INPUTS_CHANNEL(channel)) {
-        qCInfo(KARTON_DEBUG) << "SPICE: Inputs connected";
-        spice_channel_connect(channel);
-        item->m_inputs_channel = SPICE_INPUTS_CHANNEL(channel);
-    }
-}
-void DomainViewer::display_primary_create_callback(SpiceChannel *channel,
-                                                   gint format,
-                                                   gint width,
-                                                   gint height,
-                                                   gint stride,
-                                                   gint shmid,
-                                                   gpointer imgdata,
-                                                   gpointer user_data)
-{
-    DomainViewer *item = static_cast<DomainViewer *>(user_data);
-    qCInfo(KARTON_DEBUG) << "SPICE: primary framebuffer received! size:" << width << "x" << height;
-    qCInfo(KARTON_DEBUG) << "SPICE: format is:" << format;
-    QMutexLocker locker(&item->m_frameLock);
-
-    item->m_frameBuffer = static_cast<uchar *>(imgdata);
-    item->m_imageWidth = width;
-    item->m_imageHeight = height;
-    item->m_frame = QImage(width, height, QImage::Format_RGB32);
-
-    item->m_frameUpdated = true;
-    QMetaObject::invokeMethod(item, "frameUpdated", Qt::QueuedConnection); // could also do queued
-    QMetaObject::invokeMethod(item, "update", Qt::QueuedConnection);
-}
-
-void DomainViewer::display_invalidate_callback(SpiceDisplayChannel *channel, gint x, gint y, gint width, gint height, gpointer user_data)
-{
-    DomainViewer *item = static_cast<DomainViewer *>(user_data);
-    item->m_frameUpdated = true;
-
-    // Copy from spice-glib framebuffer to the QImage to render - inefficient, might want to switch to another approach (partial render?)
-    uint *source = reinterpret_cast<uint *>(item->m_frameBuffer);
-    for (int i = y; i < y + height; ++i) {
-        for (int j = x; j < x + width; ++j) {
-            item->m_frame.setPixel(j, i, source[item->m_imageWidth * i + j]);
-        }
-    }
-
-    QMetaObject::invokeMethod(item, "update", Qt::QueuedConnection);
 }
 
 void DomainViewer::checkChannelStatus()

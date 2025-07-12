@@ -39,8 +39,8 @@ Kirigami.ApplicationWindow {
         DomainViewer {
             anchors.centerIn: parent
             domain: viewerWindow.domain
-            host: "localhost" // hardcoded TODO
-            port: 5900 // hardcoded TODO
+            // host: "localhost" // hardcoded TODO
+            // port: 5900 // hardcoded TODO
 
             width: 1008
             height: 640 // todo expose m_imageStuffs

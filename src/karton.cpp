@@ -26,7 +26,9 @@ Karton::Karton(QObject *parent)
     , m_monitor(nullptr)
     , m_domainViewer(nullptr)
     , m_currentDomain(nullptr)
+    , m_commandRunner(new CommandRunner(this))
 {
+    connect(m_commandRunner, &CommandRunner::commandFinished, this, &Karton::commandFinished);
     init();
 }
 
@@ -326,7 +328,8 @@ bool Karton::createDomain(const QVariantMap &config)
     auto domainConfig = std::make_unique<DomainConfig>(configData);
 
     DomainInstaller installer;
-    if (!runCommand(QStringLiteral("qemu-img create -f qcow2 %1 %2G").arg(domainConfig->virtualDiskPath()).arg(domainConfig->maxDiskStorage()))) {
+    if (!m_commandRunner->runCommand(
+            QStringLiteral("qemu-img create -f qcow2 %1 %2G").arg(domainConfig->virtualDiskPath()).arg(domainConfig->maxDiskStorage()))) {
         return false;
     }
     if (!installer.setupDomain(m_conn, domainConfig.get())) {
@@ -364,18 +367,4 @@ bool Karton::viewDomain(const Domain *domain)
     Q_EMIT currentDomainChanged();
 
     return true;
-}
-
-// Use for virsh, virt-viewer, virt-install and other CLI
-bool Karton::runCommand(const QString &command)
-{
-    qCDebug(KARTON_DEBUG) << "Running Command:" << command;
-    auto process = new QProcess(this);
-    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [this, process](int exitCode, QProcess::ExitStatus) {
-        QString output = QString::fromLocal8Bit(process->readAllStandardOutput());
-        Q_EMIT commandFinished(exitCode, output);
-    });
-    process->startCommand(command);
-
-    return process->waitForStarted();
 }

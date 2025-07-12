@@ -23,6 +23,7 @@ target_sources(karton
     domaininstaller.cpp
     osinfoconfig.cpp
     domainxmlreader.cpp
+    commandrunner.cpp
 )
 
 ecm_target_qml_sources(karton
