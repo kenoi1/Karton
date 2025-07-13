@@ -71,6 +71,6 @@ QString DomainXmlReader::retrieveDiskPath(QXmlStreamReader &xmlReader, QXmlStrea
             return xmlReader.attributes().value("file").toString();
         }
     }
-    qCCritical(KARTON_DEBUG) << "did not find path.";
+    qCCritical(KARTON_DEBUG) << "xmlstreamreader: Could not find disk path";
     return QString();
 }

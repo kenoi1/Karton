@@ -43,20 +43,8 @@ public:
     QString getXmlConfigPath(const QString &domainName);
 
     void cleanupDomainViewer();
-
-    void setCurrentDomain(Domain *domain)
-    {
-        if (m_currentDomain != domain) {
-            m_currentDomain = domain;
-            Q_EMIT currentDomainChanged();
-        }
-    }
-    Domain *currentDomain()
-    {
-        if (!m_currentDomain)
-            qWarning() << "Warning: currentDomain is null!";
-        return m_currentDomain;
-    }
+    void setCurrentDomain(Domain *domain);
+    Domain *currentDomain();
 
 Q_SIGNALS:
     void currentDomainChanged();

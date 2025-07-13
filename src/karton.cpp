@@ -83,6 +83,20 @@ bool Karton::init()
     return true;
 }
 
+void Karton::setCurrentDomain(Domain *domain)
+{
+    if (m_currentDomain != domain) {
+        m_currentDomain = domain;
+        Q_EMIT currentDomainChanged();
+    }
+}
+Domain *Karton::currentDomain()
+{
+    if (!m_currentDomain)
+        qWarning() << "Warning: currentDomain is null!";
+    return m_currentDomain;
+}
+
 // searchDomain(domain) returns index position of the domain in m_domains
 int Karton::searchDomain(const virDomainPtr domainPtr)
 {

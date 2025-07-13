@@ -46,6 +46,16 @@ private:
         QString listen;
     };
 
+    struct SoundConfig {
+        QString model;
+        QString id;
+    };
+
+    struct AudioConfig {
+        QString id;
+        QString type;
+    };
+
     struct VideoConfig {
         QString model;
         QString heads;
@@ -60,9 +70,12 @@ private:
     struct ConsoleConfig {
         QString type;
     };
+
     void addDiskDevices(QDomDocument &document, QDomElement &parent, const DiskDeviceConfig &config);
     void addNetworkInterfaceDevices(QDomDocument &document, QDomElement &parent, const NetworkInterfaceConfig &config);
     void addGraphicsDevices(QDomDocument &document, QDomElement &parent, const GraphicsConfig &config);
+    void addSoundDevices(QDomDocument &document, QDomElement &parent, const SoundConfig &config);
+    void addAudioDevices(QDomDocument &document, QDomElement &parent, const AudioConfig &config);
     void addVideoDevices(QDomDocument &document, QDomElement &parent, const VideoConfig &config);
     void addInputDevices(QDomDocument &document, QDomElement &parent, const InputConfig &config);
     void addConsoleDevices(QDomDocument &document, QDomElement &parent, const ConsoleConfig &config);

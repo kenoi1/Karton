@@ -56,6 +56,7 @@ target_link_libraries(karton
     Qt6::QuickControls2
     Qt6::Widgets
     Qt6::Xml
+    Qt6::Multimedia
     KF6::I18n
     KF6::CoreAddons
     KF6::IconThemes

@@ -14,6 +14,11 @@
 #include <QSGNode>
 #include <QSGTexture>
 
+#include <QAudioFormat>
+#include <QAudioSink>
+#include <QBuffer>
+#include <QIODevice>
+
 #include "commandrunner.h"
 #include "domain.h"
 
@@ -41,6 +46,8 @@ public:
     bool setupSpiceSession();
     bool connectToSpice();
     void disconnectFromSpice();
+
+    void stopAudio();
 
     void updateTexture();
 
@@ -95,6 +102,9 @@ private:
     static void display_invalidate_callback(SpiceDisplayChannel *channel, gint x, gint y, gint width, gint height, gpointer user_data);
     static uint8_t evdevToPcXt(uint32_t evdev_scancode);
 
+    static void playback_start_callback(SpicePlaybackChannel *channel, gint format, gint channels, gint rate, gpointer user_data);
+    static void playback_data_callback(SpicePlaybackChannel *channel, gpointer data, gint size, gpointer user_data);
+    static void playback_stop_callback(SpicePlaybackChannel *channel, gpointer user_data);
     CommandRunner *m_commandRunner;
 
     QColor m_color;
@@ -111,6 +121,14 @@ private:
     SpiceSession *m_session = nullptr;
     SpiceChannel *m_display_channel = nullptr;
     SpiceInputsChannel *m_inputs_channel = nullptr;
+
+    SpiceAudio *m_audio;
+    SpicePlaybackChannel *m_playback_channel;
+    QAudioSink *m_audioSink;
+    QIODevice *m_audioDevice;
+    QAudioFormat m_audioFormat;
+    QBuffer *m_audioBuffer;
+    QByteArray m_audioData;
 
     QString m_host;
     int m_port = 0;

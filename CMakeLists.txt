@@ -29,6 +29,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     QuickControls2
     Widgets
     Xml
+    Multimedia
 )
 
 find_package(Libvirt REQUIRED)

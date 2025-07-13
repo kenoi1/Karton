@@ -23,6 +23,11 @@ DomainViewer::DomainViewer(QQuickItem *parent)
     , m_connected(false)
     , m_frameUpdated(false)
     , m_commandRunner(new CommandRunner(this))
+    , m_audio(nullptr)
+    , m_playback_channel(nullptr)
+    , m_audioSink(nullptr)
+    , m_audioDevice(nullptr)
+    , m_audioBuffer(nullptr)
 {
     setFlag(ItemHasContents, true);
     setAcceptedMouseButtons(Qt::AllButtons);
@@ -71,7 +76,7 @@ void DomainViewer::componentComplete()
 QSGNode *DomainViewer::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
     QMutexLocker locker(&m_frameLock);
-    // qCInfo(KARTON_DEBUG) << "updatePaintNode received frame: size proport." << m_frame.size() << ", is this null??:" << m_frame.isNull();
+    // qCInfo(KARTON_DEBUG) << "updatePaintNode received frame: size proport." << m_frame.size() << ", null?:" << m_frame.isNull();
 
     // checkChannelStatus();
 
@@ -123,7 +128,7 @@ bool DomainViewer::setupSpiceSession()
 }
 bool DomainViewer::connectToSpice()
 {
-    qCCritical(KARTON_DEBUG) << "Running connection to spice! host- " << m_host << ", Port is:" << m_port;
+    qCCritical(KARTON_DEBUG) << "Running connection to spice! host - " << m_host << ", Port is:" << m_port;
     if (!m_domain) {
         qCCritical(KARTON_DEBUG) << "connectToSpice() called but domain is null!";
         return false;
@@ -144,6 +149,7 @@ bool DomainViewer::connectToSpice()
     if (!spice_session_connect(m_session)) {
         g_object_unref(m_session);
         m_session = nullptr;
+        m_audio = nullptr;
         return false;
     }
     qCInfo(KARTON_DEBUG) << "yay! connected to " << domain()->config()->name();
@@ -154,11 +160,16 @@ bool DomainViewer::connectToSpice()
 
 void DomainViewer::disconnectFromSpice()
 {
+    stopAudio();
+
     if (m_session) {
         spice_session_disconnect(m_session);
+
         g_object_unref(m_session);
         m_session = nullptr;
         m_display_channel = nullptr;
+        m_audio = nullptr;
+        m_playback_channel = nullptr;
         m_connected = false;
     }
 }
@@ -167,7 +178,7 @@ void DomainViewer::channel_new_cb(SpiceSession *session, SpiceChannel *channel, 
 {
     DomainViewer *item = static_cast<DomainViewer *>(user_data);
 
-    // checkChannelStatus(); // debug msgs.
+    // checkChannelStatus(); // channel debug msgs
     if (SPICE_IS_DISPLAY_CHANNEL(channel)) {
         qCInfo(KARTON_DEBUG) << "SPICE display connected";
 
@@ -180,6 +191,14 @@ void DomainViewer::channel_new_cb(SpiceSession *session, SpiceChannel *channel, 
         qCInfo(KARTON_DEBUG) << "SPICE: Inputs connected";
         spice_channel_connect(channel);
         item->m_inputs_channel = SPICE_INPUTS_CHANNEL(channel);
+    } else if (SPICE_IS_PLAYBACK_CHANNEL(channel)) {
+        qCInfo(KARTON_DEBUG) << "SPICE: Audio playback connected";
+        spice_channel_connect(channel);
+        item->m_playback_channel = SPICE_PLAYBACK_CHANNEL(channel);
+
+        g_signal_connect(channel, "playback-start", G_CALLBACK(playback_start_callback), item);
+        g_signal_connect(channel, "playback-data", G_CALLBACK(playback_data_callback), item);
+        g_signal_connect(channel, "playback-stop", G_CALLBACK(playback_stop_callback), item);
     }
 }
 void DomainViewer::display_primary_create_callback(SpiceChannel *channel,
@@ -220,6 +239,64 @@ void DomainViewer::display_invalidate_callback(SpiceDisplayChannel *channel, gin
     }
 
     QMetaObject::invokeMethod(item, "update", Qt::QueuedConnection);
+}
+
+void DomainViewer::playback_start_callback(SpicePlaybackChannel *channel, gint format, gint channels, gint rate, gpointer user_data)
+{
+    DomainViewer *item = static_cast<DomainViewer *>(user_data);
+    qCInfo(KARTON_DEBUG) << "Audio playback starting - Format:" << format << "Channels:" << channels << "Rate:" << rate;
+
+    item->m_audioFormat.setSampleRate(rate);
+    item->m_audioFormat.setChannelCount(channels);
+    item->m_audioFormat.setSampleFormat(QAudioFormat::Int16);
+
+    // item->m_audioSink = new QAudioSink(item->m_audioFormat, item);
+    // if (item->m_audioSink->state() == QAudio::StoppedState) {
+    //     item->m_audioBuffer = new QBuffer(&item->m_audioData, item);
+    //     item->m_audioBuffer->open(QIODevice::ReadWrite);
+    //     item->m_audioDevice = item->m_audioSink->start();
+    //     qCInfo(KARTON_DEBUG) << "Audio output started successfully";
+    // } else {
+    //     qCWarning(KARTON_DEBUG) << "Failed to start audio output";
+    // }
+    item->m_audioDevice = item->m_audioSink->start();
+}
+
+void DomainViewer::playback_data_callback(SpicePlaybackChannel *channel, gpointer data, gint size, gpointer user_data)
+{
+    DomainViewer *item = static_cast<DomainViewer *>(user_data);
+
+    if (item->m_audioDevice && item->m_audioSink->state() == QAudio::ActiveState) {
+        qint64 written = item->m_audioDevice->write(static_cast<const char *>(data), size);
+        if (written != size) {
+            qCWarning(KARTON_DEBUG) << "Audio write incomplete:" << written << "of" << size << "bytes";
+        }
+    }
+}
+
+void DomainViewer::playback_stop_callback(SpicePlaybackChannel *channel, gpointer user_data)
+{
+    DomainViewer *item = static_cast<DomainViewer *>(user_data);
+    qCInfo(KARTON_DEBUG) << "Audio playback stopping";
+    item->stopAudio();
+}
+
+void DomainViewer::stopAudio()
+{
+    if (m_audioSink) {
+        m_audioSink->stop();
+        delete m_audioSink;
+        m_audioSink = nullptr;
+    }
+
+    if (m_audioBuffer) {
+        m_audioBuffer->close();
+        delete m_audioBuffer;
+        m_audioBuffer = nullptr;
+    }
+
+    m_audioDevice = nullptr;
+    m_audioData.clear();
 }
 
 // maps qt provided scancode to pcxt
@@ -338,7 +415,7 @@ void DomainViewer::hoverMoveEvent(QHoverEvent *event)
 {
     static int hoverCounter = 0;
     if (++hoverCounter % 20 == 0) {
-        qCInfo(KARTON_DEBUG) << "Mouse hover at (" << event->position().x() << "," << event->position().y() << ")";
+        // qCInfo(KARTON_DEBUG) << "Mouse hover at (" << event->position().x() << "," << event->position().y() << ")";
     }
     if (m_inputs_channel && m_connected) {
         int x = event->position().x();

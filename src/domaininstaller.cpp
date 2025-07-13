@@ -191,6 +191,12 @@ QString DomainInstaller::generateXML(virConnectPtr conn, const DomainConfig *con
     // devices->graphics element
     addGraphicsDevices(document, devices, {.type = QStringLiteral("spice"), .autoport = QStringLiteral("yes"), .listen = QStringLiteral("address")});
 
+    // devices->sound element
+    addSoundDevices(document, devices, {.model = QStringLiteral("ich9"), .id = QStringLiteral("1")});
+
+    // devices->audio element
+    addAudioDevices(document, devices, {.id = QStringLiteral("1"), .type = QStringLiteral("spice")});
+
     // devices->video element
     addVideoDevices(document, devices, {.model = QStringLiteral("virtio"), .heads = QStringLiteral("1"), .primary = QStringLiteral("yes")});
 
@@ -276,6 +282,25 @@ void DomainInstaller::addGraphicsDevices(QDomDocument &document, QDomElement &pa
     QMap<QString, QString> listen;
     listen[QStringLiteral("type")] = config.listen;
     addElementWithAttributes(document, graphics, QStringLiteral("listen"), QString(), listen);
+}
+
+void DomainInstaller::addSoundDevices(QDomDocument &document, QDomElement &parent, const SoundConfig &config)
+{
+    QDomElement sound = document.createElement(QStringLiteral("sound"));
+    parent.appendChild(sound);
+    sound.setAttribute(QStringLiteral("model"), config.model);
+
+    QDomElement audio = document.createElement(QStringLiteral("audio"));
+    sound.appendChild(audio);
+    audio.setAttribute(QStringLiteral("id"), config.id);
+}
+
+void DomainInstaller::addAudioDevices(QDomDocument &document, QDomElement &parent, const AudioConfig &config)
+{
+    QDomElement audio = document.createElement(QStringLiteral("audio"));
+    parent.appendChild(audio);
+    audio.setAttribute(QStringLiteral("id"), config.id);
+    audio.setAttribute(QStringLiteral("type"), config.type);
 }
 
 void DomainInstaller::addVideoDevices(QDomDocument &document, QDomElement &parent, const VideoConfig &config)
