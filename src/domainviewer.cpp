@@ -27,7 +27,6 @@ DomainViewer::DomainViewer(QQuickItem *parent)
     , m_playback_channel(nullptr)
     , m_audioSink(nullptr)
     , m_audioDevice(nullptr)
-    , m_audioBuffer(nullptr)
 {
     setFlag(ItemHasContents, true);
     setAcceptedMouseButtons(Qt::AllButtons);
@@ -246,31 +245,24 @@ void DomainViewer::playback_start_callback(SpicePlaybackChannel *channel, gint f
     DomainViewer *item = static_cast<DomainViewer *>(user_data);
     qCInfo(KARTON_DEBUG) << "Audio playback starting - Format:" << format << "Channels:" << channels << "Rate:" << rate;
 
+    item->stopAudio();
+
     item->m_audioFormat.setSampleRate(rate);
     item->m_audioFormat.setChannelCount(channels);
     item->m_audioFormat.setSampleFormat(QAudioFormat::Int16);
 
-    // item->m_audioSink = new QAudioSink(item->m_audioFormat, item);
-    // if (item->m_audioSink->state() == QAudio::StoppedState) {
-    //     item->m_audioBuffer = new QBuffer(&item->m_audioData, item);
-    //     item->m_audioBuffer->open(QIODevice::ReadWrite);
-    //     item->m_audioDevice = item->m_audioSink->start();
-    //     qCInfo(KARTON_DEBUG) << "Audio output started successfully";
-    // } else {
-    //     qCWarning(KARTON_DEBUG) << "Failed to start audio output";
-    // }
+    item->m_audioSink = new QAudioSink(item->m_audioFormat, item);
     item->m_audioDevice = item->m_audioSink->start();
+
+    qCInfo(KARTON_DEBUG) << "Audio output started successfully";
 }
 
 void DomainViewer::playback_data_callback(SpicePlaybackChannel *channel, gpointer data, gint size, gpointer user_data)
 {
     DomainViewer *item = static_cast<DomainViewer *>(user_data);
 
-    if (item->m_audioDevice && item->m_audioSink->state() == QAudio::ActiveState) {
-        qint64 written = item->m_audioDevice->write(static_cast<const char *>(data), size);
-        if (written != size) {
-            qCWarning(KARTON_DEBUG) << "Audio write incomplete:" << written << "of" << size << "bytes";
-        }
+    if (item->m_audioDevice) {
+        item->m_audioDevice->write(static_cast<const char *>(data), size);
     }
 }
 
@@ -289,14 +281,7 @@ void DomainViewer::stopAudio()
         m_audioSink = nullptr;
     }
 
-    if (m_audioBuffer) {
-        m_audioBuffer->close();
-        delete m_audioBuffer;
-        m_audioBuffer = nullptr;
-    }
-
     m_audioDevice = nullptr;
-    m_audioData.clear();
 }
 
 // maps qt provided scancode to pcxt

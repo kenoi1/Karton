@@ -16,7 +16,6 @@
 
 #include <QAudioFormat>
 #include <QAudioSink>
-#include <QBuffer>
 #include <QIODevice>
 
 #include "commandrunner.h"
@@ -127,8 +126,6 @@ private:
     QAudioSink *m_audioSink;
     QIODevice *m_audioDevice;
     QAudioFormat m_audioFormat;
-    QBuffer *m_audioBuffer;
-    QByteArray m_audioData;
 
     QString m_host;
     int m_port = 0;
