@@ -115,15 +115,17 @@ void DomainViewer::handleHostPort(int exitCode, const QString &output)
             m_host = host;
             m_port = port;
             qCInfo(KARTON_DEBUG) << "setting host-port to " << host << ", " << port;
-            bool temp = connectToSpice(); // TODO: make this func a bool so return errors, but its async rn so its pain.
+            if (!connectToSpice()) {
+                qCCritical(KARTON_DEBUG) << "Failed to connect to SPICE";
+            }
         }
     }
 }
 bool DomainViewer::setupSpiceSession()
 {
     // once finished, handleHostPort() will set the host and port provided by the output.
-    m_commandRunner->runCommand(QStringLiteral("virsh domdisplay %1").arg(m_domain->config()->name()));
-    return true; // TODO proper errors
+    bool commandStarted = m_commandRunner->runCommand(QStringLiteral("virsh domdisplay %1").arg(m_domain->config()->name()));
+    return commandStarted;
 }
 bool DomainViewer::connectToSpice()
 {
