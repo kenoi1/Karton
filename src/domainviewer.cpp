@@ -379,27 +379,31 @@ void DomainViewer::wheelEvent(QWheelEvent *event)
 
 void DomainViewer::mouseMoveEvent(QMouseEvent *event)
 {
-    if (!m_inputs_channel || !m_connected)
-        return;
+    int button_mask = 0;
+    if (event->buttons() & Qt::LeftButton)
+        button_mask |= SPICE_MOUSE_BUTTON_MASK_LEFT;
+    if (event->buttons() & Qt::MiddleButton)
+        button_mask |= SPICE_MOUSE_BUTTON_MASK_MIDDLE;
+    if (event->buttons() & Qt::RightButton)
+        button_mask |= SPICE_MOUSE_BUTTON_MASK_RIGHT;
 
     int x = event->position().x();
     int y = event->position().y();
 
-    if (m_imageWidth > 0 && m_imageHeight > 0 && width() > 0 && height() > 0) {
+    if (width() > 0 && height() > 0) {
         x = (x * m_imageWidth) / width();
         y = (y * m_imageHeight) / height();
     }
 
-    spice_inputs_channel_position(m_inputs_channel, x, y, m_current_button_mask, 0);
-
+    // note: theres a warning that it's deprecated, but newer version has some bug with drag.
+    spice_inputs_position(m_inputs_channel, x, y, 0, button_mask);
     static int moveCounter = 0;
     if (++moveCounter % 10 == 0) {
-        qCDebug(KARTON_DEBUG) << "Mouse move at (" << x << "," << y << "), mask: " << m_current_button_mask;
+        qCDebug(KARTON_DEBUG) << "Mouse drag at (" << x << "," << y << "), mask: " << m_current_button_mask;
     }
 
     event->accept();
 }
-
 void DomainViewer::hoverMoveEvent(QHoverEvent *event)
 {
     static int hoverCounter = 0;
@@ -421,7 +425,6 @@ void DomainViewer::hoverMoveEvent(QHoverEvent *event)
 
 void DomainViewer::mousePressEvent(QMouseEvent *event)
 {
-    grabMouse();
     qCInfo(KARTON_DEBUG) << "Mouse click at (" << event->position().x() << "," << event->position().y() << ") button:" << event->button();
     setFocus(true);
 
@@ -469,10 +472,6 @@ void DomainViewer::mouseReleaseEvent(QMouseEvent *event)
     spice_inputs_channel_button_release(m_inputs_channel, button, m_current_button_mask);
 
     event->accept();
-
-    if (m_current_button_mask == 0) {
-        ungrabMouse();
-    }
 }
 
 void DomainViewer::checkChannelStatus()
