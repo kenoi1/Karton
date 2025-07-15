@@ -24,6 +24,8 @@ target_sources(karton
     osinfoconfig.cpp
     domainxmlreader.cpp
     commandrunner.cpp
+    evdev_to_xtkbd_map.c
+    evdev_to_xtkbd_map.h
 )
 
 ecm_target_qml_sources(karton
