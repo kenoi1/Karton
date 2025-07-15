@@ -55,6 +55,7 @@ public:
     void mouseMoveEvent(QMouseEvent *event) override;
     void hoverMoveEvent(QHoverEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
@@ -120,6 +121,8 @@ private:
     SpiceSession *m_session = nullptr;
     SpiceChannel *m_display_channel = nullptr;
     SpiceInputsChannel *m_inputs_channel = nullptr;
+
+    int m_current_button_mask = 0;
 
     SpiceAudio *m_audio;
     SpicePlaybackChannel *m_playback_channel;

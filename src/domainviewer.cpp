@@ -370,29 +370,41 @@ void DomainViewer::wheelEvent(QWheelEvent *event)
     }
 
     if (angleDelta.x() > 0) { // scroll right
-        spice_inputs_channel_button_press(m_inputs_channel, SPICE_MOUSE_BUTTON_RIGHT, 0);
-        spice_inputs_channel_button_release(m_inputs_channel, SPICE_MOUSE_BUTTON_RIGHT, 0);
+        // TODO: find horizontol in spice protocol
     } else if (angleDelta.x() < 0) { // scroll left
-        spice_inputs_channel_button_press(m_inputs_channel, SPICE_MOUSE_BUTTON_LEFT, 0);
-        spice_inputs_channel_button_release(m_inputs_channel, SPICE_MOUSE_BUTTON_LEFT, 0);
     }
 
     qCDebug(KARTON_DEBUG) << "wheel event at (" << x << "," << y << ") delta:" << angleDelta;
 }
+
 void DomainViewer::mouseMoveEvent(QMouseEvent *event)
-{ // todo send spice
-    event->accept();
-    static int moveCounter = 0;
-    if (++moveCounter % 5 == 0) {
-        qCInfo(KARTON_DEBUG) << "Mouse Drag: at (" << event->position().x() << "," << event->position().y() << ")";
+{
+    if (!m_inputs_channel || !m_connected)
+        return;
+
+    int x = event->position().x();
+    int y = event->position().y();
+
+    if (m_imageWidth > 0 && m_imageHeight > 0 && width() > 0 && height() > 0) {
+        x = (x * m_imageWidth) / width();
+        y = (y * m_imageHeight) / height();
     }
+
+    spice_inputs_channel_position(m_inputs_channel, x, y, m_current_button_mask, 0);
+
+    static int moveCounter = 0;
+    if (++moveCounter % 10 == 0) {
+        qCDebug(KARTON_DEBUG) << "Mouse move at (" << x << "," << y << "), mask: " << m_current_button_mask;
+    }
+
+    event->accept();
 }
 
 void DomainViewer::hoverMoveEvent(QHoverEvent *event)
 {
     static int hoverCounter = 0;
     if (++hoverCounter % 20 == 0) {
-        // qCInfo(KARTON_DEBUG) << "Mouse hover at (" << event->position().x() << "," << event->position().y() << ")";
+        qCInfo(KARTON_DEBUG) << "Mouse hover at (" << event->position().x() << "," << event->position().y() << ")";
     }
     if (m_inputs_channel && m_connected) {
         int x = event->position().x();
@@ -409,34 +421,58 @@ void DomainViewer::hoverMoveEvent(QHoverEvent *event)
 
 void DomainViewer::mousePressEvent(QMouseEvent *event)
 {
+    grabMouse();
     qCInfo(KARTON_DEBUG) << "Mouse click at (" << event->position().x() << "," << event->position().y() << ") button:" << event->button();
     setFocus(true);
+
+    switch (event->button()) {
+    case Qt::LeftButton:
+        m_current_button_mask |= SPICE_MOUSE_BUTTON_MASK_LEFT;
+        spice_inputs_channel_button_press(m_inputs_channel, SPICE_MOUSE_BUTTON_LEFT, m_current_button_mask);
+        break;
+    case Qt::MiddleButton:
+        m_current_button_mask |= SPICE_MOUSE_BUTTON_MASK_MIDDLE;
+        spice_inputs_channel_button_press(m_inputs_channel, SPICE_MOUSE_BUTTON_MIDDLE, m_current_button_mask);
+        break;
+    case Qt::RightButton:
+        m_current_button_mask |= SPICE_MOUSE_BUTTON_MASK_RIGHT;
+        spice_inputs_channel_button_press(m_inputs_channel, SPICE_MOUSE_BUTTON_RIGHT, m_current_button_mask);
+        break;
+    default:
+        return;
+    }
+
+    event->accept();
+}
+
+void DomainViewer::mouseReleaseEvent(QMouseEvent *event)
+{
+    qCInfo(KARTON_DEBUG) << "Mouse release at (" << event->position().x() << "," << event->position().y() << ") button:" << event->button();
     int button = 0;
     switch (event->button()) {
     case Qt::LeftButton:
         button = SPICE_MOUSE_BUTTON_LEFT;
-        break;
-    case Qt::RightButton:
-        button = SPICE_MOUSE_BUTTON_RIGHT;
+        m_current_button_mask &= ~SPICE_MOUSE_BUTTON_MASK_LEFT;
         break;
     case Qt::MiddleButton:
         button = SPICE_MOUSE_BUTTON_MIDDLE;
+        m_current_button_mask &= ~SPICE_MOUSE_BUTTON_MASK_MIDDLE;
+        break;
+    case Qt::RightButton:
+        button = SPICE_MOUSE_BUTTON_RIGHT;
+        m_current_button_mask &= ~SPICE_MOUSE_BUTTON_MASK_RIGHT;
         break;
     default:
-        qCWarning(KARTON_DEBUG) << "mousepressevent: Unknown button click";
         return;
     }
 
-    int button_mask = 0;
-    if (event->buttons() & Qt::LeftButton)
-        button_mask |= SPICE_MOUSE_BUTTON_MASK_LEFT;
-    if (event->buttons() & Qt::MiddleButton)
-        button_mask |= SPICE_MOUSE_BUTTON_MASK_MIDDLE;
-    if (event->buttons() & Qt::RightButton)
-        button_mask |= SPICE_MOUSE_BUTTON_MASK_RIGHT;
+    spice_inputs_channel_button_release(m_inputs_channel, button, m_current_button_mask);
 
-    spice_inputs_channel_button_press(m_inputs_channel, button, button_mask);
     event->accept();
+
+    if (m_current_button_mask == 0) {
+        ungrabMouse();
+    }
 }
 
 void DomainViewer::checkChannelStatus()
