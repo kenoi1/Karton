@@ -17,7 +17,7 @@ bool CommandRunner::runCommand(const QString &command)
 {
     qCDebug(KARTON_DEBUG) << "Running Command:" << command;
     auto process = new QProcess(this);
-    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [this, process](int exitCode, QProcess::ExitStatus) {
+    connect(process, &QProcess::finished, [this, process](int exitCode, QProcess::ExitStatus) {
         QString output = QString::fromLocal8Bit(process->readAllStandardOutput());
         Q_EMIT commandFinished(exitCode, output);
     });
