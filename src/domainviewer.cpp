@@ -87,7 +87,7 @@ QSGNode *DomainViewer::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         return nullptr;
     }
 
-    QSGSimpleTextureNode *node = static_cast<QSGSimpleTextureNode *>(oldNode);
+    auto node = static_cast<QSGSimpleTextureNode *>(oldNode);
 
     if (!node) {
         node = new QSGSimpleTextureNode();
