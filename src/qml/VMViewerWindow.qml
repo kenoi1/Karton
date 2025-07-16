@@ -9,7 +9,7 @@ import org.kde.karton
 Kirigami.ApplicationWindow {
     id: viewerWindow
     
-    property var domain: null
+    property Domain domain: null
     
     title: domain ? i18n("VM Viewer - %1", domain.config.name) : i18n("VM Viewer")
     
