@@ -8,18 +8,17 @@ import org.kde.karton
 
 Kirigami.ApplicationWindow {
     id: viewerWindow
+    required property Domain domain
     
-    property Domain domain: null
+    title: domain ? i18nc("%1 is the name of the virtual machine", "VM Viewer - %1", domain.config.name) : i18n("VM Viewer")
     
-    title: domain ? i18n("VM Viewer - %1", domain.config.name) : i18n("VM Viewer")
-    
-    width: 1008
-    height: 680
+    width: Kirigami.Units.gridUnit * 53
+    height: Kirigami.Units.gridUnit * 36
     
     Controls.Button { // full screen
-        anchors.top: parent.top + 0.5
+        anchors.top: parent.top - 0.5
         anchors.right: parent.right
-        anchors.margins: 10
+        anchors.margins: Kirigami.Units.gridUnit * 1
         
         icon.name: "view-fullscreen"
         onClicked: {
@@ -38,11 +37,9 @@ Kirigami.ApplicationWindow {
         DomainViewer {
             anchors.centerIn: parent
             domain: viewerWindow.domain
-            // host: "localhost" // hardcoded TODO
-            // port: 5900 // hardcoded TODO
 
-            width: 1008
-            height: 640 // todo expose m_imageStuffs
+            width: Kirigami.Units.gridUnit * 56.55
+            height: Kirigami.Units.gridUnit * 36 // TODO: expose m_imageStuff to create window from viewer size.
             scale: Math.min(parent.width / width, parent.height / height)
 
             focus: true

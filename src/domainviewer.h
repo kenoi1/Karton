@@ -26,8 +26,8 @@ class DomainViewer : public QQuickItem
     Q_OBJECT
     QML_ELEMENT
     Q_PROPERTY(Domain *domain READ domain WRITE setDomain NOTIFY domainChanged REQUIRED)
-    Q_PROPERTY(QString host READ host WRITE setHost NOTIFY hostChanged)
-    Q_PROPERTY(int port READ port WRITE setPort NOTIFY portChanged)
+    Q_PROPERTY(QString host MEMBER m_host NOTIFY hostChanged)
+    Q_PROPERTY(int port MEMBER m_port NOTIFY portChanged)
 
 public:
     explicit DomainViewer(QQuickItem *parent = nullptr);
@@ -105,10 +105,13 @@ private:
     static void playback_start_callback(SpicePlaybackChannel *channel, gint format, gint channels, gint rate, gpointer user_data);
     static void playback_data_callback(SpicePlaybackChannel *channel, gpointer data, gint size, gpointer user_data);
     static void playback_stop_callback(SpicePlaybackChannel *channel, gpointer user_data);
-    CommandRunner *m_commandRunner;
 
+    CommandRunner *m_commandRunner;
     QColor m_color;
     Domain *m_domain;
+    QString m_host;
+    int m_port = 0;
+    QString m_password;
     bool m_connected = false;
 
     int m_imageWidth;
@@ -129,10 +132,6 @@ private:
     QAudioSink *m_audioSink;
     QIODevice *m_audioDevice;
     QAudioFormat m_audioFormat;
-
-    QString m_host;
-    int m_port = 0;
-    QString m_password;
 
     static constexpr quint32 x11_wayland_evdev_offset = 8;
     // difference of 8 between x11 wayland.

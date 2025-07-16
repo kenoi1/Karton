@@ -19,12 +19,12 @@
 
 DomainViewer::DomainViewer(QQuickItem *parent)
     : QQuickItem(parent)
+    , m_commandRunner(new CommandRunner(this))
     , m_domain(nullptr)
     , m_host(QStringLiteral("localhost"))
     , m_port(5900)
     , m_connected(false)
     , m_frameUpdated(false)
-    , m_commandRunner(new CommandRunner(this))
     , m_audio(nullptr)
     , m_playback_channel(nullptr)
     , m_audioSink(nullptr)
@@ -77,9 +77,6 @@ void DomainViewer::componentComplete()
 QSGNode *DomainViewer::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
     QMutexLocker locker(&m_frameLock);
-    // qCInfo(KARTON_DEBUG) << "updatePaintNode received frame: size proport." << m_frame.size() << ", null?:" << m_frame.isNull();
-
-    // checkChannelStatus();
 
     // prevent render if not updated or valid
     if (!m_frameUpdated || m_frame.isNull() || m_frame.width() <= 0 || m_frame.height() <= 0) {
@@ -125,6 +122,7 @@ void DomainViewer::handleHostPort(int exitCode, const QString &output)
 }
 bool DomainViewer::setupSpiceSession()
 {
+    // TODO: replace virsh CLI, use libvirt API: https://libvirt.org/html/libvirt-libvirt-domain.html#VIR_MIGRATE_PARAM_GRAPHICS_URI
     // once finished, handleHostPort() will set the host and port provided by the output.
     bool commandStarted = m_commandRunner->runCommand(QStringLiteral("virsh domdisplay %1").arg(m_domain->config()->name()));
     return commandStarted;
@@ -202,6 +200,8 @@ void DomainViewer::channel_new_cb(SpiceSession *session, SpiceChannel *channel, 
         g_signal_connect(channel, "playback-start", G_CALLBACK(playback_start_callback), item);
         g_signal_connect(channel, "playback-data", G_CALLBACK(playback_data_callback), item);
         g_signal_connect(channel, "playback-stop", G_CALLBACK(playback_stop_callback), item);
+    } else {
+        qCWarning(KARTON_DEBUG) << "Unrecognised SPICE channel type";
     }
 }
 void DomainViewer::display_primary_create_callback(SpiceChannel *channel,
@@ -221,7 +221,8 @@ void DomainViewer::display_primary_create_callback(SpiceChannel *channel,
     item->m_frameBuffer = static_cast<uchar *>(imgdata);
     item->m_imageWidth = width;
     item->m_imageHeight = height;
-    item->m_frame = QImage(width, height, QImage::Format_RGB32);
+    // TODO: map incoming format.
+    item->m_frame = QImage(item->m_frameBuffer, width, height, stride, QImage::Format_RGB32);
 
     item->m_frameUpdated = true;
     QMetaObject::invokeMethod(item, "frameUpdated", Qt::QueuedConnection); // could also do queued
@@ -349,8 +350,8 @@ void DomainViewer::wheelEvent(QWheelEvent *event)
     if (!m_inputs_channel || !m_connected) {
         return;
     }
-    int x = event->position().x();
-    int y = event->position().y();
+    qreal x = event->position().x();
+    qreal y = event->position().y();
 
     if (m_imageWidth > 0 && m_imageHeight > 0 && width() > 0 && height() > 0) {
         x = (x * m_imageWidth) / width();
@@ -387,8 +388,8 @@ void DomainViewer::mouseMoveEvent(QMouseEvent *event)
     if (event->buttons() & Qt::RightButton)
         button_mask |= SPICE_MOUSE_BUTTON_MASK_RIGHT;
 
-    int x = event->position().x();
-    int y = event->position().y();
+    qreal x = event->position().x();
+    qreal y = event->position().y();
 
     if (width() > 0 && height() > 0) {
         x = (x * m_imageWidth) / width();
@@ -411,8 +412,8 @@ void DomainViewer::hoverMoveEvent(QHoverEvent *event)
         qCInfo(KARTON_DEBUG) << "Mouse hover at (" << event->position().x() << "," << event->position().y() << ")";
     }
     if (m_inputs_channel && m_connected) {
-        int x = event->position().x();
-        int y = event->position().y();
+        qreal x = event->position().x();
+        qreal y = event->position().y();
 
         if (m_imageWidth > 0 && m_imageHeight > 0 && width() > 0 && height() > 0) {
             x = (x * m_imageWidth) / width();

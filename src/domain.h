@@ -7,11 +7,13 @@
 #include <libvirt/libvirt.h>
 
 #include <QObject>
+#include <QQmlEngine>
 #include <QString>
 
 class Domain : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 
     Q_PROPERTY(bool isActive READ isActive NOTIFY isActiveChanged)
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)

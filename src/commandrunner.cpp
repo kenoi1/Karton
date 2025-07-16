@@ -6,15 +6,9 @@
 
 #include <QProcess>
 
-CommandRunner::CommandRunner(QObject *parent)
-    : QObject(parent)
-{
-}
-CommandRunner::~CommandRunner()
-{
-}
 bool CommandRunner::runCommand(const QString &command)
 {
+    // FIXME make this async to not block the gui thread
     qCDebug(KARTON_DEBUG) << "Running Command:" << command;
     auto process = new QProcess(this);
     connect(process, &QProcess::finished, [this, process](int exitCode, QProcess::ExitStatus) {
