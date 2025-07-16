@@ -35,7 +35,6 @@ Kirigami.ApplicationWindow {
         title: viewerWindow.title
         padding: 0 
 
-
         DomainViewer {
             anchors.centerIn: parent
             domain: viewerWindow.domain
