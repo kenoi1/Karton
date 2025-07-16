@@ -12,8 +12,7 @@ class CommandRunner : public QObject
     Q_OBJECT
 
 public:
-    explicit CommandRunner(QObject *parent = nullptr);
-    ~CommandRunner();
+    using QObject::QObject;
 
     bool runCommand(const QString &command);
 
