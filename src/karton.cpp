@@ -23,6 +23,7 @@
 Karton::Karton(QObject *parent)
     : QObject(parent)
     , m_conn(nullptr)
+    , m_domains(QVector<Domain *>())
     , m_monitor(nullptr)
     , m_domainViewer(nullptr)
     , m_currentDomain(nullptr)
@@ -49,6 +50,7 @@ Karton *Karton::self()
 
 Karton *Karton::create(QQmlEngine *qmlEngine, QJSEngine *)
 {
+    Q_UNUSED(qmlEngine);
     return Karton::self();
 }
 

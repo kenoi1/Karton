@@ -68,6 +68,7 @@ target_link_libraries(karton
     Qt6::Widgets
     Qt6::Xml
     Qt6::Multimedia
+    Qt6::GuiPrivate
     KF6::I18n
     KF6::I18nQml
     KF6::CoreAddons
@@ -77,6 +78,8 @@ target_link_libraries(karton
     Spiceglib::Spiceglib
     Libosinfo::Libosinfo
     Glib::Glib
+    OpenGL::EGL
+    OpenGL::GL
 )
 
 install(TARGETS karton ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})

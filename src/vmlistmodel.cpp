@@ -20,6 +20,8 @@ VMModel::VMModel(QObject *parent)
 }
 int VMModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
+
     return m_datas.size();
 }
 
@@ -36,6 +38,8 @@ VMModel *VMModel::self()
 
 VMModel *VMModel::create(QQmlEngine *qmlEngine, QJSEngine *)
 {
+    Q_UNUSED(qmlEngine);
+
     return VMModel::self();
 }
 
@@ -59,6 +63,9 @@ QHash<int, QByteArray> VMModel::roleNames() const
 
 void VMModel::onDomainsChanged(const virDomainPtr domainPtr, int event, int detail)
 {
+    Q_UNUSED(event);
+    Q_UNUSED(detail);
+
     if (domainPtr) {
         updateDomains(domainPtr);
     }

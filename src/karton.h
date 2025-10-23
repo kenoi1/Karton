@@ -68,12 +68,12 @@ private Q_SLOTS:
 
 private:
     virConnectPtr m_conn;
-    CommandRunner *m_commandRunner;
     QVector<Domain *> m_domains;
     LibvirtMonitor *m_monitor;
 
     DomainViewer *m_domainViewer = nullptr;
     Domain *m_currentDomain = nullptr;
+    CommandRunner *m_commandRunner;
 
     bool init();
 };

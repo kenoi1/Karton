@@ -44,6 +44,8 @@ private:
         QString type;
         QString autoport;
         QString listen;
+        QString glEnable;
+        QString uuid;
     };
 
     struct SoundConfig {
@@ -60,6 +62,7 @@ private:
         QString model;
         QString heads;
         QString primary;
+        QString enableAccel3d;
     };
 
     struct InputConfig {

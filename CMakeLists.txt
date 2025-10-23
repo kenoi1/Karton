@@ -28,6 +28,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Quick
     Test
     Gui
+    GuiPrivate
     QuickControls2
     Widgets
     Xml
@@ -38,6 +39,7 @@ find_package(Libvirt REQUIRED)
 find_package(Libosinfo REQUIRED)
 find_package(Glib REQUIRED)
 find_package(Spiceglib REQUIRED)
+find_package(OpenGL REQUIRED COMPONENTS OpenGL EGL)
 
 find_package(KF6 REQUIRED COMPONENTS
     Kirigami

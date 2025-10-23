@@ -17,6 +17,7 @@ Kirigami.ApplicationWindow {
 
     onClosing: {
         domainViewer.saveFrameToDomain();
+        domainViewer.disconnectFromSpice();
     }
 
     pageStack.initialPage: Kirigami.Page {

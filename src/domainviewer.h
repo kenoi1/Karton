@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #include <linux/input-event-codes.h>
 #include <spice-client.h>
 
@@ -44,7 +48,7 @@ public:
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *) override;
     bool setupSpiceSession();
     bool connectToSpice();
-    void disconnectFromSpice();
+    Q_INVOKABLE void disconnectFromSpice();
 
     void stopAudio();
 
@@ -100,10 +104,13 @@ private Q_SLOTS:
     void handleHostPort(int exitCode, const QString &output);
 
 private:
-    static void channel_new_cb(SpiceSession *session, SpiceChannel *channel, gpointer user_data);
-    static void
-    display_primary_create_callback(SpiceChannel *channel, gint format, gint width, gint height, gint stride, gint shmid, gpointer imgdata, gpointer user_data);
-    static void display_invalidate_callback(SpiceDisplayChannel *channel, gint x, gint y, gint width, gint height, gpointer user_data);
+    static void channel_new_callback(SpiceSession *session, SpiceChannel *channel, gpointer user_data);
+    static void gl_draw_callback(SpiceDisplayChannel *channel, guint x, guint y, guint width, guint height, gpointer user_data);
+    void handleGlScanout(const SpiceGlScanout *scanout);
+    void createTextureFromScanout(const SpiceGlScanout *scanout);
+    void cleanupEGLImage();
+    void cleanupEGLResources();
+    void captureFromSceneGraph();
     static uint8_t evdevToPcXt(uint32_t evdev_scancode);
 
     static void playback_start_callback(SpicePlaybackChannel *channel, gint format, gint channels, gint rate, gpointer user_data);
@@ -111,28 +118,31 @@ private:
     static void playback_stop_callback(SpicePlaybackChannel *channel, gpointer user_data);
 
     CommandRunner *m_commandRunner;
-    QColor m_color;
     Domain *m_domain;
+    QString m_spiceUri;
     QString m_host;
-    int m_port = 0;
+    int m_port;
     QString m_password;
     bool m_connected = false;
 
-    uint m_imageWidth = 0;
-    uint m_imageHeight = 0;
-    QImage m_frame;
-    uchar *m_frameBuffer = nullptr;
-    QMutex m_frameLock;
-    bool m_frameUpdated = false;
+    int m_imageWidth;
+    int m_imageHeight;
+    SpiceGlScanout m_scanout;
+    bool m_hasScanout;
+    EGLImageKHR m_eglImage = EGL_NO_IMAGE_KHR;
+    PFNEGLDESTROYIMAGEKHRPROC m_eglDestroyImageKHR = nullptr;
+    PFNGLEGLIMAGETARGETTEXTURE2DOESPROC m_glEGLImageTargetTexture2DOES = nullptr;
+    PFNEGLCREATEIMAGEKHRPROC m_eglCreateImageKHR = nullptr;
+    GLuint m_texId;
 
     SpiceSession *m_session = nullptr;
     SpiceChannel *m_display_channel = nullptr;
     SpiceInputsChannel *m_inputs_channel = nullptr;
+    SpicePlaybackChannel *m_playback_channel;
 
     int m_current_button_mask = 0;
 
     SpiceAudio *m_audio;
-    SpicePlaybackChannel *m_playback_channel;
     QAudioSink *m_audioSink;
     QIODevice *m_audioDevice;
     QAudioFormat m_audioFormat;

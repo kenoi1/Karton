@@ -44,6 +44,7 @@ OsinfoConfig *OsinfoConfig::self()
 
 OsinfoConfig *OsinfoConfig::create(QQmlEngine *qmlEngine, QJSEngine *)
 {
+    Q_UNUSED(qmlEngine);
     return OsinfoConfig::self();
 }
 
