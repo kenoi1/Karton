@@ -9,9 +9,9 @@ import org.kde.karton
 Kirigami.ApplicationWindow {
     id: viewerWindow
     required property Domain domain
-
+    
     title: domain ? i18nc("%1 is the name of the virtual machine", "VM Viewer - %1", domain.config.name) : i18n("VM Viewer")
-
+    
     width: Kirigami.Units.gridUnit * 53
     height: Kirigami.Units.gridUnit * 36
 
@@ -22,7 +22,7 @@ Kirigami.ApplicationWindow {
 
     pageStack.initialPage: Kirigami.Page {
         title: viewerWindow.title
-        padding: 0
+        padding: 0 
 
         actions: [
             Kirigami.Action {
@@ -40,15 +40,13 @@ Kirigami.ApplicationWindow {
         DomainViewer {
             id: domainViewer
 
-            property DevicePixelRatioHelper dprHelper: DevicePixelRatioHelper {
-                window: domainViewer.Window.window
-            }
-
-            // Pre-cancel out scaling, and show VM pixels at 1:1
-            width: implicitWidth / dprHelper.devicePixelRatio
-            height: implicitHeight / dprHelper.devicePixelRatio
-
+            anchors.centerIn: parent
             domain: viewerWindow.domain
+
+            width: Kirigami.Units.gridUnit * 56.55
+            height: Kirigami.Units.gridUnit * 36 // TODO: expose m_imageStuff to create window from viewer size.
+            scale: Math.min(parent.width / width, parent.height / height)
+
             focus: true
             activeFocusOnTab: true
             onActiveFocusChanged: {
