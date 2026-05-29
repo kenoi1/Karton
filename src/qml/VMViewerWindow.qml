@@ -40,12 +40,17 @@ Kirigami.ApplicationWindow {
         DomainViewer {
             id: domainViewer
 
-            anchors.centerIn: parent
-            domain: viewerWindow.domain
+            property DevicePixelRatioHelper dprHelper: DevicePixelRatioHelper {
+                window: domainViewer.Window.window
+            }
 
-            width: Kirigami.Units.gridUnit * 56.55
-            height: Kirigami.Units.gridUnit * 36 // TODO: expose m_imageStuff to create window from viewer size.
-            scale: Math.min(parent.width / width, parent.height / height)
+            // Pre-cancel out scaling, and show VM pixels at 1:1
+            // falls back to a default size (hardcoded) until the first GL scanout sets implicitWidth/Height.
+            // fixes 0 width/height bug.
+            width: implicitWidth > 0 ? implicitWidth / dprHelper.devicePixelRatio : Kirigami.Units.gridUnit * 56.55
+            height: implicitHeight > 0 ? implicitHeight / dprHelper.devicePixelRatio : Kirigami.Units.gridUnit * 36
+
+            domain: viewerWindow.domain
 
             focus: true
             activeFocusOnTab: true

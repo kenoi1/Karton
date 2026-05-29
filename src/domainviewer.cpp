@@ -245,6 +245,8 @@ void DomainViewer::handleGlScanout(const SpiceGlScanout *scanout)
 
     m_imageHeight = scanout->height;
     m_imageWidth = scanout->width;
+    setImplicitWidth(m_imageWidth);
+    setImplicitHeight(m_imageHeight);
     m_hasScanout = true;
 
     update();
@@ -252,11 +254,11 @@ void DomainViewer::handleGlScanout(const SpiceGlScanout *scanout)
 
 void DomainViewer::createTextureFromScanout(const SpiceGlScanout *scanout)
 {
-    // qCDebug(KARTON_DEBUG) << "=== createTextureFromScanout()";
-    // qCDebug(KARTON_DEBUG) << "FD:" << scanout->fd;
-    // qCDebug(KARTON_DEBUG) << "Size:" << scanout->width << "x" << scanout->height;
-    // qCDebug(KARTON_DEBUG) << "Format:" << QStringLiteral("0x%1").arg(scanout->format, 0, 16);
-    // qCDebug(KARTON_DEBUG) << "Stride:" << scanout->stride;
+    qCDebug(KARTON_DEBUG) << "=== createTextureFromScanout()";
+    qCDebug(KARTON_DEBUG) << "FD:" << scanout->fd;
+    qCDebug(KARTON_DEBUG) << "Size:" << scanout->width << "x" << scanout->height;
+    qCDebug(KARTON_DEBUG) << "Format:" << QStringLiteral("0x%1").arg(scanout->format, 0, 16);
+    qCDebug(KARTON_DEBUG) << "Stride:" << scanout->stride;
 
     if (scanout->fd == -1) {
         return;
@@ -415,10 +417,10 @@ QSGNode *DomainViewer::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     textureNode->setTexture(texture);
     textureNode->setRect(boundingRect());
 
-    // qCDebug(KARTON_DEBUG) << m_domain->config()->name() << ": Successfully updated canvas.";
-    // qCDebug(KARTON_DEBUG) << "  SPICE Graphics URI: " << m_spiceUri;
-    // qCDebug(KARTON_DEBUG) << "  Texture ID:" << m_texId;
-    // qCDebug(KARTON_DEBUG) << "  Size:" << m_imageWidth << "x" << m_imageHeight;
+    qCDebug(KARTON_DEBUG) << m_domain->config()->name() << ": Successfully updated canvas.";
+    qCDebug(KARTON_DEBUG) << "  SPICE Graphics URI: " << m_spiceUri;
+    qCDebug(KARTON_DEBUG) << "  Texture ID:" << m_texId;
+    qCDebug(KARTON_DEBUG) << "  Size:" << m_imageWidth << "x" << m_imageHeight;
 
     return textureNode;
 }
